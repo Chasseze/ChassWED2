@@ -5,6 +5,13 @@ import { EventEmitter } from '../utils/EventEmitter.js';
 import { DOMUtils } from '../utils/DOMUtils.js';
 import { CommandManager } from './CommandManager.js';
 import { DocumentManager } from './DocumentManager.js';
+import { AIService } from '../services/AIService.js';
+import { AIAssistant } from '../ui/AIAssistant.js';
+import { TemplatesService } from '../services/TemplatesService.js';
+import { TemplatesUI } from '../ui/TemplatesUI.js';
+import { AdvancedFormattingService } from '../services/AdvancedFormattingService.js';
+import { AdvancedFormattingUI } from '../ui/AdvancedFormattingUI.js';
+import { EmailSharingService } from '../services/EmailSharingService.js';
 
 export class Editor extends EventEmitter {
     constructor(options = {}) {
@@ -23,6 +30,13 @@ export class Editor extends EventEmitter {
         // Core components
         this.documentManager = new DocumentManager();
         this.commandManager = null;
+        this.aiService = new AIService();
+        this.aiAssistant = null;
+        this.templatesService = new TemplatesService();
+        this.templatesUI = null;
+        this.advancedFormattingService = null;
+        this.advancedFormattingUI = null;
+        this.emailSharingService = null;
         
         // DOM elements
         this.editorElement = null;
@@ -61,6 +75,19 @@ export class Editor extends EventEmitter {
             
             // Initialize command manager
             this.commandManager = new CommandManager(this.editorElement);
+            
+            // Initialize AI assistant
+            this.aiAssistant = new AIAssistant(this, this.aiService);
+            
+            // Initialize templates UI
+            this.templatesUI = new TemplatesUI(this, this.templatesService);
+            
+            // Initialize advanced formatting
+            this.advancedFormattingService = new AdvancedFormattingService(this.editorElement);
+            this.advancedFormattingUI = new AdvancedFormattingUI(this, this.advancedFormattingService);
+            
+            // Initialize email sharing
+            this.emailSharingService = new EmailSharingService(this);
             
             // Setup event listeners
             this.setupEventListeners();
@@ -131,6 +158,38 @@ export class Editor extends EventEmitter {
         if (themeToggle) {
             DOMUtils.addEventListener(themeToggle, 'click', () => {
                 this.toggleTheme();
+            });
+        }
+        
+        // AI Assistant toggle
+        const aiAssistantBtn = DOMUtils.query('#aiAssistantBtn');
+        if (aiAssistantBtn) {
+            DOMUtils.addEventListener(aiAssistantBtn, 'click', () => {
+                this.aiAssistant.toggle();
+            });
+        }
+        
+        // Templates button
+        const templatesBtn = DOMUtils.query('#templatesBtn');
+        if (templatesBtn) {
+            DOMUtils.addEventListener(templatesBtn, 'click', () => {
+                this.templatesUI.toggle();
+            });
+        }
+        
+        // Advanced formatting button
+        const advancedFormattingBtn = DOMUtils.query('#advancedFormattingBtn');
+        if (advancedFormattingBtn) {
+            DOMUtils.addEventListener(advancedFormattingBtn, 'click', () => {
+                this.advancedFormattingUI.toggle();
+            });
+        }
+        
+        // Email sharing button
+        const emailShareBtn = DOMUtils.query('#emailShareBtn');
+        if (emailShareBtn) {
+            DOMUtils.addEventListener(emailShareBtn, 'click', () => {
+                this.emailSharingService.shareViaEmail();
             });
         }
         

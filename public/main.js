@@ -378,6 +378,37 @@ class CharlesWebEditor {
       printBtn.addEventListener("click", () => window.print());
     }
 
+    // New feature buttons (AI, Templates, Advanced Formatting, Email Share)
+    const aiAssistantBtn = document.getElementById("aiAssistantBtn");
+    if (aiAssistantBtn) {
+      aiAssistantBtn.addEventListener("click", () => {
+        this.showToast("🤖 AI Assistant feature coming soon!", "info");
+      });
+    }
+
+    const templatesBtn = document.getElementById("templatesBtn");
+    if (templatesBtn) {
+      templatesBtn.addEventListener("click", () => {
+        this.showToast("📄 Document Templates feature coming soon!", "info");
+      });
+    }
+
+    const advancedFormattingBtn = document.getElementById(
+      "advancedFormattingBtn",
+    );
+    if (advancedFormattingBtn) {
+      advancedFormattingBtn.addEventListener("click", () => {
+        this.showToast("✨ Advanced Formatting feature coming soon!", "info");
+      });
+    }
+
+    const emailShareBtn = document.getElementById("emailShareBtn");
+    if (emailShareBtn) {
+      emailShareBtn.addEventListener("click", () => {
+        this.showToast("📧 Email Sharing feature coming soon!", "info");
+      });
+    }
+
     // Document tab clicks and context menu
     document.addEventListener("click", (e) => {
       const tab = e.target.closest(".tab");

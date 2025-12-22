@@ -7,6 +7,10 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "firebase": "^12.7.0"
+  },
+  "devDependencies": {
+    "firebase-tools": "^15.1.0"
   }
 }
