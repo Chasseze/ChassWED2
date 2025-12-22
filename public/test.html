@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CharlesWebEditor Debug</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            z-index: 10000;
+        }
+        .test-btn {
+            position: fixed;
+            top: 50px;
+            left: 10px;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 10000;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-info" id="debugInfo">
+        Debug Info: <span id="debugText">Loading...</span>
+    </div>
+    
+    <div class="test-btn" id="testBtn">Test Transition</div>
+    
+    <!-- Welcome Screen -->
+    <div class="welcome-screen active" id="welcomeScreen">
+        <div class="welcome-logo">
+            <i class="fas fa-file-word"></i>
+        </div>
+        <h1 class="welcome-title">CharlesWebEditor</h1>
+        <p class="welcome-subtitle">
+            A professional-grade web-based text editor with all the features you need for document creation,
+            editing, and formatting. Experience the power of a full-featured word processor in your browser.
+        </p>
+        <div class="welcome-actions">
+            <button class="welcome-btn primary" id="startEditorBtn">
+                <i class="fas fa-play-circle"></i> Start Editing
+            </button>
+            <button class="welcome-btn secondary" id="tourBtn">
+                <i class="fas fa-map"></i> Take a Tour
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Editor -->
+    <div class="editor-container" id="editorContainer" style="display: none;">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-file-word"></i>
+                <span class="logo-text">CharlesWebEditor</span>
+            </div>
+            <div class="header-controls">
+                <button class="header-btn" id="themeToggle" title="Toggle Dark Mode">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                    <span>Theme</span>
+                </button>
+            </div>
+        </div>
+        <div class="editor-area">
+            <div class="page-container" id="pageContainer">
+                <div class="page a4" id="page">
+                    <div id="editor" contenteditable="true" spellcheck="false">
+                        <h1>Welcome to CharlesWebEditor</h1>
+                        <p>This is a <strong>professional-grade text editor</strong> built with modern web technologies.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple test to debug the transition
+        function testTransition() {
+            console.log('🔍 Testing transition...');
+            
+            const welcomeScreen = document.getElementById('welcomeScreen');
+            const editorContainer = document.getElementById('editorContainer');
+            const debugText = document.getElementById('debugText');
+            
+            if (debugText) {
+                debugText.textContent = 'Testing transition...';
+            }
+            
+            console.log('🔍 Elements found:', {
+                welcomeScreen: !!welcomeScreen,
+                editorContainer: !!editorContainer,
+                welcomeScreenClasses: welcomeScreen ? welcomeScreen.className : null,
+                editorContainerDisplay: editorContainer ? editorContainer.style.display : null
+            });
+            
+            if (welcomeScreen && editorContainer) {
+                console.log('🔍 Performing transition...');
+                
+                // Remove active class
+                welcomeScreen.classList.remove('active');
+                console.log('🔍 Removed active class');
+                
+                // Show editor container
+                editorContainer.style.display = 'flex';
+                console.log('🔍 Set display to flex');
+                
+                // Focus editor
+                const editor = document.getElementById('editor');
+                if (editor) {
+                    editor.focus();
+                    console.log('🔍 Focused editor');
+                }
+                
+                console.log('✅ Transition complete!');
+                
+                if (debugText) {
+                    debugText.textContent = '✅ Transition successful!';
+                }
+            } else {
+                if (debugText) {
+                    debugText.textContent = '❌ Elements not found!';
+                }
+            }
+        }
+        
+        // Test button
+        const testBtn = document.getElementById('testBtn');
+        if (testBtn) {
+            testBtn.addEventListener('click', testTransition);
+        }
+        
+        // Auto-test after 2 seconds
+        setTimeout(() => {
+            console.log('🔍 Auto-testing transition...');
+            testTransition();
+        }, 2000);
+        
+        // Manual test after 5 seconds
+        setTimeout(() => {
+            console.log('🔍 Manual test after 5 seconds...');
+            const welcomeScreen = document.getElementById('welcomeScreen');
+            if (welcomeScreen && welcomeScreen.classList.contains('active')) {
+                console.log('🔨 Welcome screen still active, forcing transition...');
+                const startBtn = document.getElementById('startEditorBtn');
+                if (startBtn) {
+                    startBtn.click();
+                }
+            }
+        }, 5000);
+    }
+        
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🔍 DOM Content Loaded - Starting test...');
+            testTransition();
+        });
+    </script>
+</body>
+</html>

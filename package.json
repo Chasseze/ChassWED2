@@ -1,0 +1,12 @@
+{
+  "name": "chasswed2",
+  "version": "1.0.0",
+  "description": "Scalable web-based text editor app served via Node.js and Express.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
