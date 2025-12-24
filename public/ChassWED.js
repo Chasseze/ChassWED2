@@ -212,6 +212,341 @@ class CharlesWebEditor {
                 `
             },
             {
+                id: 'sales-invoice',
+                name: 'Sales Invoice',
+                description: 'Professional sales invoice template',
+                icon: 'fas fa-file-invoice',
+                content: `
+                    <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+                        <header style="margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div>
+                                    <h1 style="margin: 0; font-size: 28px; color: #333;">INVOICE</h1>
+                                    <p style="margin: 5px 0; font-size: 14px; color: #666;">Invoice #: [Invoice Number]</p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <p style="margin: 0; font-weight: bold;">[Your Company Name]</p>
+                                    <p style="margin: 2px 0; font-size: 14px;">[Your Address]</p>
+                                    <p style="margin: 2px 0; font-size: 14px;">[City, State ZIP]</p>
+                                    <p style="margin: 2px 0; font-size: 14px;">[Your Phone]</p>
+                                    <p style="margin: 2px 0; font-size: 14px;">[Your Email]</p>
+                                </div>
+                            </div>
+                        </header>
+                        
+                        <section style="margin-bottom: 30px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                                <div style="width: 48%;">
+                                    <h3 style="margin: 0 0 10px 0; color: #333;">Bill To:</h3>
+                                    <p style="margin: 2px 0; font-size: 14px;">[Client Name]</p>
+                                    <p style="margin: 2px 0; font-size: 14px;">[Client Company]</p>
+                                    <p style="margin: 2px 0; font-size: 14px;">[Client Address]</p>
+                                    <p style="margin: 2px 0; font-size: 14px;">[City, State ZIP]</p>
+                                </div>
+                                <div style="width: 48%; text-align: right;">
+                                    <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+                                    <p style="margin: 5px 0;"><strong>Due Date:</strong> [Due Date]</p>
+                                    <p style="margin: 5px 0;"><strong>P.O. #:</strong> [Purchase Order]</p>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <section style="margin-bottom: 30px;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: #f5f5f5; border-bottom: 2px solid #333;">
+                                        <th style="padding: 12px; text-align: left; font-weight: bold;">Item/Description</th>
+                                        <th style="padding: 12px; text-align: center; font-weight: bold;">Quantity</th>
+                                        <th style="padding: 12px; text-align: right; font-weight: bold;">Unit Price</th>
+                                        <th style="padding: 12px; text-align: right; font-weight: bold;">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="border-bottom: 1px solid #ddd;">
+                                        <td style="padding: 12px;">[Product/Service Description]</td>
+                                        <td style="padding: 12px; text-align: center;">[Qty]</td>
+                                        <td style="padding: 12px; text-align: right;">$[Price]</td>
+                                        <td style="padding: 12px; text-align: right;">$[Total]</td>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid #ddd;">
+                                        <td style="padding: 12px;">[Product/Service Description]</td>
+                                        <td style="padding: 12px; text-align: center;">[Qty]</td>
+                                        <td style="padding: 12px; text-align: right;">$[Price]</td>
+                                        <td style="padding: 12px; text-align: right;">$[Total]</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </section>
+                        
+                        <section style="margin-bottom: 30px;">
+                            <div style="display: flex; justify-content: flex-end;">
+                                <div style="width: 300px;">
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <tr>
+                                            <td style="padding: 8px; text-align: right;">Subtotal:</td>
+                                            <td style="padding: 8px; text-align: right;">$[Subtotal]</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px; text-align: right;">Tax ([Tax Rate]%):</td>
+                                            <td style="padding: 8px; text-align: right;">$[Tax Amount]</td>
+                                        </tr>
+                                        <tr style="border-top: 2px solid #333; font-weight: bold;">
+                                            <td style="padding: 12px 8px; text-align: right;">TOTAL:</td>
+                                            <td style="padding: 12px 8px; text-align: right; font-size: 18px;">$[Grand Total]</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <section style="margin-bottom: 30px;">
+                            <h3 style="margin: 0 0 10px 0; color: #333;">Notes</h3>
+                            <p style="font-size: 14px; line-height: 1.5;">[Payment terms, late fees, or other important information]</p>
+                        </section>
+                        
+                        <section style="margin-bottom: 20px;">
+                            <h3 style="margin: 0 0 10px 0; color: #333;">Payment Instructions</h3>
+                            <p style="font-size: 14px; line-height: 1.5;">Please make payment to: [Bank Name], Account #: [Account Number]</p>
+                            <p style="font-size: 14px; line-height: 1.5;">Thank you for your business!</p>
+                        </section>
+                    </div>
+                `
+            },
+            {
+                id: 'sales-receipt',
+                name: 'Sales Receipt',
+                description: 'Sales receipt template for completed transactions',
+                icon: 'fas fa-receipt',
+                content: `
+                    <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+                        <header style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px;">
+                            <h1 style="margin: 0; font-size: 28px; color: #333;">SALES RECEIPT</h1>
+                            <p style="margin: 5px 0; font-size: 14px; color: #666;">Receipt #: [Receipt Number]</p>
+                            <p style="margin: 5px 0; font-size: 14px; color: #666;">Date: ${new Date().toLocaleDateString()}</p>
+                        </header>
+                        
+                        <section style="margin-bottom: 30px;">
+                            <div style="text-align: center; margin-bottom: 20px;">
+                                <p style="margin: 0; font-weight: bold; font-size: 16px;">[Your Company Name]</p>
+                                <p style="margin: 2px 0; font-size: 14px;">[Your Address]</p>
+                                <p style="margin: 2px 0; font-size: 14px;">[City, State ZIP]</p>
+                                <p style="margin: 2px 0; font-size: 14px;">[Your Phone]</p>
+                                <p style="margin: 2px 0; font-size: 14px;">[Your Email]</p>
+                            </div>
+                        </section>
+                        
+                        <section style="margin-bottom: 30px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                                <div style="width: 48%;">
+                                    <h3 style="margin: 0 0 10px 0; color: #333;">Sold To:</h3>
+                                    <p style="margin: 2px 0; font-size: 14px;">[Customer Name]</p>
+                                    <p style="margin: 2px 0; font-size: 14px;">[Customer Address]</p>
+                                    <p style="margin: 2px 0; font-size: 14px;">[City, State ZIP]</p>
+                                </div>
+                                <div style="width: 48%; text-align: right;">
+                                    <p style="margin: 5px 0;"><strong>Payment Method:</strong> [Cash/Card/Check]</p>
+                                    <p style="margin: 5px 0;"><strong>Transaction ID:</strong> [Transaction ID]</p>
+                                    <p style="margin: 5px 0;"><strong>Salesperson:</strong> [Salesperson Name]</p>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <section style="margin-bottom: 30px;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: #f5f5f5; border-bottom: 2px solid #333;">
+                                        <th style="padding: 12px; text-align: left; font-weight: bold;">Item/Description</th>
+                                        <th style="padding: 12px; text-align: center; font-weight: bold;">Qty</th>
+                                        <th style="padding: 12px; text-align: right; font-weight: bold;">Unit Price</th>
+                                        <th style="padding: 12px; text-align: right; font-weight: bold;">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="border-bottom: 1px solid #ddd;">
+                                        <td style="padding: 12px;">[Item Description]</td>
+                                        <td style="padding: 12px; text-align: center;">[Qty]</td>
+                                        <td style="padding: 12px; text-align: right;">$[Price]</td>
+                                        <td style="padding: 12px; text-align: right;">$[Total]</td>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid #ddd;">
+                                        <td style="padding: 12px;">[Item Description]</td>
+                                        <td style="padding: 12px; text-align: center;">[Qty]</td>
+                                        <td style="padding: 12px; text-align: right;">$[Price]</td>
+                                        <td style="padding: 12px; text-align: right;">$[Total]</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </section>
+                        
+                        <section style="margin-bottom: 30px;">
+                            <div style="display: flex; justify-content: flex-end;">
+                                <div style="width: 300px;">
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <tr>
+                                            <td style="padding: 8px; text-align: right;">Subtotal:</td>
+                                            <td style="padding: 8px; text-align: right;">$[Subtotal]</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px; text-align: right;">Tax:</td>
+                                            <td style="padding: 8px; text-align: right;">$[Tax]</td>
+                                        </tr>
+                                        <tr style="border-top: 2px solid #333; font-weight: bold;">
+                                            <td style="padding: 12px 8px; text-align: right;">TOTAL PAID:</td>
+                                            <td style="padding: 12px 8px; text-align: right; font-size: 18px;">$[Total]</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <section style="margin-bottom: 30px;">
+                            <div style="text-align: center;">
+                                <p style="font-size: 14px; font-weight: bold;">PAYMENT RECEIVED - THANK YOU!</p>
+                                <p style="font-size: 12px; margin: 10px 0;">This serves as your official receipt for this transaction.</p>
+                                <p style="font-size: 12px;">Please keep for your records.</p>
+                            </div>
+                        </section>
+                        
+                        <section style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; margin-top: 40px;">
+                                <div style="width: 45%; text-align: center;">
+                                    <div style="border-top: 1px solid #333; padding-top: 5px;">
+                                        <p style="font-size: 12px; margin: 0;">Customer Signature</p>
+                                    </div>
+                                </div>
+                                <div style="width: 45%; text-align: center;">
+                                    <div style="border-top: 1px solid #333; padding-top: 5px;">
+                                        <p style="font-size: 12px; margin: 0;">Authorized Signature</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                `
+            },
+            {
+                id: 'memo-reminder',
+                name: 'Memo Reminder',
+                description: 'Internal memo and reminder template',
+                icon: 'fas fa-sticky-note',
+                content: `
+                    <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+                        <header style="margin-bottom: 30px; border-bottom: 3px solid #333; padding-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <h1 style="margin: 0; font-size: 32px; color: #333; text-transform: uppercase;">MEMORANDUM</h1>
+                                <div style="text-align: right;">
+                                    <p style="margin: 0; font-weight: bold; color: #d32f2f; font-size: 18px;">REMINDER</p>
+                                    <p style="margin: 5px 0; font-size: 14px;">Priority: [High/Medium/Low]</p>
+                                </div>
+                            </div>
+                        </header>
+                        
+                        <section style="margin-bottom: 30px;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td style="padding: 8px; font-weight: bold; width: 120px; background: #f5f5f5;">TO:</td>
+                                    <td style="padding: 8px;">[Recipient Name/Department]</td>
+                                    <td style="padding: 8px; font-weight: bold; width: 120px; background: #f5f5f5;">DATE:</td>
+                                    <td style="padding: 8px;">${new Date().toLocaleDateString()}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px; font-weight: bold; background: #f5f5f5;">FROM:</td>
+                                    <td style="padding: 8px;">[Your Name/Department]</td>
+                                    <td style="padding: 8px; font-weight: bold; background: #f5f5f5;">DUE BY:</td>
+                                    <td style="padding: 8px; color: #d32f2f; font-weight: bold;">[Due Date/Time]</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px; font-weight: bold; background: #f5f5f5;">SUBJECT:</td>
+                                    <td colspan="3" style="padding: 8px; font-weight: bold; color: #333;">[Memo Subject - Action Required]</td>
+                                </tr>
+                            </table>
+                        </section>
+                        
+                        <section style="margin-bottom: 30px;">
+                            <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-left: 4px solid #f39c12; padding: 15px; margin-bottom: 20px;">
+                                <h3 style="margin: 0 0 10px 0; color: #856404; display: flex; align-items: center;">
+                                    <span style="font-size: 20px; margin-right: 10px;">⚠️</span>
+                                    REMINDER NOTICE
+                                </h3>
+                                <p style="margin: 0; line-height: 1.5; color: #856404;">This is a reminder regarding the following item(s) that require your attention. Please review and take appropriate action by the specified deadline.</p>
+                            </div>
+                        </section>
+                        
+                        <section style="margin-bottom: 30px;">
+                            <h2 style="color: #333; border-bottom: 2px solid #333; padding-bottom: 5px; margin-bottom: 15px;">Background/Context</h2>
+                            <p style="line-height: 1.6; margin-bottom: 15px;">[Provide background information about why this reminder is necessary. Include any relevant context, previous communications, or history related to this matter.]</p>
+                        </section>
+                        
+                        <section style="margin-bottom: 30px;">
+                            <h2 style="color: #333; border-bottom: 2px solid #333; padding-bottom: 5px; margin-bottom: 15px;">Action Required</h2>
+                            <div style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; margin-bottom: 15px;">
+                                <ol style="margin: 0; padding-left: 20px;">
+                                    <li style="margin-bottom: 10px;"><strong>[Action Item 1]</strong> - [Specific details and requirements]</li>
+                                    <li style="margin-bottom: 10px;"><strong>[Action Item 2]</strong> - [Specific details and requirements]</li>
+                                    <li style="margin-bottom: 10px;"><strong>[Action Item 3]</strong> - [Specific details and requirements]</li>
+                                </ol>
+                            </div>
+                        </section>
+                        
+                        <section style="margin-bottom: 30px;">
+                            <h2 style="color: #333; border-bottom: 2px solid #333; padding-bottom: 5px; margin-bottom: 15px;">Important Details</h2>
+                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+                                <tr>
+                                    <td style="padding: 10px; font-weight: bold; width: 150px; background: #f5f5f5;">Reference #:</td>
+                                    <td style="padding: 10px;">[Reference Number]</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; font-weight: bold; background: #f5f5f5;">Project/Case:</td>
+                                    <td style="padding: 10px;">[Project or Case Name]</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; font-weight: bold; background: #f5f5f5;">Contact Person:</td>
+                                    <td style="padding: 10px;">[Contact Name and Information]</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; font-weight: bold; background: #f5f5f5;">Location:</td>
+                                    <td style="padding: 10px;">[Location or Meeting Room]</td>
+                                </tr>
+                            </table>
+                        </section>
+                        
+                        <section style="margin-bottom: 30px;">
+                            <h2 style="color: #333; border-bottom: 2px solid #333; padding-bottom: 5px; margin-bottom: 15px;">Consequences of Non-Compliance</h2>
+                            <p style="line-height: 1.6; color: #d32f2f; font-weight: 500;">[Clearly state what will happen if the required action is not taken by the deadline. Include any penalties, delays, or impacts.]</p>
+                        </section>
+                        
+                        <section style="margin-bottom: 30px;">
+                            <h2 style="color: #333; border-bottom: 2px solid #333; padding-bottom: 5px; margin-bottom: 15px;">Support/Resources</h2>
+                            <p style="line-height: 1.6;">[Information about where to get help, resources available, or who to contact with questions.]</p>
+                            <ul style="margin: 10px 0; padding-left: 20px;">
+                                <li>Help Desk: [Phone Number/Email]</li>
+                                <li>Documentation: [Link or Location]</li>
+                                <li>Training: [Schedule or Contact]</li>
+                            </ul>
+                        </section>
+                        
+                        <section style="margin-bottom: 20px;">
+                            <div style="background: #e8f5e8; border: 1px solid #c8e6c9; padding: 15px;">
+                                <p style="margin: 0; font-weight: bold; color: #2e7d32;">Please confirm receipt of this reminder and acknowledge the required actions.</p>
+                            </div>
+                        </section>
+                        
+                        <footer style="margin-top: 40px; border-top: 1px solid #ccc; padding-top: 20px;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <div>
+                                    <p style="margin: 0; font-size: 12px;">This memorandum is confidential and intended solely for the addressee.</p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <p style="margin: 0; font-size: 12px;">[Your Name/Department]</p>
+                                    <p style="margin: 0; font-size: 12px;">[Your Title]</p>
+                                    <p style="margin: 0; font-size: 12px;">[Your Contact Information]</p>
+                                </div>
+                            </div>
+                        </footer>
+                    </div>
+                `
+            },
+            {
                 id: 'invoice',
                 name: 'Invoice Template',
                 description: 'Professional invoice format',

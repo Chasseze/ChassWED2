@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head></head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Charles</title>WebEditor Templates Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body</style> {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .template-item {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+        .template-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-color: #007bff;
+        }
+        .template-icon {
+            font-size: 24px;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .template-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .template-description {
+            font-size: 14px;
+            color: #666;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button.secondary {
+            background: #6c757d;
+        }
+        button.secondary:hover {
+            background: #545b62;
+        }
+        #editor {
+            border: 1px solid #ddd;
+            min-height: 300px;
+            padding: 20px;
+            margin: 20px 0;
+            background: white;
+            border-radius: 5px;
+        }
+        .status-bar {
+            margin-top: 20px;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="</body>test-container">
+        <h1></h1>CharlesWebEditor Templates Test</h1>
+        <p></p>This test file checks if all templates (both old and new) are working properly.</p>
+
+        <div class="test-section">
+            <h2>Test</h2> 1: Editor Initialization</h2>
+            <div id="test1-result" class="test-result">Running test...</div>
+            <button onclick="testEditorInitialization()">Run Test 1</button>
+        </div>
+
+        <div class="test-section">
+            <h2></h2>Test 2: Templates Array Check</h2>
+            <div id="test2-result" class="test-result">Waiting for test...</div>
+            <button onclick="testTemplatesArray()">Run Test 2</button>
+        </div>
+
+        <div class="test-section">
+            <h2></h2>Test 3: Template Application</h2>
+            <div id="test3-result" class="test-result">Waiting for test...</div>
+            <div id="editor" contenteditable="true">
+                <p>This</p> is the test editor. Click a template below to test.</p>
+            </div>
+            <div id="templates-container">
+                <!-- Templates will be loaded here -->
+            </div>
+            <button onclick="loadTestTemplates()">Load Test Templates</button>
+            <button onclick="testApplyTemplate('blank')" class="secondary">Test Blank Template</button>
+            <button onclick="testApplyTemplate('resume')" class="secondary">Test Resume Template</button>
+        </div>
+
+        <div class="test-section">
+            <h2></h2>Test 4: Old vs New Templates</h2>
+            <div id="test4-result" class="test-result">Waiting for test...</div>
+            <button onclick="testOldNewTemplates()">Run Test 4</button>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 5: Template Features</</h2>h2>
+            <div id="test5-result" class="test-result">Waiting for test...</div>
+            <button onclick="testTemplateFeatures()">Run Test 5</button>
+        </div>
+
+        <div class="status-bar" id="status-bar">
+            Status: Ready
+        </div>
+    </div>
+
+    <script></script>
+        // Global variables
+        let testEditor = null;
+        let testTemplates = [];
+
+        // Test 1: Editor Initialization
+        function testEditorInitialization() {
+            const result = document.getElementById('test1-result');
+
+            // Check if main.js is loaded
+            if (typeof window.charliesEditor !== 'undefined') {
+                testEditor = window.charliesEditor;
+                result.innerHTML = `<div class="success">✅ Editor initialized successfully</div>
+                                   <div>Version</div>: ${testEditor.version}</div>
+                                   <div></div>Release Date: ${testEditor.releaseDate}</div>`;
+                updateStatus('Test 1 passed: Editor initialized');
+            } else {
+                // Try to load main.js
+                result.innerHTML = `<div class="error">❌ Editor not found. Trying to load main.js...</div>`;
+
+                const script = document.createElement('script');
+                script.src = 'main.js';
+                script.onload = function() {
+                    if (typeof window.charliesEditor !== 'undefined') {
+                        testEditor = window.charliesEditor;
+                        result.innerHTML = `<div class="success">✅ Editor loaded successfully</div>
+                                           <div></div>Version: ${testEditor.version}</div>`;
+                        updateStatus('Test 1 passed: Editor loaded');
+                    } else {
+                        result.innerHTML = `<div class="error">❌ Failed to load editor</div>`;
+                        updateStatus('Test 1 failed: Editor not loaded');
+                    }
+                };
+                script.onerror = function() {
+                    result.innerHTML = `<div class="error">❌ Error loading main.js</div>`;
+                    updateStatus('Test 1 failed: Error loading main.js');
+                };
+                document.head.appendChild(script);
+            }
+        }
+
+        // Test 2: Templates Array Check
+        function testTemplatesArray() {
+            const result = document.getElementById('test2-result');
+
+            if (!testEditor) {
+                result.innerHTML = `<div class="error">❌ Run Test 1 first to initialize editor</div>`;
+                return;
+            }
+
+            if (testEditor.templates && Array.isArray(testEditor.templates)) {
+                testTemplates = testEditor.templates;
+                let html = `<div class="success">✅ Found ${testTemplates.length} templates</div>`;
+
+                // List all templates
+                html += `<div style="margin-top: 10px;"><strong></strong>Template List:</strong></div>`;
+                html += `<ul style="font-family: monospace; font-size: 12px;">`;
+                testTemplates.forEach((template, index) => {
+                    html += `<li>${</li>index + 1}. ${template.name} (${template.id}) - ${template.description}</li>`;
+                });
+                html += `</ul>`;
+
+                // Check for old vs new templates
+                const hasCategories = testTemplates.some(t => t.category);
+                const hasCustomTemplates = testTemplates.some(t => t.isCustom);
+
+                html += `<div style="margin-top: 10px;"><strong></strong>Template System Analysis:</strong></div>`;
+                html += `<div>Has</div> categories: ${hasCategories ? '✅ Yes (New system)' : '❌ No (Old system)'}</div>`;
+                html += `<div></div>Has custom templates: ${hasCustomTemplates ? '✅ Yes (New system)' : '❌ No (Old system)'}</div>`;
+
+                result.innerHTML = html;
+                updateStatus(`Test 2 passed: Found ${testTemplates.length} templates`);
+            } else {
+                result.innerHTML = `<div class="error">❌ No templates array found</div>`;
+                updateStatus('Test 2 failed: No templates array');
+            }
+        }
+
+        // Test 3: Template Application
+        function loadTestTemplates() {
+            const container = document.getElementById('templates-container');
+
+            if (testTemplates.length === 0) {
+                alert('Run Test 2 first to load templates');
+                return;
+            }
+
+            let html = `<div class="template-grid">`;
+            testTemplates.forEach(template => {
+                html += `
+                    <div class="template-item" onclick="testApplyTemplate('${template.id}')">
+                        <div class="template-icon">
+                            <i class="${template.icon || 'fas fa-file'}"></i>
+                        </div>
+                        <div class="template-name">${template.name}</div>
+                        <div class="template-description">${template.description}</div>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+
+            container.innerHTML = html;
+            updateStatus(`Loaded ${testTemplates.length} templates for testing`);
+        }
+
+        function testApplyTemplate(templateId) {
+            const result = document.getElementById('test3-result');
+            const editor = document.getElementById('editor');
+
+            if (!testEditor) {
+                result.innerHTML = `<div class="error">❌ Editor not initialized</div>`;
+                return;
+            }
+
+            const template = testTemplates.find(t => t.id === templateId);
+            if (!template) {
+                result.innerHTML = `<div class="error">❌ Template "${templateId}" not found</div>`;
+                return;
+            }
+
+            // Apply template to editor
+            editor.innerHTML = template.content;
+
+            // Check if applyTemplate function exists
+            if (typeof testEditor.applyTemplate === 'function') {
+                try {
+                    testEditor.applyTemplate(templateId);
+                    result.innerHTML = `<div class="success">✅ Applied "${template.name}" template using applyTemplate() function</div>`;
+                } catch (error) {
+                    result.innerHTML = `<div class="warning">⚠️ Manual template applied (applyTemplate() failed: ${error.message})</div>`;
+                }
+            } else {
+                result.innerHTML = `<div class="warning">⚠️ Manual template applied (applyTemplate() function not found)</div>`;
+            }
+
+            updateStatus(`Applied template: ${template.name}`);
+        }
+
+        // Test 4: Old vs New Templates
+        function testOldNewTemplates() {
+            const result = document.getElementById('test4-result');
+
+            if (testTemplates.length === 0) {
+                result.innerHTML = `<div class="error">❌ Run Test 2 first to load templates</div>`;
+                return;
+            }
+
+            let html = `<div><strong>Old</strong> vs New Template System Analysis:</strong></div>`;
+
+            // Check for old system characteristics
+            const oldSystemTemplates = testTemplates.filter(t =>
+                !t.category && !t.isCustom && !t.createdAt
+            );
+
+            // Check for new system characteristics
+            const newSystemTemplates = testTemplates.filter(t =>
+                t.category || t.isCustom || t.createdAt
+            );
+
+            html += `<div>Old</div> system templates: ${oldSystemTemplates.length}</div>`;
+            html += `<div>New</div> system templates: ${newSystemTemplates.length}</div>`;
+
+            if (oldSystemTemplates.length > 0 && newSystemTemplates.length > 0) {
+                html += `<div class="success">✅ Both old and new template systems detected</div>`;
+                html += `<div style="margin-top: 10px;"><strong>Recommend</strong>ation:</strong> Ensure both systems work together</div>`;
+            } else if (oldSystemTemplates.length > 0) {
+                html += `<div class="warning">⚠️ Only old template system detected</div>`;
+                html += `<div style="margin-top: 10px;"><strong></strong>Recommendation:</strong> Consider upgrading to new system with categories</div>`;
+            } else if (newSystemTemplates.length > 0) {
+                html += `<div class="success">✅ Only new template system detected</div>`;
+                html += `<div style="margin-top: 10px;"><strong></strong>Recommendation:</strong> Good! Using modern template system</div>`;
+            }
+
+            // Check template content
+            const hasComplexTemplates = testTemplates.some(t =>
+                t.content && t.content.includes('<div') && t.content.includes('style=')
+            );
+            const hasSimpleTemplates = testTemplates.some(t =>
+                t.content && !t.content.includes('style=') && t.content.length < 500
+            );
+
+            html += `<div style="margin-top: 10px;"><strong></strong>Template Content Analysis:</strong></div>`;
+            html += `<div>Complex</div> templates (with styling): ${hasComplexTemplates ? '✅ Yes' : '❌ No'}</div>`;
+            html += `<div>Simple</div> templates: ${hasSimpleTemplates ? '✅ Yes' : '❌ No'}</div>`;
+
+            result.innerHTML = html;
+            updateStatus('Test 4 completed: Old vs New templates analyzed');
+        }
+
+        // Test 5: Template Features
+        function testTemplateFeatures() {
+            const result = document.getElementById('test5-result');
+
+            if (testTemplates.length === 0) {
+                result.innerHTML = `<div class="error">❌ Run Test 2 first to load templates</div>`;
+                return;
+            }
+
+            let html = `<div><strong>Template</strong> Features Check:</strong></div>`;
+
+            // Check 1: Icons
+            const hasIcons = testTemplates.every(t => t.icon && t.icon.includes('fa-'));
+            html += `<div></div>All templates have icons: ${hasIcons ? '✅ Yes' : '❌ No'}</div>`;
+
+            // Check 2: Descriptions
+            const hasDescriptions = testTemplates.every(t => t.description && t.description.length > 0);
+            html += `<div></div>All templates have descriptions: ${hasDescriptions ? '✅ Yes' : '❌ No'}</div>`;
+
+            // Check 3: Valid content
+            const hasValidContent = testTemplates.every(t => t.content && t.content.length > 0);
+            html += `<div></div>All templates have valid content: ${hasValidContent ? '✅ Yes' : '❌ No'}</div>`;
+
+            // Check 4: Unique IDs
+            const templateIds = testTemplates.map(t => t.id);
+            const uniqueIds = new Set(templateIds);
+            const hasUniqueIds = templateIds.length === uniqueIds.size;
+            html += `<div>All templates have unique IDs: ${has</div>UniqueIds ? '✅ Yes' : '❌ No'}</div>`;
+
+            // Check 5: Template application function
+            const hasApplyFunction = typeof testEditor.applyTemplate === 'function';
+            html += `<div>apply</div>Template() function exists: ${hasApplyFunction ? '✅ Yes' : '❌ No'}</div>`;
+
+            // Check 6: Toast notifications (if available)
+            const hasToastFunction = typeof testEditor.showToast === 'function';
+            html += `<div>show</div>Toast() function exists: ${hasToastFunction ? '✅ Yes' : '❌ No'}</div>`;
+
+            // Summary
+            const checks = [hasIcons, hasDescriptions, hasValidContent, hasUniqueIds, hasApplyFunction, hasToastFunction];
+            const passedChecks = checks.filter(Boolean).length;
+            const totalChecks = checks.length;
+
+            html += `<div style="margin-top: 10px;"><strong></strong>Summary:</strong> ${passedChecks}/${totalChecks} checks passed</div>`;
+
+            if (passedChecks === totalChecks) {
+                html += `<div class="success">✅ All template features are working correctly!</div>`;
+            } else if (passedChecks >= totalChecks * 0.7) {
+                html += `<div class="warning">⚠️ Most template features are working</div>`;
+            } else {
+                html += `<div class="error">❌ Template features need improvement</div>`;
+            }
+
+            result.innerHTML = html;
+            updateStatus(`Test 5 completed: ${passedChecks}/${totalChecks} features working`);
+        }
+
+        // Helper function
+        function updateStatus(message) {
+            const statusBar = document.getElementById('status-bar');
+            statusBar.textContent = `Status: ${message}`;
+            console.log(`Test Status: ${message}`);
+        }
+
+        // Initialize tests
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus('Test page loaded. Click buttons to run tests.');
+        });
+    </script>
+</body>
+</html>

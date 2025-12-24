@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head></head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Charles</title>WebEditor - Merged Templates Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style></style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin: 25px 0;
+            padding: 25px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        .status-box {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .template-card {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            text-align: center;
+        }
+        .template-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-color: #007bff;
+        }
+        .template-card.new {
+            border-color: #28a745;
+            background: #f8fff9;
+        }
+        .template-card.old {
+            border-color: #6c757d;
+            background: #f8f9fa;
+        }
+        .template-icon {
+            font-size: 32px;
+            margin-bottom: 15px;
+            color: #007bff;
+        }
+        .template-icon.new {
+            color: #28a745;
+        }
+        .template-icon.old {
+            color: #6c757d;
+        }
+        .template-name {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .template-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+            min-height: 40px;
+        }
+        .template-id {
+            font-family: monospace;
+            font-size: 12px;
+            color: #888;
+            background: #f5f5f5;
+            padding: 3px 8px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        .template-system {
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 3px;
+            margin-top: 10px;
+            display: inline-block;
+        }
+        .system-new {
+            background: #28a745;
+            color: white;
+        }
+        .system-old {
+            background: #6c757d;
+            color: white;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button.secondary {
+            background: #6c757d;
+        }
+        button.secondary:hover {
+            background: #545b62;
+        }
+        button.success-btn {
+            background: #28a745;
+        }
+        button.success-btn:hover {
+            background: #1e7e34;
+        }
+        #editor {
+            border: 2px solid #ddd;
+            min-height: 400px;
+            padding: 25px;
+            margin: 25px 0;
+            background: white;
+            border-radius: 8px;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+        .test-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+        .stat-box {
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            background: white;
+            border: 1px solid #e0e0e0;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .console-output {
+            background: #1e1e1e;
+            color: #f8f8f8;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin: 20px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .console-line {
+            margin: 5px 0;
+            padding: 3px 0;
+            border-bottom: 1px solid #333;
+        }
+        .timestamp {
+            color: #6c757d;
+        }
+        .log-info {
+            color: #17a2b8;
+        }
+        .log-success {
+            color: #28a745;
+        }
+        .log-warning {
+            color: #ffc107;
+        }
+        .log-error {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body></body>
+    <div class="test-container">
+        <h1></h1>🧪 CharlesWebEditor - Merged Templates Test</h1>
+        <p>This</p> page tests all templates from both old and new systems to ensure they work properly.</p>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">Total Templates</div>
+                <div class="stat-value" id="totalTemplates">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Old System</div>
+                <div class="stat-value" id="oldTemplates">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">New System</div>
+                <div class="stat-value" id="newTemplates">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Test Status</div>
+                <div class="stat-value" id="testStatus">❓</div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>1</h2>. System Initialization</h2>
+            <div id="initStatus" class="status-box info">Checking system...</div>
+            <button onclick="initializeTest()">Initialize Test</button>
+            <button onclick="checkEditor()" class="secondary">Check Editor</button>
+        </div>
+
+        <div class="test-section">
+            <h2>2</h2>. Template Discovery</h2>
+            <div id="discoveryStatus" class="status-box info">Waiting for initialization...</div>
+            <button onclick="discoverTemplates()">Discover Templates</button>
+            <button onclick="showTemplateStats()" class="secondary">Show Statistics</button>
+        </div>
+
+        <div class="test-section">
+            <h2>3</h2>. Template Gallery</h2>
+            <div id="galleryStatus" class="status-box info">Templates will appear here...</div>
+            <div id="templateGallery" class="template-grid">
+                <!-- Templates will be loaded here -->
+            </div>
+            <button onclick="loadTemplateGallery()">Load Template Gallery</button>
+            <button onclick="clearGallery()" class="secondary">Clear Gallery</button>
+        </div>
+
+        <div class="test-section">
+            <h2>4. Editor Area</h2</h2>>
+            <div id="editor" contenteditable="true">
+                <h2>Welcome</h2> to Template Testing</h2>
+                <p></p>This is the test editor. Click on any template card above to apply it here.</p>
+                <p>You</p> can also edit this content directly.</p>
+            </div>
+            <div class="test-controls">
+                <button onclick="testRandomTemplate()">Test Random Template</button>
+                <button onclick="testAllTemplates()" class="success-btn">Test All Templates</button>
+                <button onclick="clearEditor()" class="secondary">Clear Editor</button>
+                <button onclick="showEditorInfo()">Show Editor Info</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>5. Specific Template Tests</h2</h2>>
+            <div id="specificTestsStatus" class="status-box info">Ready for specific tests...</div>
+            <div class="test-controls">
+                <button onclick="testTemplate('sales-invoice')">Test Sales Invoice</button>
+                <button onclick="testTemplate('sales-receipt')">Test Sales Receipt</button>
+                <button onclick="testTemplate('memo-reminder')">Test Memo Reminder</button>
+                <button onclick="testTemplate('meeting-minutes')">Test Meeting Minutes</button>
+                <button onclick="testTemplate('essay')">Test Essay</button>
+                <button onclick="testTemplate('project-proposal')">Test Project Proposal</button>
+                <button onclick="testTemplate('blank')">Test Blank</button>
+                <button onclick="testTemplate('resume')">Test Resume</button>
+                <button onclick="testTemplate('letter')">Test Letter</button>
+                <button onclick="testTemplate('report')">Test Report</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>6</h2>. Console Output</h2>
+            <div class="console-output" id="consoleOutput">
+                <div class="console-line"><span class="timestamp">[00:00:00]</span> <span class="log-info">System ready for testing...</span></div>
+            </div>
+            <button onclick="clearConsole()">Clear Console</button>
+            <button onclick="exportTestResults()" class="secondary">Export Results</button>
+        </div>
+
+        <div class="test-section">
+            <h2></h2>7. Test Results</h2>
+            <div id="testResults" class="status-box info">No tests run yet.</div>
+            <button onclick="runComprehensiveTest()">Run Comprehensive Test</button>
+            <button onclick="generateReport()" class="success-btn">Generate Report</button>
+        </div>
+    </div>
+
+    <script>
+        //</script> Global variables
+        let testEditor = null;
+        let testTemplates = [];
+        let testResults = {
+            total: 0,
+            passed: 0,
+            failed: 0,
+            oldSystem: 0,
+            newSystem: 0,
+            details: []
+        };
+
+        // Console logging
+        function logToConsole(message, type = 'info') {
+            const consoleOutput = document.getElementById('consoleOutput');
+            const timestamp = new Date().toLocaleTimeString();
+            const typeClass = 'log-' + type;
+            const line = document.createElement('div');
+            line.className = 'console-line';
+            line.innerHTML = `<span class="timestamp">[${timestamp}]</span> <span class="${typeClass}">${message}</span>`;
+            consoleOutput.appendChild(line);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+
+            // Also log to browser console
+            const consoleMethods = {
+                info: console.info,
+                success: console.log,
+                warning: console.warn,
+                error: console.error
+            };
+            (consoleMethods[type] || console.log)(`[${timestamp}] ${message}`);
+        }
+
+        function clearConsole() {
+            document.getElementById('consoleOutput').innerHTML = '';
+            logToConsole('Console cleared', 'info');
+        }
+
+        // Status updates
+        function updateStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = 'status-box ' + type;
+        }
+
+        function updateStats() {
+            document.getElementById('totalTemplates').textContent = testTemplates.length;
+            document.getElementById('oldTemplates').textContent = testResults.oldSystem;
+            document.getElementById('newTemplates').textContent = testResults.newSystem;
+
+            if (testResults.total > 0) {
+                const passRate = Math.round((testResults.passed / testResults.total) * 100);
+                document.getElementById('testStatus').textContent = `${passRate}%`;
+                document.getElementById('testStatus').style.color = passRate >= 80 ? '#28a745' : passRate >= 60 ? '#ffc107' : '#dc3545';
+            }
+        }
+
+        // Test functions
+        function initializeTest() {
+            logToConsole('Initializing test...', 'info');
+            updateStatus('initStatus', 'Checking for editor...', 'info');
+
+            if (typeof window.charliesEditor === 'undefined') {
+                updateStatus('initStatus', '❌ Editor not found! Make sure main.js is loaded.', 'error');
+                logToConsole('Editor not found. Loading main.js...', 'error');
+
+                // Try to load main.js
+                const script = document.createElement('script');
+                script.src = 'main.js';
+                script.onload = function() {
+                    if (typeof window.charliesEditor !== 'undefined') {
+                        testEditor = window.charliesEditor;
+                        updateStatus('initStatus', '✅ Editor loaded successfully!', 'success');
+                        logToConsole(`Editor loaded: v${testEditor.version}`, 'success');
+                        updateStats();
+                    } else {
+                        updateStatus('initStatus', '❌ Failed to load editor', 'error');
+                        logToConsole('Failed to load editor after script load', 'error');
+                    }
+                };
+                script.onerror = function() {
+                    updateStatus('initStatus', '❌ Error loading main.js', 'error');
+                    logToConsole('Error loading main.js', 'error');
+                };
+                document.head.appendChild(script);
+            } else {
+                testEditor = window.charliesEditor;
+                updateStatus('initStatus', `✅ Editor found: v${testEditor.version}`, 'success');
+                logToConsole(`Editor initialized: v${testEditor.version} (${testEditor.releaseDate})`, 'success');
+                updateStats();
+            }
+        }
+
+        function checkEditor() {
+            if (!testEditor) {
+                logToConsole('Editor not initialized. Run initialization first.', 'warning');
+                return;
+            }
+
+            const editorElement = document.getElementById('editor');
+            if (editorElement) {
+                logToConsole(`Editor element found. Content length: ${editorElement.innerHTML.length} chars`, 'success');
+                logToConsole(`Content editable: ${editorElement.contentEditable}`, 'info');
+            } else {
+                logToConsole('Editor element not found!', 'error');
+            }
+        }
+
+        function discoverTemplates() {
+            if (!testEditor) {
+                updateStatus('discoveryStatus', '❌ Editor not initialized', 'error');
+                logToConsole('Cannot discover templates: Editor not initialized', 'error');
+                return;
+            }
+
+            if (!testEditor.templates || !Array.isArray(testEditor.templates)) {
+                updateStatus('discoveryStatus', '❌ Templates array not found', 'error');
+                logToConsole('Templates array not found in editor', 'error');
+                return;
+            }
+
+            testTemplates = testEditor.templates;
+            updateStatus('discoveryStatus', `✅ Found ${testTemplates.length} templates`, 'success');
+            logToConsole(`Discovered ${testTemplates.length} templates`, 'success');
+
+            // Count old vs new system templates
+            const oldSystemIds = ['blank', 'resume', 'letter', 'report'];
+            const newSystemIds = ['sales-invoice', 'sales-receipt', 'memo-reminder', 'meeting-minutes', 'essay', 'project-proposal'];
+
+            testResults.oldSystem = testTemplates.filter(t => oldSystemIds.includes(t.id)).length;
+            testResults.newSystem = testTemplates.filter(t => newSystemIds.includes(t.id)).length;
+
+            logToConsole(`Old system templates: ${testResults.oldSystem}/${oldSystemIds.length}`, 'info');
+            logToConsole(`New system templates: ${testResults.newSystem}/${newSystemIds.length}`, 'info');
+
+            // List all templates
+            testTemplates.forEach((template, index) => {
+                const system = oldSystemIds.includes(template.id) ? 'OLD' : newSystemIds.includes(template.id) ? 'NEW' : 'UNKNOWN';
+                logToConsole(`${index + 1}. ${template.name} (${template.id}) [${system}]`, 'info');
+            });
+
+            updateStats();
+        }
+
+        function loadTemplateGallery() {
+            const gallery = document.getElementById('templateGallery');
+            const status = document.getElementById('galleryStatus');
+
+            if (testTemplates.length === 0) {
+                updateStatus('galleryStatus', '❌ No templates found. Discover templates first.', 'error');
+                return;
+            }
+
+            gallery.innerHTML = '';
+
+            const oldSystemIds = ['blank', 'resume', 'letter', 'report'];
+
+            testTemplates.forEach(template => {
+                const isOldSystem = oldSystemIds.includes(template.id);
+                const card = document.createElement('div');
+                card.className = `template-card ${isOldSystem ? 'old' : 'new'}`;
+                card.onclick = () => applyTemplate(template.id);
+
+                card.innerHTML = `
+                    <div class="template-icon ${isOldSystem ? 'old' : 'new'}">
+                        <i class="${template.icon}"></i>
+                    </div>
+                    <div class="template-name">${template.name}</div>
+                    <div class="template-description">${template.description}</div>
+                    <div class="template-id">${template.id}</div>
+                    <div class="template-system ${isOldSystem ? 'system-old' : 'system-new'}">
+                        ${isOldSystem ? 'Old System' : 'New System'}
+                    </div>
+                `;
+
+                gallery.appendChild(card);
+            });
+
+            updateStatus('galleryStatus', `✅ Loaded ${testTemplates.length} templates`, 'success');
+            logToConsole(`Template gallery loaded with ${testTemplates.length} templates`, 'success');
+        }
+
+        function clearGallery() {
+            document.getElementById('templateGallery').innerHTML = '';
+            updateStatus('galleryStatus', 'Gallery cleared', 'info');
+            logToConsole('Template gallery cleared', 'info');
+        }
+
+        function applyTemplate(templateId) {
+            if (!testEditor) {
+                logToConsole('Cannot apply template: Editor not initialized', 'error');
+                return;
+            }
+
+            const template = testTemplates.find(t => t.id === templateId);
+            if (!template) {
+                logToConsole(`Template not found: ${templateId}`, 'error');
+                return;
+            }
+
+            logToConsole(`Applying template: ${template.name} (${templateId})`, 'info');
+
+            if (typeof testEditor.applyTemplate === 'function') {
+                testEditor.applyTemplate(templateId);
+                logToConsole(`✅ Template applied: ${template.name}`, 'success');
+
+                // Update test results
+                const existingTest = testResults.details.find(t => t.id === templateId);
+                if (!existingTest) {
+                    testResults.details.push({
+                        id: templateId,
+                        name: template.name,
+                        status: 'passed',
+                        timestamp: new Date().toISOString()
+                    });
+                    testResults.total++;
+                    testResults.passed++;
+                    updateStats();
+                }
+            } else {
+                logToConsole('❌ applyTemplate function not found', 'error');
+            }
+        }
+
+        function testTemplate(templateId) {
+            applyTemplate(templateId);
+        }
+
+        function testRandomTemplate() {
+            if (testTemplates.length === 0) {
+                logToConsole('No templates available for random test', 'warning');
+                return;
+            }
+
+            const randomIndex = Math.floor(Math.random() * testTemplates.length);
+            const randomTemplate = testTemplates[randomIndex];
+            logToConsole(`Testing random template: ${randomTemplate.name}`, 'info');
+            applyTemplate(randomTemplate.id);
+        }
+
+        function testAllTemplates() {
+            if (testTemplates.length === 0) {
+                logToConsole('No templates to test', 'warning');
+                return;
+            }
+
+            logToConsole(`Starting test of all ${testTemplates.length} templates...`, 'info');
+
+            let index = 0;
+            function testNextTemplate() {
+                if (index >= testTemplates.length) {
+                    logToConsole('✅ All templates tested!', 'success');
+                    return;
+                }
+
+                const template = testTemplates[index];
+                logToConsole(`Testing ${index + 1}/${testTemplates.length}: ${template.name}`, 'info');
+                applyTemplate(template.id);
+
+                index++;
+                setTimeout(testNextTemplate, 1000);
+            }
+
+            testNextTemplate();
+        }
+
+        function clearEditor() {
+            const editorElement = document.getElementById('editor');
+            editorElement.innerHTML = '<p>Editor</p> cleared. Ready for new content.</p>';
+            logToConsole('Editor cleared', 'info');
+        }
+
+        function showEditorInfo() {
+            const editorElement = document.getElementById('editor');
+            logToConsole(`Editor info:`, 'info');
+            logToConsole(`  - Content length: ${editorElement.innerHTML.length} characters`, 'info');
+            logToConsole(`  - Has tables: ${editorElement.innerHTML.includes('<table')}`, 'info');
+            logToConsole(`  - Has lists: ${editorElement.innerHTML.includes('<ul') || editorElement.innerHTML.includes('<ol')}`, 'info');
+            logToConsole(`  - Has images: ${editorElement.innerHTML.includes('<img')}`, 'info');
+        }
+
+        function showTemplateStats() {
+            if (testTemplates.length === 0) {
+                logToConsole('No templates to show statistics for', 'warning');
+                return;
+            }
+
+            logToConsole('📊 TEMPLATE STATISTICS:', 'info');
+            logToConsole(`Total templates: ${testTemplates.length}`, 'info');
+            logToConsole(`Old system: ${testResults.oldSystem} templates`, 'info');
+            logToConsole(`New system: ${testResults.newSystem} templates`, 'info');
+
+            // Content analysis
+            let totalContentLength = 0;
+            let hasTables = 0;
+            let hasLists = 0;
+            let hasPlaceholders = 0;
+
+            testTemplates.forEach(template => {
+                totalContentLength += template.content.length;
+                if (template.content.includes('<table')) hasTables++;
+                if (template.content.includes('<ul') || template.content.includes('<ol')) hasLists++;
+                if (template.content.includes('[') && template.content.includes(']')) hasPlaceholders++;
+            });
+
+            const avgContentLength = Math.round(totalContentLength / testTemplates.length);
+
+            logToConsole(`Average content length: ${avgContentLength} characters`, 'info');
+            logToConsole(`Templates with tables: ${hasTables}/${testTemplates.length}`, 'info');
+            logToConsole(`Templates with lists: ${hasLists}/${testTemplates.length}`, 'info');
+            logToConsole(`Templates with placeholders: ${hasPlaceholders}/${testTemplates.length}`, 'info');
+        }
+
+        function runComprehensiveTest() {
+            logToConsole('🚀 Starting comprehensive template test...', 'info');
+
+            // Reset results
+            testResults = {
+                total: 0,
+                passed: 0,
+                failed: 0,
+                oldSystem: testResults.oldSystem,
+                newSystem: testResults.newSystem,
+                details: []
+            };
+
+            if (testTemplates.length === 0) {
+                updateStatus('testResults', '❌ No templates to test', 'error');
+                logToConsole('No templates available for testing', 'error');
+                return;
+            }
+
+            testResults.total = testTemplates.length;
+
+            // Test each template
+            testTemplates.forEach((template, index) => {
+                setTimeout(() => {
+                    logToConsole(`Testing ${index + 1}/${testTemplates.length}: ${template.name}`, 'info');
+
+                    try {
+                        if (typeof testEditor.applyTemplate === 'function') {
+                            const originalContent = document.getElementById('editor').innerHTML;
+                            testEditor.applyTemplate(template.id);
+
+                            setTimeout(() => {
+                                const newContent = document.getElementById('editor').innerHTML;
+                                if (newContent !== originalContent) {
+                                    testResults.passed++;
+                                    testResults.details.push({
+                                        id: template.id,
+                                        name: template.name,
+                                        status: 'passed',
+                                        timestamp: new Date().toISOString()
+                                    });
+                                    logToConsole(`✅ ${template.name}: PASSED`, 'success');
+                                } else {
+                                    testResults.failed++;
+                                    testResults.details.push({
+                                        id: template.id,
+                                        name: template.name,
+                                        status: 'failed',
+                                        timestamp: new Date().toISOString(),
+                                        reason: 'Content did not change'
+                                    });
+                                    logToConsole(`❌ ${template.name}: FAILED - Content did not change`, 'error');
+                                }
+
+                                updateTestResultsDisplay();
+                            }, 300);
+                        }
+                    } catch (error) {
+                        testResults.failed++;
+                        testResults.details.push({
+                            id: template.id,
+                            name: template.name,
+                            status: 'failed',
+                            timestamp: new Date().toISOString(),
+                            reason: error.message
+                        });
+                        logToConsole(`❌ ${template.name}: ERROR - ${error.message}`, 'error');
+                        updateTestResultsDisplay();
+                    }
+                }, index * 1500);
+            });
+
+            // Final summary after all tests
+            setTimeout(() => {
+                updateTestResultsDisplay();
+                logToConsole('✅ Comprehensive test completed!', 'success');
+            }, testTemplates.length * 1500 + 1000);
+        }
+
+        function updateTestResultsDisplay() {
+            const resultsElement = document.getElementById('testResults');
+            const passRate = testResults.total > 0 ? Math.round((testResults.passed / testResults.total) * 100) : 0;
+
+            let html = `<strong>Test</strong> Results:</strong><br>`;
+            html += `Total: ${testResults.total} | Passed: ${testResults.passed} | Failed: ${testResults.failed}<br>`;
+            html += `Pass Rate: ${passRate}%`;
+
+            if (testResults.failed > 0) {
+                const failedTemplates = testResults.details.filter(t => t.status === 'failed');
+                html += `<br><br><strong>Failed</strong> Templates:</strong><br>`;
+                failedTemplates.forEach(t => {
+                    html += `• ${t.name} (${t.reason || 'Unknown error'})<br>`;
+                });
+            }
+
+            resultsElement.innerHTML = html;
+            resultsElement.className = `status-box ${passRate >= 80 ? 'success' : passRate >= 60 ? 'warning' : 'error'}`;
+
+            updateStats();
+        }
+
+        function generateReport() {
+            logToConsole('📄 GENERATING TEST REPORT...', 'info');
+
+            const report = {
+                timestamp: new Date().toISOString(),
+                editorVersion: testEditor ? testEditor.version : 'Unknown',
+                totalTemplates: testTemplates.length,
+                oldSystemTemplates: testResults.oldSystem,
+                newSystemTemplates: testResults.newSystem,
+                testResults: testResults,
+                templateList: testTemplates.map(t => ({
+                    id: t.id,
+                    name: t.name,
+                    description: t.description,
+                    contentLength: t.content.length
+                }))
+            };
+
+            logToConsole('Test Report Generated:', 'info');
+            logToConsole(JSON.stringify(report, null, 2), 'info');
+
+            // Create downloadable report
+            const dataStr = JSON.stringify(report, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            const exportFileDefaultName = `template-test-report-${new Date().toISOString().slice(0,10)}.json`;
+
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+
+            logToConsole('✅ Report exported as JSON file', 'success');
+        }
+
+        function exportTestResults() {
+            generateReport();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            logToConsole('Test page loaded successfully', 'success');
+            logToConsole('Click "Initialize Test" to start testing', 'info');
+
+            // Auto-initialize if editor is already loaded
+            if (typeof window.charliesEditor !== 'undefined') {
+                setTimeout(() => {
+                    testEditor = window.charliesEditor;
+                    logToConsole('Editor detected, auto-initializing...', 'info');
+                    updateStatus('initStatus', `✅ Editor auto-detected: v${testEditor.version}`, 'success');
+                }, 1000);
+            }
+        });
+
+        // Export functions to global scope for console testing
+        window.testTemplate = testTemplate;
+        window.testAllTemplates = testAllTemplates;
+        window.showTemplateStats = showTemplateStats;
+        window.clearEditor = clearEditor;
+        window.runComprehensiveTest = runComprehensiveTest;
+        window.generateReport = generateReport;
+
+        logToConsole('Test functions loaded. Use in console: testTemplate("sales-invoice")', 'info');
+    </script>
+</body>
+</html>
