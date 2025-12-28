@@ -69,6 +69,8 @@ body {
     box-shadow: 0 10px 25px var(--shadow-medium);
     position: relative;
     transition: background-color 0.3s ease;
+    /* Ensure status bar positioning works */
+    overflow: hidden;
 }
 /* Header */
 .header {
@@ -324,6 +326,9 @@ body {
     overflow: hidden;
     flex-direction: row !important;
     width: 100% !important;
+    /* Make room for status bar */
+    padding-bottom: 50px;
+    position: relative;
 }
 /* Sidebar */
 .sidebar {
@@ -437,6 +442,8 @@ body {
     width: calc(100% - var(--sidebar-width)) !important;
     min-width: 0 !important;
     margin-left: 0 !important;
+    /* Make room for status bar at bottom */
+    margin-bottom: 50px;
 }
 /* SCROLL BAR ADDITION FOR EDITOR */
 .page-container {
@@ -620,6 +627,13 @@ body {
     /* DIAGNOSTIC: Strong border to identify status bar */
     border: 3px solid #00ff00 !important;
     background-color: rgba(0, 255, 0, 0.1) !important;
+    /* Fix position: stick to bottom of editor-container */
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    z-index: 10;
 }
 .status-info {
     display: flex;
@@ -787,6 +801,16 @@ body {
     .editor-area {
         width: 100% !important;
         margin-left: 0 !important;
+        margin-bottom: 50px !important;
+    }
+
+    .status-bar {
+        position: absolute !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 50px !important;
+        z-index: 10 !important;
     }
     .page-container {
         padding: 15px;
