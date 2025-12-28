@@ -1008,6 +1008,22 @@ class CharlesWebEditor {
       printBtn.addEventListener("click", () => window.print());
     }
 
+    // Page Layout button
+    const pageLayoutBtn = document.getElementById("pageLayoutBtn");
+    if (pageLayoutBtn) {
+      pageLayoutBtn.addEventListener("click", () => {
+        this.showPageLayoutModal();
+      });
+    }
+
+    // Quick Styles button
+    const quickStylesBtn = document.getElementById("quickStylesBtn");
+    if (quickStylesBtn) {
+      quickStylesBtn.addEventListener("click", () => {
+        this.showQuickStylesModal();
+      });
+    }
+
     // New feature buttons (AI, Templates, Advanced Formatting, Email Share)
     const aiAssistantBtn = document.getElementById("aiAssistantBtn");
     if (aiAssistantBtn) {
@@ -1048,6 +1064,58 @@ class CharlesWebEditor {
         this.showToast("📧 Email Sharing feature coming soon!", "info");
       });
     }
+
+    // Page Layout modal event listeners
+    const closePageLayoutModal = document.getElementById(
+      "closePageLayoutModal",
+    );
+    if (closePageLayoutModal) {
+      closePageLayoutModal.addEventListener("click", () => {
+        this.hidePageLayoutModal();
+      });
+    }
+
+    const cancelPageLayoutBtn = document.getElementById("cancelPageLayoutBtn");
+    if (cancelPageLayoutBtn) {
+      cancelPageLayoutBtn.addEventListener("click", () => {
+        this.hidePageLayoutModal();
+      });
+    }
+
+    const applyPageLayoutBtn = document.getElementById("applyPageLayoutBtn");
+    if (applyPageLayoutBtn) {
+      applyPageLayoutBtn.addEventListener("click", () => {
+        this.applyPageLayout();
+      });
+    }
+
+    // Quick Styles modal event listeners
+    const closeQuickStylesModal = document.getElementById(
+      "closeQuickStylesModal",
+    );
+    if (closeQuickStylesModal) {
+      closeQuickStylesModal.addEventListener("click", () => {
+        this.hideQuickStylesModal();
+      });
+    }
+
+    const cancelQuickStylesBtn = document.getElementById(
+      "cancelQuickStylesBtn",
+    );
+    if (cancelQuickStylesBtn) {
+      cancelQuickStylesBtn.addEventListener("click", () => {
+        this.hideQuickStylesModal();
+      });
+    }
+
+    // Style buttons in Quick Styles modal
+    document.querySelectorAll(".style-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const style = e.target.closest(".style-btn").dataset.style;
+        this.applyStyle(style);
+        this.hideQuickStylesModal();
+      });
+    });
 
     // Document tab clicks and context menu
     document.addEventListener("click", (e) => {
@@ -2351,6 +2419,138 @@ Enter your Google Client ID:`;
     this.editor.innerHTML = template.content;
     this.saveDocumentState();
     this.showToast(`Applied ${template.name} template`, "success");
+  }
+
+  // Page Layout Modal Functions
+  showPageLayoutModal() {
+    const modal = document.getElementById("pageLayoutModal");
+    if (modal) {
+      modal.classList.add("active");
+      // Set current values
+      const pageSizeSelect = document.getElementById("pageSizeSelectModal");
+      const pageOrientation = document.getElementById("pageOrientationModal");
+      const marginTop = document.getElementById("marginTopModal");
+      const marginBottom = document.getElementById("marginBottomModal");
+      const marginLeft = document.getElementById("marginLeftModal");
+      const marginRight = document.getElementById("marginRightModal");
+
+      if (pageSizeSelect) pageSizeSelect.value = this.currentPageSize || "a4";
+      if (pageOrientation)
+        pageOrientation.value = this.currentPageOrientation || "portrait";
+      if (marginTop) marginTop.value = this.currentMarginTop || 25;
+      if (marginBottom) marginBottom.value = this.currentMarginBottom || 25;
+      if (marginLeft) marginLeft.value = this.currentMarginLeft || 25;
+      if (marginRight) marginRight.value = this.currentMarginRight || 25;
+    }
+  }
+
+  hidePageLayoutModal() {
+    const modal = document.getElementById("pageLayoutModal");
+    if (modal) {
+      modal.classList.remove("active");
+    }
+  }
+
+  applyPageLayout() {
+    const pageSizeSelect = document.getElementById("pageSizeSelectModal");
+    const pageOrientation = document.getElementById("pageOrientationModal");
+    const marginTop = document.getElementById("marginTopModal");
+    const marginBottom = document.getElementById("marginBottomModal");
+    const marginLeft = document.getElementById("marginLeftModal");
+    const marginRight = document.getElementById("marginRightModal");
+
+    if (pageSizeSelect) this.currentPageSize = pageSizeSelect.value;
+    if (pageOrientation) this.currentPageOrientation = pageOrientation.value;
+    if (marginTop) this.currentMarginTop = parseInt(marginTop.value);
+    if (marginBottom) this.currentMarginBottom = parseInt(marginBottom.value);
+    if (marginLeft) this.currentMarginLeft = parseInt(marginLeft.value);
+    if (marginRight) this.currentMarginRight = parseInt(marginRight.value);
+
+    // Apply page size
+    const page = document.getElementById("page");
+    if (page) {
+      page.className = "page";
+      if (this.currentPageSize === "a4") {
+        page.classList.add("a4");
+      } else if (this.currentPageSize === "letter") {
+        page.classList.add("letter");
+      } else if (this.currentPageSize === "legal") {
+        page.classList.add("legal");
+      }
+    }
+
+    // Apply margins to editor
+    const editor = document.getElementById("editor");
+    if (editor) {
+      editor.style.paddingTop = `${this.currentMarginTop}px`;
+      editor.style.paddingBottom = `${this.currentMarginBottom}px`;
+      editor.style.paddingLeft = `${this.currentMarginLeft}px`;
+      editor.style.paddingRight = `${this.currentMarginRight}px`;
+    }
+
+    this.hidePageLayoutModal();
+    this.showToast("✅ Page layout applied successfully!", "success");
+  }
+
+  // Quick Styles Modal Functions
+  showQuickStylesModal() {
+    const modal = document.getElementById("quickStylesModal");
+    if (modal) {
+      modal.classList.add("active");
+    }
+  }
+
+  hideQuickStylesModal() {
+    const modal = document.getElementById("quickStylesModal");
+    if (modal) {
+      modal.classList.remove("active");
+    }
+  }
+
+  applyStyle(styleName) {
+    const editor = document.getElementById("editor");
+    if (!editor) return;
+
+    // Remove existing style classes
+    editor.classList.remove(
+      "style-heading1",
+      "style-heading2",
+      "style-heading3",
+      "style-normal",
+      "style-quote",
+      "style-code",
+    );
+
+    // Apply new style
+    switch (styleName) {
+      case "heading1":
+        document.execCommand("formatBlock", false, "h1");
+        editor.classList.add("style-heading1");
+        break;
+      case "heading2":
+        document.execCommand("formatBlock", false, "h2");
+        editor.classList.add("style-heading2");
+        break;
+      case "heading3":
+        document.execCommand("formatBlock", false, "h3");
+        editor.classList.add("style-heading3");
+        break;
+      case "normal":
+        document.execCommand("formatBlock", false, "p");
+        editor.classList.add("style-normal");
+        break;
+      case "quote":
+        document.execCommand("formatBlock", false, "blockquote");
+        editor.classList.add("style-quote");
+        break;
+      case "code":
+        document.execCommand("formatBlock", false, "pre");
+        editor.classList.add("style-code");
+        break;
+    }
+
+    this.saveDocumentState();
+    this.showToast(`✅ Applied ${styleName} style`, "success");
   }
 
   updateWordCount() {

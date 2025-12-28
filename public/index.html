@@ -300,6 +300,28 @@
                         <option value="de">German</option>
                     </select>
                 </div>
+                <!-- Page Layout -->
+                <div class="toolbar-group">
+                    <button
+                        class="toolbar-btn clickable"
+                        id="pageLayoutBtn"
+                        title="Page Layout Settings"
+                    >
+                        <i class="fas fa-file-alt"></i>
+                        <span>Layout</span>
+                    </button>
+                </div>
+                <!-- Quick Styles -->
+                <div class="toolbar-group">
+                    <button
+                        class="toolbar-btn clickable"
+                        id="quickStylesBtn"
+                        title="Quick Styles"
+                    >
+                        <i class="fas fa-paint-brush"></i>
+                        <span>Styles</span>
+                    </button>
+                </div>
                 <!-- AI Assistant -->
                 <div class="toolbar-group">
                     <button
@@ -330,7 +352,7 @@
                         title="Advanced Formatting"
                     >
                         <i class="fas fa-magic"></i>
-                        <span>Format</span>
+                        <span>Format</span</span>>
                     </button>
                 </div>
                 <!-- Email Sharing -->
@@ -350,11 +372,7 @@
                 <!-- Sidebar -->
                 <div class="sidebar" id="sidebar">
                     <div class="sidebar-tabs">
-                        <div class="sidebar-tab active" data-tab="layout">
-                            Page Layout
-                        </div>
-                        <div class="sidebar-tab" data-tab="styles">Styles</div>
-                        <div class="sidebar-tab" data-tab="templates">
+                        <div class="sidebar-tab active" data-tab="templates">
                             Templates
                         </div>
                         <div class="sidebar-tab" data-tab="history">
@@ -363,132 +381,11 @@
                         <div class="sidebar-tab" data-tab="recent">Recent</div>
                     </div>
                     <div class="sidebar-content" id="sidebarContent">
-                        <!-- Page Layout Tab -->
+                        <!-- Templates Tab -->
                         <div
                             class="sidebar-tab-content active"
-                            data-tab="layout"
+                            data-tab="templates"
                         >
-                            <div class="sidebar-section">
-                                <h3>Page Size</h3>
-                                <div class="sidebar-option">
-                                    <label for="pageSizeSelect">Size:</label>
-                                    <select
-                                        class="toolbar-select"
-                                        id="pageSizeSelect"
-                                    >
-                                        <option value="a4">
-                                            A4 (210 × 297 mm)
-                                        </option>
-                                        <option value="letter">
-                                            Letter (216 × 279 mm)
-                                        </option>
-                                        <option value="legal">
-                                            Legal (216 × 356 mm)
-                                        </option>
-                                    </select>
-                                </div>
-                                <div class="sidebar-option">
-                                    <label for="pageOrientation"
-                                        >Orientation:</label
-                                    >
-                                    <select
-                                        class="toolbar-select"
-                                        id="pageOrientation"
-                                    >
-                                        <option value="portrait">
-                                            Portrait
-                                        </option>
-                                        <option value="landscape">
-                                            Landscape
-                                        </option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="sidebar-section">
-                                <h3>Margins (mm)</h3>
-                                <div class="margin-inputs">
-                                    <div class="margin-input">
-                                        <label>Top</label>
-                                        <input
-                                            type="number"
-                                            id="marginTop"
-                                            value="25"
-                                            min="0"
-                                        />
-                                    </div>
-                                    <div class="margin-input">
-                                        <label>Bottom</label>
-                                        <input
-                                            type="number"
-                                            id="marginBottom"
-                                            value="25"
-                                            min="0"
-                                        />
-                                    </div>
-                                    <div class="margin-input">
-                                        <label>Left</label>
-                                        <input
-                                            type="number"
-                                            id="marginLeft"
-                                            value="25"
-                                            min="0"
-                                        />
-                                    </div>
-                                    <div class="margin-input">
-                                        <label>Right</label>
-                                        <input
-                                            type="number"
-                                            id="marginRight"
-                                            value="25"
-                                            min="0"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Styles Tab -->
-                        <div class="sidebar-tab-content" data-tab="styles">
-                            <div class="sidebar-section">
-                                <h3>Quick Styles</h3>
-                                <div class="sidebar-option">
-                                    <button
-                                        class="btn btn-secondary"
-                                        style="width: 100%"
-                                        data-style="heading1"
-                                    >
-                                        <i class="fas fa-heading"></i> Heading 1
-                                    </button>
-                                </div>
-                                <div class="sidebar-option">
-                                    <button
-                                        class="btn btn-secondary"
-                                        style="width: 100%"
-                                        data-style="heading2"
-                                    >
-                                        <i class="fas fa-heading"></i> Heading 2
-                                    </button>
-                                </div>
-                                <div class="sidebar-option">
-                                    <button
-                                        class="btn btn-secondary"
-                                        style="width: 100%"
-                                        data-style="heading3"
-                                    >
-                                        <i class="fas fa-heading"></i> Heading 3
-                                    </button>
-                                </div>
-                                <div class="sidebar-option">
-                                    <button
-                                        class="btn btn-secondary"
-                                        style="width: 100%"
-                                        data-style="normal"
-                                    >
-                                        <i class="fas fa-paragraph"></i> Normal
-                                        Text
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
                         <!-- History Tab -->
                         <div class="sidebar-tab-content" data-tab="history">
                             <div class="sidebar-section">
@@ -977,6 +874,110 @@
                 </div>
             </div>
         </div>
+
+        <!-- Page Layout Modal -->
+        <div class="modal" id="pageLayoutModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Page Layout Settings</h3>
+                    <button class="modal-close" id="closePageLayoutModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="pageSizeSelectModal">Page Size:</label>
+                        <select class="toolbar-select" id="pageSizeSelectModal">
+                            <option value="a4">A4 (210 × 297 mm)</option>
+                            <option value="letter">Letter (216 × 279 mm)</option>
+                            <option value="legal">Legal (216 × 356 mm)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pageOrientationModal">Orientation:</label>
+                        <select class="toolbar-select" id="pageOrientationModal">
+                            <option value="portrait">Portrait</option>
+                            <option value="landscape">Landscape</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Margins (mm):</label>
+                        <div class="margin-inputs-modal">
+                            <div class="margin-input-modal">
+                                <label>Top</label>
+                                <input type="number" id="marginTopModal" value="25" min="0" />
+                            </div>
+                            <div class="margin-input-modal">
+                                <label>Bottom</label>
+                                <input type="number" id="marginBottomModal" value="25" min="0" />
+                            </div>
+                            <div class="margin-input-modal">
+                                <label>Left</label>
+                                <input type="number" id="marginLeftModal" value="25" min="0" />
+                            </div>
+                            <div class="margin-input-modal">
+                                <label>Right</label>
+                                <input type="number" id="marginRightModal" value="25" min="0" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="cancelPageLayoutBtn">
+                        Cancel
+                    </button>
+                    <button class="btn btn-primary" id="applyPageLayoutBtn">
+                        Apply Layout
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Styles Modal -->
+        <div class="modal" id="quickStylesModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Quick Styles</h3>
+                    <button class="modal-close" id="closeQuickStylesModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="styles-grid">
+                        <button class="style-btn" data-style="heading1">
+                            <i class="fas fa-heading"></i>
+                            <span>Heading 1</span>
+                        </button>
+                        <button class="style-btn" data-style="heading2">
+                            <i class="fas fa-heading"></i>
+                            <span>Heading</span> 2</span>
+                        </button>
+                        <button class="style-btn" data-style="heading3">
+                            <i class="fas fa-heading"></i>
+                            <span>Heading</span> 3</span>
+                        </button>
+                        <button class="style-btn" data-style="normal">
+                            <i class="fas fa-paragraph"></i>
+                            <span></span>Normal Text</span>
+                        </button>
+                        <button class="style-btn" data-style="quote">
+                            <i class="fas fa-quote-right"></i>
+                            <span>Quote</span></span>
+                        </button>
+                        <button class="style-btn" data-style="code">
+                            <i class="fas fa-code"></i>
+                            <span>Code</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="cancelQuickStylesBtn">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
         <script src="main.js"></script>
