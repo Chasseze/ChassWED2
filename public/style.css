@@ -322,6 +322,8 @@ body {
     display: flex;
     flex: 1;
     overflow: hidden;
+    flex-direction: row !important;
+    width: 100% !important;
 }
 /* Sidebar */
 .sidebar {
@@ -335,6 +337,10 @@ body {
     /* DIAGNOSTIC: Strong border to identify sidebar */
     border: 3px solid #0000ff !important;
     background-color: rgba(0, 0, 255, 0.05) !important;
+    position: relative !important;
+    left: 0 !important;
+    top: 0 !important;
+    height: 100% !important;
 }
 .sidebar.collapsed {
     transform: translateX(-100%);
@@ -428,6 +434,9 @@ body {
     /* DIAGNOSTIC: Strong border to identify editor area */
     border: 3px solid #ff0000 !important;
     background-color: rgba(255, 0, 0, 0.05) !important;
+    width: calc(100% - var(--sidebar-width)) !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
 }
 /* SCROLL BAR ADDITION FOR EDITOR */
 .page-container {
@@ -773,6 +782,11 @@ body {
         z-index: 100;
         background: white;
         box-shadow: 5px 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .editor-area {
+        width: 100% !important;
+        margin-left: 0 !important;
     }
     .page-container {
         padding: 15px;
