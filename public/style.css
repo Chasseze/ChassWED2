@@ -79,21 +79,21 @@ body {
     align-items: center;
     background: var(--header-bg);
     color: white;
-    padding: 10px 20px;
-    height: 60px;
+    padding: 8px 16px;
+    height: 56px;
     border-bottom: 2px solid var(--accent-color);
     transition: background 0.3s ease;
 }
 .logo {
     display: flex;
     align-items: center;
-    gap: 12px;
-    font-size: 1.6rem;
+    gap: 10px;
+    font-size: 1.5rem;
     font-weight: 700;
 }
 .logo i {
     color: var(--accent-color);
-    font-size: 1.8rem;
+    font-size: 1.6rem;
 }
 .logo-text {
     background: linear-gradient(
@@ -109,19 +109,19 @@ body {
 }
 .header-controls {
     display: flex;
-    gap: 15px;
+    gap: 12px;
 }
 .header-btn {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
-    padding: 8px 16px;
+    padding: 6px 12px;
     border-radius: 4px;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 14px;
+    font-size: 13px;
     transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
@@ -182,15 +182,17 @@ body {
     border-radius: 2px;
 }
 .tab {
-    padding: 12px 20px;
+    padding: 10px 16px;
     background: #f1f5f9;
     border-right: 1px solid var(--border-color);
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 8px;
-    min-width: 140px;
+    font-size: 0.9rem;
+    gap: 6px;
+    min-width: 120px;
     position: relative;
+    font-size: 0.85rem;
     transition: all 0.2s;
 }
 .tab:hover {
@@ -230,7 +232,7 @@ body {
 /* Toolbars */
 .toolbar {
     background: var(--light-bg);
-    padding: 10px 15px;
+    padding: 8px 12px;
     border-bottom: 1px solid var(--border-color);
     display: flex;
     flex-wrap: wrap;
@@ -251,10 +253,10 @@ body {
     background: transparent;
     border: 1px solid var(--border-color);
     color: var(--text-dark);
-    padding: 8px 12px;
+    padding: 6px 10px;
     cursor: pointer;
     border-radius: 4px;
-    font-size: 14px;
+    font-size: 13px;
     transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
@@ -304,16 +306,16 @@ body {
     background: transparent;
     border: 1px solid var(--border-color);
     color: var(--text-dark);
-    padding: 4px 6px;
+    padding: 3px 5px;
     border-radius: 4px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 400;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 .color-picker {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     padding: 2px;
     border: 1px solid var(--border-color);
     border-radius: 6px;
@@ -612,11 +614,11 @@ body {
 .status-bar {
     background: var(--dark-bg);
     color: white;
-    padding: 10px 20px;
+    padding: 8px 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 
     /* Fix position: stick to bottom of editor-container */
@@ -629,7 +631,7 @@ body {
 }
 .status-info {
     display: flex;
-    gap: 25px;
+    gap: 20px;
 }
 .status-item {
     display: flex;
@@ -639,14 +641,14 @@ body {
 .zoom-control {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 .zoom-btn {
     background: rgba(255, 255, 255, 0.1);
     border: none;
     color: white;
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     border-radius: 4px;
     cursor: pointer;
     display: flex;
@@ -658,9 +660,9 @@ body {
     background: rgba(255, 255, 255, 0.2);
 }
 .zoom-percent {
-    min-width: 50px;
+    font-size: 0.8rem;
+    min-width: 38px;
     text-align: center;
-    font-weight: 500;
 }
 /* Toast Notification */
 .toast {
