@@ -332,7 +332,9 @@ body {
     overflow-y: auto;
     flex-shrink: 0;
     transition: all 0.3s ease;
-
+    /* DIAGNOSTIC: Strong border to identify sidebar */
+    border: 3px solid #0000ff !important;
+    background-color: rgba(0, 0, 255, 0.05) !important;
 }
 .sidebar.collapsed {
     transform: translateX(-100%);
@@ -423,7 +425,9 @@ body {
     position: relative;
     overflow: hidden;
     background: #f8fafc;
-
+    /* DIAGNOSTIC: Strong border to identify editor area */
+    border: 3px solid #ff0000 !important;
+    background-color: rgba(255, 0, 0, 0.05) !important;
 }
 /* SCROLL BAR ADDITION FOR EDITOR */
 .page-container {
@@ -471,6 +475,9 @@ body {
     font-size: 16px;
     padding: 40px 50px;
     overflow-wrap: break-word;
+    /* DIAGNOSTIC: Strong background to identify editor content */
+    background-color: rgba(255, 255, 0, 0.1) !important;
+    border: 2px dashed #ff9900 !important;
 }
 #editor:focus {
     outline: none;
@@ -601,7 +608,9 @@ body {
     align-items: center;
     font-size: 0.85rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-
+    /* DIAGNOSTIC: Strong border to identify status bar */
+    border: 3px solid #00ff00 !important;
+    background-color: rgba(0, 255, 0, 0.1) !important;
 }
 .status-info {
     display: flex;
