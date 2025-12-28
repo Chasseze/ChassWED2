@@ -127,10 +127,20 @@ body {
     overflow: hidden;
 }
 
+.header-btn i {
+    font-size: 14px;
+    color: white;
+    transition: color 0.2s ease;
+}
+
 .header-btn:hover {
     background: rgba(255, 255, 255, 0.2);
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.header-btn:hover i {
+    color: white;
 }
 
 .header-btn:active {
@@ -138,6 +148,10 @@ body {
 }
 
 .header-btn.loading {
+    color: transparent;
+}
+
+.header-btn.loading i {
     color: transparent;
 }
 
@@ -261,6 +275,10 @@ body {
     transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
 }
 
 .toolbar-btn:hover {
@@ -269,14 +287,25 @@ body {
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
 }
+.toolbar-btn:hover i {
+    color: white;
+}
 
 .toolbar-btn:active {
     transform: scale(0.98) translateY(0);
+}
+.toolbar-btn i {
+    font-size: 14px;
+    color: var(--text-dark);
+    transition: color 0.2s ease;
 }
 
 .toolbar-btn.loading {
     color: transparent;
     pointer-events: none;
+}
+.toolbar-btn.loading i {
+    color: transparent;
 }
 
 .toolbar-btn.loading::after {
@@ -298,10 +327,16 @@ body {
     transform: translateY(-1px);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
+.toolbar-btn:hover i {
+    color: var(--text-dark);
+}
 .toolbar-btn.active {
     background: var(--primary-color);
     color: white;
     border-color: var(--primary-color);
+}
+.toolbar-btn.active i {
+    color: white;
 }
 .toolbar-select {
     background: transparent;
