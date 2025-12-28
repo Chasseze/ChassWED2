@@ -79,21 +79,21 @@ body {
     align-items: center;
     background: var(--header-bg);
     color: white;
-    padding: 8px 16px;
-    height: 56px;
-    border-bottom: 2px solid var(--accent-color);
+    padding: 6px 14px;
+    height: 48px;
+    border-bottom: 1px solid var(--accent-color);
     transition: background 0.3s ease;
 }
 .logo {
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 700;
 }
 .logo i {
     color: var(--accent-color);
-    font-size: 1.6rem;
+    font-size: 1.5rem;
 }
 .logo-text {
     background: linear-gradient(
@@ -115,13 +115,13 @@ body {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
-    padding: 6px 12px;
-    border-radius: 4px;
+    padding: 5px 10px;
+    border-radius: 3px;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 13px;
+    gap: 6px;
+    font-size: 12px;
     transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
@@ -165,6 +165,7 @@ body {
     background: #e2e8f0;
     display: flex;
     border-bottom: 1px solid var(--border-color);
+    height: 36px;
 }
 .tabs {
     display: flex;
@@ -182,17 +183,17 @@ body {
     border-radius: 2px;
 }
 .tab {
-    padding: 10px 16px;
+    padding: 8px 14px;
     background: #f1f5f9;
     border-right: 1px solid var(--border-color);
     cursor: pointer;
     display: flex;
     align-items: center;
-    font-size: 0.9rem;
-    gap: 6px;
-    min-width: 120px;
+    font-size: 0.8rem;
+    gap: 5px;
+    min-width: 110px;
     position: relative;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     transition: all 0.2s;
 }
 .tab:hover {
@@ -232,11 +233,11 @@ body {
 /* Toolbars */
 .toolbar {
     background: var(--light-bg);
-    padding: 8px 12px;
+    padding: 6px 10px;
     border-bottom: 1px solid var(--border-color);
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
     align-items: center;
 }
 .toolbar-group {
@@ -253,10 +254,10 @@ body {
     background: transparent;
     border: 1px solid var(--border-color);
     color: var(--text-dark);
-    padding: 6px 10px;
+    padding: 5px 8px;
     cursor: pointer;
-    border-radius: 4px;
-    font-size: 13px;
+    border-radius: 3px;
+    font-size: 12px;
     transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
@@ -614,11 +615,11 @@ body {
 .status-bar {
     background: var(--dark-bg);
     color: white;
-    padding: 8px 15px;
+    padding: 6px 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 
     /* Fix position: stick to bottom of editor-container */
@@ -626,17 +627,17 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 50px;
+    height: 40px;
     z-index: 10;
 }
 .status-info {
     display: flex;
-    gap: 20px;
+    gap: 16px;
 }
 .status-item {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 .zoom-control {
     display: flex;
@@ -647,9 +648,9 @@ body {
     background: rgba(255, 255, 255, 0.1);
     border: none;
     color: white;
-    width: 26px;
-    height: 26px;
-    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    border-radius: 3px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -795,7 +796,7 @@ body {
     .editor-area {
         width: 100% !important;
         margin-left: 0 !important;
-        margin-bottom: 50px !important;
+        margin-bottom: 40px !important;
     }
 
     .status-bar {
@@ -803,7 +804,7 @@ body {
         bottom: 0 !important;
         left: 0 !important;
         right: 0 !important;
-        height: 50px !important;
+        height: 40px !important;
         z-index: 10 !important;
     }
     .page-container {
@@ -815,14 +816,22 @@ body {
 }
 @media (max-width: 768px) {
     .header {
-        padding: 10px 15px;
-        height: 55px;
+        padding: 5px 10px;
+        height: 44px;
     }
     .logo {
         font-size: 1.3rem;
     }
     .header-btn span {
         display: none;
+    }
+
+    .logo {
+        font-size: 1.2rem;
+    }
+
+    .logo i {
+        font-size: 1.3rem;
     }
     .header-btn {
         padding: 8px 12px;
@@ -848,6 +857,15 @@ body {
     }
     .status-item span:not(.material-icons) {
         display: none;
+    }
+
+    .status-bar {
+        padding: 4px 8px !important;
+        font-size: 0.7rem !important;
+    }
+
+    .status-info {
+        gap: 12px !important;
     }
 }
 @media print {
