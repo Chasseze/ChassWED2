@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head></head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout</title> Test - CharlesWebEditor</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style></style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .test-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .test-header {
+            background: #1e293b;
+            color: white;
+            padding: 10px 20px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .test-toolbar {
+            background: #f8fafc;
+            padding: 10px 15px;
+            border-bottom: 1px solid #cbd5e1;
+            display: flex;
+            gap: 8px;
+        }
+
+        .test-main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .test-sidebar {
+            width: 280px;
+            background: #f1f5f9;
+            border-right: 1px solid #cbd5e1;
+            padding: 12px;
+            flex-shrink: 0;
+        }
+
+        .test-editor-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f8fafc;
+        }
+
+        .test-page-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .test-page {
+            background: white;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            min-height: 297mm;
+            width: 210mm;
+            padding: 40px 50px;
+        }
+
+        .test-status-bar {
+            background: #1e293b;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        .diagnostic-box {
+            border: 2px solid;
+            padding: 10px;
+            margin: 5px 0;
+        }
+
+        .sidebar-diagnostic {
+            border-color: blue;
+            background: rgba(0, 0, 255, 0.05);
+        }
+
+        .editor-diagnostic {
+            border-color: red;
+            background: rgba(255, 0, 0, 0.05);
+        }
+
+        .status-diagnostic {
+            border-color: green;
+            background: rgba(0, 255, 0, 0.05);
+        }
+
+        .test-button {
+            padding: 8px 12px;
+            background: transparent;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        h1, h2, h3 {
+            margin-top: 0;
+        }
+
+        .test-results {
+            padding: 20px;
+            background: #f8fafc;
+            border-top: 1px solid #cbd5e1;
+        }
+
+        .result-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+            border-left: 4px solid #2563eb;
+        }
+
+        .result-good {
+            border-left-color: #10b981;
+        }
+
+        .result-bad {
+            border-left-color: #ef4444;
+        }
+    </style>
+</head>
+<body></body>
+    <div class="test-container">
+        <div class="test-header">
+            <div class="logo">
+                <i class="fas fa-file-word"></i>
+                <span class="logo-text">CharlesWebEditor - Layout Test</span>
+            </div>
+            <div></div>
+                <button class="test-button" onclick="runLayoutTests()">
+                    <i class="fas fa-play"></i> Run Tests
+                </button>
+            </div>
+        </div>
+
+        <div class="test-toolbar">
+            <button class="test-button">
+                <i class="fas fa-file"></i> New
+            </button>
+            <button class="test-button">
+                <i class="fas fa-save"></i> Save
+            </button>
+            <button class="test-button">
+                <i class="fas fa-bold"></i> Bold
+            </button>
+            <button class="test-button">
+                <i class="fas fa-italic"></i> Italic
+            </button>
+            <button class="test-button">
+                <i class="fas fa-magic"></i> Format
+            </button>
+        </div>
+
+        <div class="test-main-content">
+            <div class="test-sidebar diagnostic-box sidebar-diagnostic">
+                <h3></h3>Sidebar Area</h3>
+                <p>This</p> should be on the left side, 280px wide.</p>
+                <p>Diagn</p>ostic border: Blue</p>
+                <div id="sidebar-content">
+                    <p>Side</p>bar content goes here.</p>
+                    <p></p>This should NOT contain the main editor content.</p>
+                </div>
+            </div>
+
+            <div class="test-editor-area diagnostic-box editor-diagnostic">
+                <div class="test-page-container">
+                    <div class="test-page">
+                        <h1>Editor</h1> Area</h1>
+                        <p>This</p> should be the main editor area, taking up all remaining space.</p>
+                        <p>Diagn</p>ostic border: Red</p>
+                        <p>This</p> is where the main editor content should be.</p>
+                        <p>Try</p> typing here to test the editor functionality.</p>
+                        <div contenteditable="true" style="min-height: 200px; border: 1px dashed #ccc; padding: 10px; margin: 10px 0;">
+                            <p></p>This is an editable area. You can type here.</p>
+                            <p></p>This should be in the main editor area, NOT in the sidebar.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="test-status-bar diagnostic-box status-diagnostic">
+                    <div></div>
+                        <i class="fas fa-font"></i>
+                        <span>Arial, 16pt</span>
+                    </div>
+                    <div></div>
+                        <i class="fas fa-keyboard"></i>
+                        <span></span>Words: 0 | Chars: 0 | 0 min read</span>
+                    </div>
+                    <div></div>
+                        <i class="fas fa-save"></i>
+                        <span>Auto</span>-saved</span>
+                    </div>
+                    <div></div>
+                        <button class="test-button">
+                            <i class="fas fa-search-minus"></i>
+                        </button>
+                        <span>100</span>%</span>
+                        <button class="test-button">
+                            <i class="fas fa-search-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-results">
+            <h2>Layout</h2> Test Results</h2>
+            <div id="test-results-container">
+                <div class="result-item">
+                    <strong>Test</strong> 1:</strong> Check if sidebar is on left side
+                    <div id="test1-result">Not run yet</div>
+                </div>
+                <div class="result-item">
+                    <strong>Test</strong> 2:</strong> Check if editor is in main area (not sidebar)
+                    <div id="test2-result">Not run yet</div>
+                </div>
+                <div class="result-item">
+                    <strong></strong>Test 3:</strong> Check if status bar is at bottom
+                    <div id="test3-result">Not run yet</div>
+                </div>
+                <div class="result-item">
+                    <strong>Test</strong> 4:</strong> Check Format button HTML
+                    <div id="test4-result">Not run yet</div>
+                </div>
+                <div class="result-item">
+                    <strong></strong>Test 5:</strong> Check overall layout structure
+                    <div id="test5-result">Not run yet</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function</script> runLayoutTests() {
+            // Test 1: Check if sidebar is on left side
+            const sidebar = document.querySelector('.test-sidebar');
+            const sidebarRect = sidebar.getBoundingClientRect();
+            const test1Result = document.getElementById('test1-result');
+
+            if (sidebarRect.left < 100) {
+                test1Result.innerHTML = '<span style="color: green">✓ PASS: Sidebar is on left side</span>';
+                test1Result.parentElement.classList.add('result-good');
+            } else {
+                test1Result.innerHTML = '<span style="color: red">✗ FAIL: Sidebar is not on left side</span>';
+                test1Result.parentElement.classList.add('result-bad');
+            }
+
+            // Test 2: Check if editor is in main area (not sidebar)
+            const editorArea = document.querySelector('.test-editor-area');
+            const editorRect = editorArea.getBoundingClientRect();
+            const sidebarContent = document.getElementById('sidebar-content');
+            const test2Result = document.getElementById('test2-result');
+
+            // Check if editor area is to the right of sidebar
+            if (editorRect.left > sidebarRect.right - 50) {
+                test2Result.innerHTML = '<span style="color: green">✓ PASS: Editor is in main area</span>';
+                test2Result.parentElement.classList.add('result-good');
+            } else {
+                test2Result.innerHTML = '<span style="color: red">✗ FAIL: Editor appears to be in sidebar area</span>';
+                test2Result.parentElement.classList.add('result-bad');
+            }
+
+            // Test 3: Check if status bar is at bottom
+            const statusBar = document.querySelector('.test-status-bar');
+            const statusRect = statusBar.getBoundingClientRect();
+            const containerRect = document.querySelector('.test-container').getBoundingClientRect();
+            const test3Result = document.getElementById('test3-result');
+
+            if (statusRect.bottom > containerRect.bottom - 50) {
+                test3Result.innerHTML = '<span style="color: green">✓ PASS: Status bar is at bottom</span>';
+                test3Result.parentElement.classList.add('result-good');
+            } else {
+                test3Result.innerHTML = '<span style="color: red">✗ FAIL: Status bar is not at bottom</span>';
+                test3Result.parentElement.classList.add('result-bad');
+            }
+
+            // Test 4: Check Format button HTML
+            const formatButtons = document.querySelectorAll('.test-button');
+            let formatButtonFound = false;
+            let formatButtonHasIcon = false;
+
+            formatButtons.forEach(button => {
+                if (button.innerHTML.includes('fa-magic') && button.innerHTML.includes('Format')) {
+                    formatButtonFound = true;
+                    // Check for malformed HTML
+                    if (!button.innerHTML.includes('</span>>') && !button.innerHTML.includes('</span</span>')) {
+                        formatButtonHasIcon = true;
+                    }
+                }
+            });
+
+            const test4Result = document.getElementById('test4-result');
+            if (formatButtonFound && formatButtonHasIcon) {
+                test4Result.innerHTML = '<span style="color: green">✓ PASS: Format button has correct HTML</span>';
+                test4Result.parentElement.classList.add('result-good');
+            } else {
+                test4Result.innerHTML = '<span style="color: red">✗ FAIL: Format button has incorrect HTML</span>';
+                test4Result.parentElement.classList.add('result-bad');
+            }
+
+            // Test 5: Check overall layout structure
+            const mainContent = document.querySelector('.test-main-content');
+            const mainContentRect = mainContent.getBoundingClientRect();
+            const test5Result = document.getElementById('test5-result');
+
+            // Check if main content takes up most of the space
+            if (mainContentRect.height > containerRect.height * 0.7) {
+                test5Result.innerHTML = '<span style="color: green">✓ PASS: Main content area has correct height</span>';
+                test5Result.parentElement.classList.add('result-good');
+            } else {
+                test5Result.innerHTML = '<span style="color: red">✗ FAIL: Main content area is too small</span>';
+                test5Result.parentElement.classList.add('result-bad');
+            }
+
+            // Also check the actual index.html file
+            fetch('index.html')
+                .then(response => response.text())
+                .then(html => {
+                    // Check for malformed Format button in actual file
+                    const malformedFormatRegex = /<span>Format</span><\/span<\/span>>/;
+                    const correctFormatRegex = /<span>Format</span><\/span>/;
+
+                    if (malformedFormatRegex.test(html)) {
+                        test4Result.innerHTML = '<span style="color: red">✗ FAIL: Actual index.html has malformed Format button</span>';
+                        test4Result.parentElement.classList.add('result-bad');
+                    } else if (correctFormatRegex.test(html)) {
+                        test4Result.innerHTML = '<span style="color: green">✓ PASS: Actual index.html has correct Format button</span>';
+                        test4Result.parentElement.classList.add('result-good');
+                    }
+
+                    // Check if status bar is inside main-content div
+                    const statusBarInMainContent = html.includes('</div>\n            <!-- Status Bar -->') ||
+                                                   html.includes('</div>\n            <!-- Status Bar -->');
+
+                    if (statusBarInMainContent) {
+                        test3Result.innerHTML += '<br><span style="color: orange">⚠ WARNING: Status bar might be outside main-content in index.html</span>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking index.html:', error);
+                });
+        }
+
+        // Run tests automatically after page loads
+        window.addEventListener('load', () => {
+            setTimeout(runLayoutTests, 500);
+        });
+    </script>
+</body>
+</html>
