@@ -823,19 +823,19 @@
         <div class="context-menu" id="tabContextMenu">
             <button
                 class="context-menu-item"
-                onclick="window.charliesEditor.renameCurrentDocument()"
+                onclick="window.charlesEditor.renameCurrentDocument()"
             >
                 <i class="fas fa-edit"></i> Rename
             </button>
             <button
                 class="context-menu-item"
-                onclick="window.charliesEditor.duplicateCurrentDocument()"
+                onclick="window.charlesEditor.duplicateCurrentDocument()"
             >
                 <i class="fas fa-copy"></i> Duplicate
             </button>
             <button
                 class="context-menu-item"
-                onclick="window.charliesEditor.closeCurrentDocument()"
+                onclick="window.charlesEditor.closeCurrentDocument()"
             >
                 <i class="fas fa-times"></i> Close
             </button>
@@ -945,11 +945,11 @@
                         </button>
                         <button class="style-btn" data-style="heading2">
                             <i class="fas fa-heading"></i>
-                            <span>Heading</span> 2</span>
+                            <span>Heading 2</span>
                         </button>
                         <button class="style-btn" data-style="heading3">
                             <i class="fas fa-heading"></i>
-                            <span>Heading</span> 3</span>
+                            <span>Heading 3</span>
                         </button>
                         <button class="style-btn" data-style="normal">
                             <i class="fas fa-paragraph"></i>
@@ -969,6 +969,234 @@
                     <button class="btn btn-secondary" id="cancelQuickStylesBtn">
                         Close
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Templates Modal -->
+        <div class="modal" id="templatesModal">
+            <div class="modal-content" style="max-width: 800px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">Document Templates</h3>
+                    <button class="modal-close" id="closeTemplatesModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="templatesModalList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; padding: 10px;">
+                        <!-- Templates will be inserted here -->
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="cancelTemplatesBtn">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Formatting Modal -->
+        <div class="modal" id="advancedFormattingModal">
+            <div class="modal-content" style="max-width: 600px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">Advanced Formatting</h3>
+                    <button class="modal-close" id="closeAdvancedFormattingModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Text Effects</label>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                            <button class="btn btn-secondary" id="formatStrikethrough" title="Strikethrough">
+                                <i class="fas fa-strikethrough"></i> Strikethrough
+                            </button>
+                            <button class="btn btn-secondary" id="formatSuperscript" title="Superscript">
+                                <i class="fas fa-superscript"></i> Superscript
+                            </button>
+                            <button class="btn btn-secondary" id="formatSubscript" title="Subscript">
+                                <i class="fas fa-subscript"></i> Subscript
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Line Spacing</label>
+                        <select class="toolbar-select" id="lineSpacing">
+                            <option value="1">Single</option>
+                            <option value="1.15">1.15</option>
+                            <option value="1.5">1.5</option>
+                            <option value="2" selected>Double</option>
+                            <option value="2.5">2.5</option>
+                            <option value="3">3</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Paragraph Spacing</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <label style="min-width: 80px;">Before:</label>
+                            <input type="number" id="paragraphSpacingBefore" value="0" min="0" max="100" style="flex: 1;" />
+                            <span>pt</span>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                            <label style="min-width: 80px;">After:</label>
+                            <input type="number" id="paragraphSpacingAfter" value="12" min="0" max="100" style="flex: 1;" />
+                            <span>pt</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Text Transform</label>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                            <button class="btn btn-secondary" id="formatUppercase" title="UPPERCASE">
+                                UPPERCASE
+                            </button>
+                            <button class="btn btn-secondary" id="formatLowercase" title="lowercase">
+                                lowercase
+                            </button>
+                            <button class="btn btn-secondary" id="formatCapitalize" title="Capitalize">
+                                Capitalize
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="cancelAdvancedFormattingBtn">
+                        Close
+                    </button>
+                    <button class="btn btn-primary" id="applyAdvancedFormattingBtn">
+                        Apply
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email Share Modal -->
+        <div class="modal" id="emailShareModal">
+            <div class="modal-content" style="max-width: 500px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">Share via Email</h3>
+                    <button class="modal-close" id="closeEmailShareModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="emailTo">To:</label>
+                        <input type="email" id="emailTo" placeholder="recipient@example.com" multiple style="width: 100%; padding: 8px;" />
+                        <small style="color: #666; font-size: 12px;">Separate multiple emails with commas</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="emailSubject">Subject:</label>
+                        <input type="text" id="emailSubject" placeholder="Document from CharlesWebEditor" style="width: 100%; padding: 8px;" />
+                    </div>
+                    <div class="form-group">
+                        <label for="emailMessage">Message:</label>
+                        <textarea id="emailMessage" rows="4" placeholder="Optional message..." style="width: 100%; padding: 8px; resize: vertical;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="emailIncludeDocument" checked />
+                            Include document as HTML attachment
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="cancelEmailShareBtn">
+                        Cancel
+                    </button>
+                    <button class="btn btn-primary" id="sendEmailBtn">
+                        <i class="fas fa-paper-plane"></i> Send Email
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Assistant Panel -->
+        <div class="ai-assistant-panel" id="aiAssistantPanel">
+            <div class="ai-assistant-header">
+                <h3>
+                    <i class="fas fa-robot"></i>
+                    AI Assistant
+                </h3>
+                <button class="ai-close-btn" id="closeAIAssistantBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="ai-assistant-content">
+                <!-- Grammar & Writing Check -->
+                <div class="ai-section">
+                    <h4>Writing Analysis</h4>
+                    <div class="grammar-status">
+                        <div class="status-indicator" id="grammarStatusIndicator"></div>
+                        <span class="status-text" id="grammarStatusText">Ready to analyze</span>
+                    </div>
+                    <button class="ai-btn" id="checkGrammarBtn" style="width: 100%;">
+                        <i class="fas fa-spell-check"></i>
+                        Check Grammar & Style
+                    </button>
+                    <div class="grammar-suggestions" id="grammarSuggestions" style="margin-top: 15px; display: none;">
+                        <!-- Suggestions will be added here -->
+                    </div>
+                </div>
+
+                <!-- Text Statistics -->
+                <div class="ai-section">
+                    <h4>Document Statistics</h4>
+                    <div id="aiStats" style="font-size: 13px; color: var(--text-secondary);">
+                        <div>Words: <strong id="aiWordCount">0</strong></div>
+                        <div>Characters: <strong id="aiCharCount">0</strong></div>
+                        <div>Paragraphs: <strong id="aiParagraphCount">0</strong></div>
+                        <div>Reading Time: <strong id="aiReadingTime">0 min</strong></div>
+                    </div>
+                    <button class="ai-btn small" id="refreshStatsBtn" style="margin-top: 10px; width: 100%;">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh Stats
+                    </button>
+                </div>
+
+                <!-- Writing Suggestions -->
+                <div class="ai-section">
+                    <h4>Writing Suggestions</h4>
+                    <button class="ai-btn" id="improveTextBtn" style="width: 100%; margin-bottom: 8px;">
+                        <i class="fas fa-magic"></i>
+                        Improve Selected Text
+                    </button>
+                    <button class="ai-btn" id="makeShorterBtn" style="width: 100%; margin-bottom: 8px;">
+                        <i class="fas fa-compress"></i>
+                        Make Shorter
+                    </button>
+                    <button class="ai-btn" id="makeLongerBtn" style="width: 100%; margin-bottom: 8px;">
+                        <i class="fas fa-expand"></i>
+                        Make Longer
+                    </button>
+                    <button class="ai-btn" id="changeToneBtn" style="width: 100%;">
+                        <i class="fas fa-adjust"></i>
+                        Change Tone
+                    </button>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="ai-section">
+                    <h4>Quick Actions</h4>
+                    <button class="ai-btn" id="summarizeBtn" style="width: 100%; margin-bottom: 8px;">
+                        <i class="fas fa-file-alt"></i>
+                        Summarize Document
+                    </button>
+                    <button class="ai-btn" id="generateTitleBtn" style="width: 100%; margin-bottom: 8px;">
+                        <i class="fas fa-heading"></i>
+                        Generate Title
+                    </button>
+                    <button class="ai-btn" id="expandIdeasBtn" style="width: 100%;">
+                        <i class="fas fa-lightbulb"></i>
+                        Expand Ideas
+                    </button>
+                </div>
+
+                <!-- AI Response Area -->
+                <div class="ai-section" id="aiResponseSection" style="display: none;">
+                    <h4>AI Response</h4>
+                    <div id="aiResponse" style="background: var(--bg-secondary); padding: 12px; border-radius: 6px; font-size: 13px; line-height: 1.6; color: var(--text-primary); max-height: 200px; overflow-y: auto;">
+                        <!-- AI responses will appear here -->
+                    </div>
                 </div>
             </div>
         </div>

@@ -5,13 +5,13 @@ A scalable web-based text editor app served via Node.js and Express. The fronten
 ## Features
 - Modern frontend (HTML, CSS, JS)
 - Node.js + Express backend
-- Serves app at http://localhost:3000
+- Serves app at http://localhost:3002
 - Ready for future backend/frontend separation
 
 ## Getting Started
 1. Install dependencies: `npm install`
 2. Start the server: `npm start`
-3. Open your browser at [http://localhost:3000](http://localhost:3000)
+3. Open your browser at [http://localhost:3002](http://localhost:3002)
 
 ## Project Structure
 - `public/` — All static frontend files (HTML, CSS, JS)

@@ -64,7 +64,7 @@ You asked for three improvements to CharlesWebEditor. Here's what was delivered:
 
 ## 🎮 Try It Now
 
-Your application is running at: **http://localhost:3000**
+Your application is running at: **http://localhost:3002**
 
 **Test the improvements**:
 1. Click any button in the toolbar - they all work! ✅

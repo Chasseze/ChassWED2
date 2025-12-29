@@ -1028,24 +1028,14 @@ class CharlesWebEditor {
     const aiAssistantBtn = document.getElementById("aiAssistantBtn");
     if (aiAssistantBtn) {
       aiAssistantBtn.addEventListener("click", () => {
-        this.showToast("🤖 AI Assistant feature coming soon!", "info");
+        this.toggleAIAssistantPanel();
       });
     }
 
     const templatesBtn = document.getElementById("templatesBtn");
     if (templatesBtn) {
       templatesBtn.addEventListener("click", () => {
-        // Switch to templates tab in sidebar
-        this.switchSidebarTab("templates");
-        // Show templates sidebar if collapsed
-        const sidebar = document.getElementById("sidebar");
-        if (sidebar && sidebar.classList.contains("collapsed")) {
-          this.toggleSidebar();
-        }
-        this.showToast(
-          "📄 Templates loaded! Select a template to apply.",
-          "info",
-        );
+        this.showTemplatesModal();
       });
     }
 
@@ -1054,14 +1044,14 @@ class CharlesWebEditor {
     );
     if (advancedFormattingBtn) {
       advancedFormattingBtn.addEventListener("click", () => {
-        this.showToast("✨ Advanced Formatting feature coming soon!", "info");
+        this.showAdvancedFormattingModal();
       });
     }
 
     const emailShareBtn = document.getElementById("emailShareBtn");
     if (emailShareBtn) {
       emailShareBtn.addEventListener("click", () => {
-        this.showToast("📧 Email Sharing feature coming soon!", "info");
+        this.showEmailShareModal();
       });
     }
 
@@ -1115,6 +1105,213 @@ class CharlesWebEditor {
         this.applyStyle(style);
         this.hideQuickStylesModal();
       });
+    });
+
+    // Templates modal event listeners
+    const closeTemplatesModal = document.getElementById("closeTemplatesModal");
+    if (closeTemplatesModal) {
+      closeTemplatesModal.addEventListener("click", () => {
+        this.hideTemplatesModal();
+      });
+    }
+
+    const cancelTemplatesBtn = document.getElementById("cancelTemplatesBtn");
+    if (cancelTemplatesBtn) {
+      cancelTemplatesBtn.addEventListener("click", () => {
+        this.hideTemplatesModal();
+      });
+    }
+
+    // Advanced Formatting modal event listeners
+    const closeAdvancedFormattingModal = document.getElementById("closeAdvancedFormattingModal");
+    if (closeAdvancedFormattingModal) {
+      closeAdvancedFormattingModal.addEventListener("click", () => {
+        this.hideAdvancedFormattingModal();
+      });
+    }
+
+    const cancelAdvancedFormattingBtn = document.getElementById("cancelAdvancedFormattingBtn");
+    if (cancelAdvancedFormattingBtn) {
+      cancelAdvancedFormattingBtn.addEventListener("click", () => {
+        this.hideAdvancedFormattingModal();
+      });
+    }
+
+    const applyAdvancedFormattingBtn = document.getElementById("applyAdvancedFormattingBtn");
+    if (applyAdvancedFormattingBtn) {
+      applyAdvancedFormattingBtn.addEventListener("click", () => {
+        this.applyAdvancedFormatting();
+      });
+    }
+
+    // Advanced formatting buttons
+    const formatStrikethrough = document.getElementById("formatStrikethrough");
+    if (formatStrikethrough) {
+      formatStrikethrough.addEventListener("click", () => {
+        this.executeCommand("strikeThrough");
+      });
+    }
+
+    const formatSuperscript = document.getElementById("formatSuperscript");
+    if (formatSuperscript) {
+      formatSuperscript.addEventListener("click", () => {
+        this.executeCommand("superscript");
+      });
+    }
+
+    const formatSubscript = document.getElementById("formatSubscript");
+    if (formatSubscript) {
+      formatSubscript.addEventListener("click", () => {
+        this.executeCommand("subscript");
+      });
+    }
+
+    const lineSpacing = document.getElementById("lineSpacing");
+    if (lineSpacing) {
+      lineSpacing.addEventListener("change", (e) => {
+        this.applyLineSpacing(e.target.value);
+      });
+    }
+
+    const formatUppercase = document.getElementById("formatUppercase");
+    if (formatUppercase) {
+      formatUppercase.addEventListener("click", () => {
+        this.transformText("uppercase");
+      });
+    }
+
+    const formatLowercase = document.getElementById("formatLowercase");
+    if (formatLowercase) {
+      formatLowercase.addEventListener("click", () => {
+        this.transformText("lowercase");
+      });
+    }
+
+    const formatCapitalize = document.getElementById("formatCapitalize");
+    if (formatCapitalize) {
+      formatCapitalize.addEventListener("click", () => {
+        this.transformText("capitalize");
+      });
+    }
+
+    // Email Share modal event listeners
+    const closeEmailShareModal = document.getElementById("closeEmailShareModal");
+    if (closeEmailShareModal) {
+      closeEmailShareModal.addEventListener("click", () => {
+        this.hideEmailShareModal();
+      });
+    }
+
+    const cancelEmailShareBtn = document.getElementById("cancelEmailShareBtn");
+    if (cancelEmailShareBtn) {
+      cancelEmailShareBtn.addEventListener("click", () => {
+        this.hideEmailShareModal();
+      });
+    }
+
+    const sendEmailBtn = document.getElementById("sendEmailBtn");
+    if (sendEmailBtn) {
+      sendEmailBtn.addEventListener("click", () => {
+        this.sendEmail();
+      });
+    }
+
+    // AI Assistant panel event listeners
+    const closeAIAssistantBtn = document.getElementById("closeAIAssistantBtn");
+    if (closeAIAssistantBtn) {
+      closeAIAssistantBtn.addEventListener("click", () => {
+        this.hideAIAssistantPanel();
+      });
+    }
+
+    const checkGrammarBtn = document.getElementById("checkGrammarBtn");
+    if (checkGrammarBtn) {
+      checkGrammarBtn.addEventListener("click", () => {
+        this.checkGrammarAndStyle();
+      });
+    }
+
+    const refreshStatsBtn = document.getElementById("refreshStatsBtn");
+    if (refreshStatsBtn) {
+      refreshStatsBtn.addEventListener("click", () => {
+        this.updateAIStats();
+      });
+    }
+
+    const improveTextBtn = document.getElementById("improveTextBtn");
+    if (improveTextBtn) {
+      improveTextBtn.addEventListener("click", () => {
+        this.improveSelectedText();
+      });
+    }
+
+    const makeShorterBtn = document.getElementById("makeShorterBtn");
+    if (makeShorterBtn) {
+      makeShorterBtn.addEventListener("click", () => {
+        this.makeTextShorter();
+      });
+    }
+
+    const makeLongerBtn = document.getElementById("makeLongerBtn");
+    if (makeLongerBtn) {
+      makeLongerBtn.addEventListener("click", () => {
+        this.makeTextLonger();
+      });
+    }
+
+    const changeToneBtn = document.getElementById("changeToneBtn");
+    if (changeToneBtn) {
+      changeToneBtn.addEventListener("click", () => {
+        this.changeTextTone();
+      });
+    }
+
+    const summarizeBtn = document.getElementById("summarizeBtn");
+    if (summarizeBtn) {
+      summarizeBtn.addEventListener("click", () => {
+        this.summarizeDocument();
+      });
+    }
+
+    const generateTitleBtn = document.getElementById("generateTitleBtn");
+    if (generateTitleBtn) {
+      generateTitleBtn.addEventListener("click", () => {
+        this.generateTitle();
+      });
+    }
+
+    const expandIdeasBtn = document.getElementById("expandIdeasBtn");
+    if (expandIdeasBtn) {
+      expandIdeasBtn.addEventListener("click", () => {
+        this.expandIdeas();
+      });
+    }
+
+    // Close modals when clicking outside
+    document.addEventListener("click", (e) => {
+      // Templates modal
+      const templatesModal = document.getElementById("templatesModal");
+      if (templatesModal && templatesModal.classList.contains("active")) {
+        if (e.target === templatesModal) {
+          this.hideTemplatesModal();
+        }
+      }
+      
+      // Advanced Formatting modal
+      const advancedFormattingModal = document.getElementById("advancedFormattingModal");
+      if (advancedFormattingModal && advancedFormattingModal.classList.contains("active")) {
+        if (e.target === advancedFormattingModal) {
+          this.hideAdvancedFormattingModal();
+        }
+      }
+      
+      // Email Share modal
+      const emailShareModal = document.getElementById("emailShareModal");
+      if (emailShareModal && emailShareModal.classList.contains("active")) {
+        if (e.target === emailShareModal) {
+          this.hideEmailShareModal();
+        }
+      }
     });
 
     // Document tab clicks and context menu
@@ -2302,7 +2499,7 @@ Enter your Google Client ID:`;
                         <div class="recent-item-name">${doc.name}</div>
                         <div class="recent-item-meta">${timeAgo} • ${doc.contentPreview}...</div>
                     </div>
-                    <button class="recent-item-action" onclick="window.charliesEditor.openRecentDocument('${doc.id}')">
+                    <button class="recent-item-action" onclick="window.charlesEditor.openRecentDocument('${doc.id}')">
                         Open
                     </button>
                 </div>
@@ -2398,7 +2595,7 @@ Enter your Google Client ID:`;
                 ${this.templates
                   .map(
                     (template) => `
-                    <div class="template-item" onclick="window.charliesEditor.applyTemplate('${template.id}')">
+                    <div class="template-item" onclick="window.charlesEditor.applyTemplate('${template.id}')">
                         <div class="template-icon">
                             <i class="${template.icon}"></i>
                         </div>
@@ -2505,6 +2702,590 @@ Enter your Google Client ID:`;
     if (modal) {
       modal.classList.remove("active");
     }
+  }
+
+  // Templates Modal Functions
+  showTemplatesModal() {
+    const modal = document.getElementById("templatesModal");
+    const templatesList = document.getElementById("templatesModalList");
+    
+    if (modal && templatesList) {
+      // Populate templates list
+      templatesList.innerHTML = `
+        ${this.templates
+          .map(
+            (template) => `
+            <div class="template-item" style="border: 1px solid var(--border-primary); border-radius: 8px; padding: 15px; cursor: pointer; transition: all 0.2s; background: var(--bg-primary);" 
+                 onclick="window.charlesEditor.applyTemplateFromModal('${template.id}')"
+                 onmouseover="this.style.background='var(--bg-secondary)'"
+                 onmouseout="this.style.background='var(--bg-primary)'">
+                <div style="font-size: 32px; color: var(--primary-color); margin-bottom: 10px; text-align: center;">
+                    <i class="${template.icon}"></i>
+                </div>
+                <div style="font-weight: 600; margin-bottom: 5px; text-align: center; color: var(--text-primary);">
+                    ${template.name}
+                </div>
+                <div style="font-size: 12px; color: var(--text-secondary); text-align: center;">
+                    ${template.description}
+                </div>
+            </div>
+        `,
+          )
+          .join("")}
+      `;
+      modal.classList.add("active");
+    }
+  }
+
+  hideTemplatesModal() {
+    const modal = document.getElementById("templatesModal");
+    if (modal) {
+      modal.classList.remove("active");
+    }
+  }
+
+  applyTemplateFromModal(templateId) {
+    this.applyTemplate(templateId);
+    this.hideTemplatesModal();
+  }
+
+  // Advanced Formatting Modal Functions
+  showAdvancedFormattingModal() {
+    const modal = document.getElementById("advancedFormattingModal");
+    if (modal) {
+      // Reset form values
+      const lineSpacing = document.getElementById("lineSpacing");
+      if (lineSpacing) lineSpacing.value = "2";
+      const paragraphSpacingBefore = document.getElementById("paragraphSpacingBefore");
+      if (paragraphSpacingBefore) paragraphSpacingBefore.value = "0";
+      const paragraphSpacingAfter = document.getElementById("paragraphSpacingAfter");
+      if (paragraphSpacingAfter) paragraphSpacingAfter.value = "12";
+      
+      modal.classList.add("active");
+    }
+  }
+
+  hideAdvancedFormattingModal() {
+    const modal = document.getElementById("advancedFormattingModal");
+    if (modal) {
+      modal.classList.remove("active");
+    }
+  }
+
+  applyLineSpacing(value) {
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      const selectedText = range.extractContents();
+      const span = document.createElement("span");
+      span.style.lineHeight = value;
+      span.appendChild(selectedText);
+      range.insertNode(span);
+      this.saveDocumentState();
+      this.showToast(`Line spacing set to ${value}`, "success");
+    } else {
+      // Apply to entire editor
+      this.editor.style.lineHeight = value;
+      this.saveDocumentState();
+      this.showToast(`Line spacing set to ${value}`, "success");
+    }
+  }
+
+  transformText(transform) {
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0 && selection.toString().length > 0) {
+      const range = selection.getRangeAt(0);
+      const selectedText = selection.toString();
+      let transformedText;
+      
+      switch (transform) {
+        case "uppercase":
+          transformedText = selectedText.toUpperCase();
+          break;
+        case "lowercase":
+          transformedText = selectedText.toLowerCase();
+          break;
+        case "capitalize":
+          transformedText = selectedText.replace(/\b\w/g, (char) => char.toUpperCase());
+          break;
+        default:
+          return;
+      }
+      
+      range.deleteContents();
+      range.insertNode(document.createTextNode(transformedText));
+      this.saveDocumentState();
+      this.showToast(`Text transformed to ${transform}`, "success");
+    } else {
+      this.showToast("Please select text to transform", "warning");
+    }
+  }
+
+  applyAdvancedFormatting() {
+    const paragraphSpacingBefore = document.getElementById("paragraphSpacingBefore");
+    const paragraphSpacingAfter = document.getElementById("paragraphSpacingAfter");
+    
+    if (paragraphSpacingBefore && paragraphSpacingAfter) {
+      const before = paragraphSpacingBefore.value;
+      const after = paragraphSpacingAfter.value;
+      
+      // Apply to selected paragraphs or all paragraphs
+      const selection = window.getSelection();
+      if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const paragraphs = range.commonAncestorContainer.parentElement.querySelectorAll("p");
+        paragraphs.forEach((p) => {
+          p.style.marginTop = before + "pt";
+          p.style.marginBottom = after + "pt";
+        });
+      } else {
+        // Apply to all paragraphs
+        const paragraphs = this.editor.querySelectorAll("p");
+        paragraphs.forEach((p) => {
+          p.style.marginTop = before + "pt";
+          p.style.marginBottom = after + "pt";
+        });
+      }
+      
+      this.saveDocumentState();
+      this.showToast("Advanced formatting applied", "success");
+      this.hideAdvancedFormattingModal();
+    }
+  }
+
+  // Email Share Modal Functions
+  showEmailShareModal() {
+    const modal = document.getElementById("emailShareModal");
+    if (modal) {
+      // Set default subject
+      const emailSubject = document.getElementById("emailSubject");
+      if (emailSubject) {
+        emailSubject.value = `Document from CharlesWebEditor - ${this.currentDoc.name}`;
+      }
+      
+      // Clear other fields
+      const emailTo = document.getElementById("emailTo");
+      if (emailTo) emailTo.value = "";
+      const emailMessage = document.getElementById("emailMessage");
+      if (emailMessage) emailMessage.value = "";
+      
+      modal.classList.add("active");
+    }
+  }
+
+  hideEmailShareModal() {
+    const modal = document.getElementById("emailShareModal");
+    if (modal) {
+      modal.classList.remove("active");
+    }
+  }
+
+  sendEmail() {
+    const emailTo = document.getElementById("emailTo");
+    const emailSubject = document.getElementById("emailSubject");
+    const emailMessage = document.getElementById("emailMessage");
+    const emailIncludeDocument = document.getElementById("emailIncludeDocument");
+    
+    if (!emailTo || !emailTo.value.trim()) {
+      this.showToast("Please enter recipient email address", "warning");
+      return;
+    }
+    
+    if (!emailSubject || !emailSubject.value.trim()) {
+      this.showToast("Please enter email subject", "warning");
+      return;
+    }
+    
+    const recipients = emailTo.value.split(",").map((email) => email.trim());
+    const subject = emailSubject.value;
+    const message = emailMessage ? emailMessage.value : "";
+    const includeDocument = emailIncludeDocument ? emailIncludeDocument.checked : true;
+    
+    // Create mailto link
+    let mailtoLink = `mailto:${recipients.join(",")}?`;
+    mailtoLink += `subject=${encodeURIComponent(subject)}`;
+    
+    if (message) {
+      mailtoLink += `&body=${encodeURIComponent(message)}`;
+    }
+    
+    if (includeDocument) {
+      const documentContent = this.editor.innerHTML;
+      const documentText = this.editor.innerText;
+      const bodyText = message 
+        ? `${message}\n\n--- Document Content ---\n\n${documentText}`
+        : `--- Document Content ---\n\n${documentText}`;
+      mailtoLink = `mailto:${recipients.join(",")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
+    }
+    
+    // Open email client
+    window.location.href = mailtoLink;
+    
+    this.showToast("Opening email client...", "success");
+    this.hideEmailShareModal();
+  }
+
+  // AI Assistant Panel Functions
+  toggleAIAssistantPanel() {
+    const panel = document.getElementById("aiAssistantPanel");
+    if (panel) {
+      if (panel.classList.contains("visible")) {
+        this.hideAIAssistantPanel();
+      } else {
+        this.showAIAssistantPanel();
+      }
+    }
+  }
+
+  showAIAssistantPanel() {
+    const panel = document.getElementById("aiAssistantPanel");
+    if (panel) {
+      panel.classList.add("visible");
+      this.updateAIStats();
+      
+      // Update stats when editor content changes
+      if (!this.aiStatsUpdateInterval) {
+        this.aiStatsUpdateInterval = setInterval(() => {
+          if (panel.classList.contains("visible")) {
+            this.updateAIStats();
+          }
+        }, 2000); // Update every 2 seconds
+      }
+    }
+  }
+
+  hideAIAssistantPanel() {
+    const panel = document.getElementById("aiAssistantPanel");
+    if (panel) {
+      panel.classList.remove("visible");
+      
+      // Clear update interval when panel is closed
+      if (this.aiStatsUpdateInterval) {
+        clearInterval(this.aiStatsUpdateInterval);
+        this.aiStatsUpdateInterval = null;
+      }
+    }
+  }
+
+
+  updateAIStats() {
+    const text = this.editor.innerText || "";
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+    const chars = text.length;
+    const paragraphs = this.editor.querySelectorAll("p").length || 1;
+    const readingTime = Math.ceil(words / 200); // Average reading speed: 200 words/min
+
+    const aiWordCount = document.getElementById("aiWordCount");
+    const aiCharCount = document.getElementById("aiCharCount");
+    const aiParagraphCount = document.getElementById("aiParagraphCount");
+    const aiReadingTime = document.getElementById("aiReadingTime");
+
+    if (aiWordCount) aiWordCount.textContent = words;
+    if (aiCharCount) aiCharCount.textContent = chars;
+    if (aiParagraphCount) aiParagraphCount.textContent = paragraphs;
+    if (aiReadingTime) aiReadingTime.textContent = readingTime + " min";
+  }
+
+  checkGrammarAndStyle() {
+    const checkBtn = document.getElementById("checkGrammarBtn");
+    const statusIndicator = document.getElementById("grammarStatusIndicator");
+    const statusText = document.getElementById("grammarStatusText");
+    const suggestionsDiv = document.getElementById("grammarSuggestions");
+
+    if (!checkBtn || !statusIndicator || !statusText || !suggestionsDiv) return;
+
+    // Show checking status
+    checkBtn.disabled = true;
+    statusIndicator.className = "status-indicator checking";
+    statusText.textContent = "Analyzing text...";
+    suggestionsDiv.style.display = "none";
+    suggestionsDiv.innerHTML = "";
+
+    // Simulate analysis (in a real app, this would call an AI API)
+    setTimeout(() => {
+      const text = this.editor.innerText || "";
+      const suggestions = this.analyzeText(text);
+
+      if (suggestions.length === 0) {
+        statusIndicator.className = "status-indicator success";
+        statusText.textContent = "No issues found!";
+        suggestionsDiv.style.display = "block";
+        suggestionsDiv.innerHTML = '<div class="no-suggestions">✨ Your text looks great! No suggestions at this time.</div>';
+      } else {
+        statusIndicator.className = "status-indicator warning";
+        statusText.textContent = `Found ${suggestions.length} suggestion${suggestions.length > 1 ? 's' : ''}`;
+        suggestionsDiv.style.display = "block";
+        suggestionsDiv.innerHTML = suggestions.map((suggestion, index) => `
+          <div class="grammar-suggestion">
+            <div class="suggestion-type">
+              <i class="fas fa-${suggestion.icon}"></i>
+              ${suggestion.type}
+            </div>
+            <div class="suggestion-message">${suggestion.message}</div>
+            ${suggestion.suggestion ? `<div style="color: var(--text-secondary); font-size: 12px; margin-top: 4px;">Suggestion: "${suggestion.suggestion}"</div>` : ''}
+            ${suggestion.action ? `<button class="apply-suggestion-btn" onclick="window.charlesEditor.applySuggestion(${index})">Apply</button>` : ''}
+          </div>
+        `).join("");
+      }
+
+      checkBtn.disabled = false;
+    }, 1500);
+  }
+
+  analyzeText(text) {
+    const suggestions = [];
+    
+    // Check for common issues
+    // 1. Check for repeated words
+    const words = text.split(/\s+/);
+    for (let i = 0; i < words.length - 1; i++) {
+      if (words[i].toLowerCase() === words[i + 1].toLowerCase() && words[i].length > 2) {
+        suggestions.push({
+          type: "Repetition",
+          icon: "redo",
+          message: `Repeated word: "${words[i]}"`,
+          suggestion: `Consider removing the duplicate "${words[i]}"`,
+          action: "remove"
+        });
+        break; // Only show one repetition suggestion
+      }
+    }
+
+    // 2. Check for very long sentences (over 50 words)
+    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    sentences.forEach((sentence, index) => {
+      const wordCount = sentence.trim().split(/\s+/).length;
+      if (wordCount > 50) {
+        suggestions.push({
+          type: "Style",
+          icon: "edit",
+          message: `Long sentence (${wordCount} words) - consider breaking it into shorter sentences`,
+          suggestion: "Break into 2-3 shorter sentences for better readability"
+        });
+      }
+    });
+
+    // 3. Check for passive voice indicators
+    const passiveIndicators = /\b(was|were|is|are|been|being)\s+\w+ed\b/gi;
+    if (passiveIndicators.test(text)) {
+      suggestions.push({
+        type: "Style",
+        icon: "magic",
+        message: "Consider using active voice for more engaging writing",
+        suggestion: "Rewrite sentences to use active voice where possible"
+      });
+    }
+
+    // 4. Check for common typos/patterns
+    if (/\bteh\b/i.test(text)) {
+      suggestions.push({
+        type: "Spelling",
+        icon: "spell-check",
+        message: 'Possible typo: "teh" should be "the"',
+        suggestion: "the",
+        action: "replace"
+      });
+    }
+
+    return suggestions.slice(0, 5); // Limit to 5 suggestions
+  }
+
+  applySuggestion(index) {
+    // This would apply the suggestion based on the index
+    // For now, just show a message
+    this.showToast("Suggestion applied (simulated)", "success");
+  }
+
+  improveSelectedText() {
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0 && selection.toString().trim().length > 0) {
+      const selectedText = selection.toString();
+      this.showAIResponse("Improving text...", () => {
+        // Simulate text improvement
+        const improved = this.improveText(selectedText);
+        return `Improved version:\n\n"${improved}"\n\nWould you like to replace the selected text with this improved version?`;
+      });
+    } else {
+      this.showToast("Please select text to improve", "warning");
+    }
+  }
+
+  improveText(text) {
+    // Basic text improvements (in a real app, this would use AI)
+    let improved = text;
+    
+    // Remove extra spaces
+    improved = improved.replace(/\s+/g, " ");
+    
+    // Capitalize first letter
+    improved = improved.trim();
+    if (improved.length > 0) {
+      improved = improved.charAt(0).toUpperCase() + improved.slice(1);
+    }
+    
+    // Ensure proper punctuation
+    if (!/[.!?]$/.test(improved.trim())) {
+      improved = improved.trim() + ".";
+    }
+    
+    return improved;
+  }
+
+  makeTextShorter() {
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0 && selection.toString().trim().length > 0) {
+      const selectedText = selection.toString();
+      this.showAIResponse("Making text shorter...", () => {
+        const shortened = this.shortenText(selectedText);
+        return `Shorter version:\n\n"${shortened}"\n\nThis version is ${Math.round((1 - shortened.length / selectedText.length) * 100)}% shorter.`;
+      });
+    } else {
+      this.showToast("Please select text to shorten", "warning");
+    }
+  }
+
+  shortenText(text) {
+    // Remove filler words and simplify (basic implementation)
+    const fillerWords = /\b(very|really|quite|rather|pretty|somewhat|extremely|incredibly)\s+/gi;
+    let shortened = text.replace(fillerWords, "");
+    
+    // Remove redundant phrases
+    shortened = shortened.replace(/\b(due to the fact that|because of the fact that)\b/gi, "because");
+    shortened = shortened.replace(/\b(at this point in time)\b/gi, "now");
+    shortened = shortened.replace(/\b(in order to)\b/gi, "to");
+    
+    // Clean up extra spaces
+    shortened = shortened.replace(/\s+/g, " ").trim();
+    
+    return shortened || text; // Return original if too short
+  }
+
+  makeTextLonger() {
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0 && selection.toString().trim().length > 0) {
+      const selectedText = selection.toString();
+      this.showAIResponse("Expanding text...", () => {
+        const expanded = this.expandText(selectedText);
+        return `Expanded version:\n\n"${expanded}"\n\nThis version is ${Math.round((expanded.length / selectedText.length - 1) * 100)}% longer.`;
+      });
+    } else {
+      this.showToast("Please select text to expand", "warning");
+    }
+  }
+
+  expandText(text) {
+    // Add descriptive words and expand phrases (basic implementation)
+    let expanded = text;
+    
+    // Expand common abbreviations
+    expanded = expanded.replace(/\b(etc\.)\b/gi, "and so on");
+    expanded = expanded.replace(/\b(i\.e\.)\b/gi, "that is");
+    expanded = expanded.replace(/\b(e\.g\.)\b/gi, "for example");
+    
+    // Add descriptive adjectives where appropriate
+    expanded = expanded.replace(/\b(important)\b/gi, "significantly important");
+    expanded = expanded.replace(/\b(good)\b/gi, "quite good");
+    
+    return expanded;
+  }
+
+  changeTextTone() {
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0 && selection.toString().trim().length > 0) {
+      const selectedText = selection.toString();
+      this.showAIResponse("Changing tone...", () => {
+        return `Tone options for your text:\n\n1. Professional: More formal and business-appropriate\n2. Casual: Friendly and conversational\n3. Academic: Scholarly and precise\n4. Creative: Engaging and expressive\n\nSelect a tone to apply the transformation.`;
+      });
+    } else {
+      this.showToast("Please select text to change tone", "warning");
+    }
+  }
+
+  summarizeDocument() {
+    const text = this.editor.innerText || "";
+    if (text.trim().length < 50) {
+      this.showToast("Document is too short to summarize", "warning");
+      return;
+    }
+
+    this.showAIResponse("Summarizing document...", () => {
+      const summary = this.createSummary(text);
+      return `Document Summary:\n\n${summary}\n\nThis summary captures the key points of your ${text.split(/\s+/).length}-word document.`;
+    });
+  }
+
+  createSummary(text) {
+    // Basic summarization (first and last sentences + key points)
+    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 10);
+    if (sentences.length <= 3) {
+      return text; // Too short to summarize
+    }
+    
+    const firstSentence = sentences[0].trim();
+    const lastSentence = sentences[sentences.length - 1].trim();
+    const middleSentence = sentences[Math.floor(sentences.length / 2)].trim();
+    
+    return `${firstSentence}. ${middleSentence}. ${lastSentence}.`;
+  }
+
+  generateTitle() {
+    const text = this.editor.innerText || "";
+    if (text.trim().length < 20) {
+      this.showToast("Document is too short to generate a title", "warning");
+      return;
+    }
+
+    this.showAIResponse("Generating title...", () => {
+      const title = this.generateTitleFromText(text);
+      return `Suggested Title:\n\n"${title}"\n\nThis title is based on the main topic and key words in your document.`;
+    });
+  }
+
+  generateTitleFromText(text) {
+    // Extract first sentence or create from key words
+    const firstSentence = text.split(/[.!?]+/)[0].trim();
+    if (firstSentence.length <= 60) {
+      return firstSentence;
+    }
+    
+    // Create title from first few words
+    const words = firstSentence.split(/\s+/).slice(0, 8);
+    return words.join(" ") + "...";
+  }
+
+  expandIdeas() {
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0 && selection.toString().trim().length > 0) {
+      const selectedText = selection.toString();
+      this.showAIResponse("Expanding ideas...", () => {
+        return `Ideas to expand "${selectedText}":\n\n1. Provide examples and case studies\n2. Add supporting evidence or data\n3. Include related concepts or perspectives\n4. Explain the implications or consequences\n5. Compare with similar ideas or alternatives\n\nUse these suggestions to develop your ideas further.`;
+      });
+    } else {
+      this.showToast("Please select text to expand ideas", "warning");
+    }
+  }
+
+  showAIResponse(loadingMessage, callback) {
+    const responseSection = document.getElementById("aiResponseSection");
+    const responseDiv = document.getElementById("aiResponse");
+    
+    if (!responseSection || !responseDiv) return;
+    
+    responseSection.style.display = "block";
+    responseDiv.textContent = loadingMessage;
+    responseDiv.style.fontStyle = "italic";
+    responseDiv.style.color = "var(--text-secondary)";
+    
+    // Simulate AI processing
+    setTimeout(() => {
+      const response = callback();
+      responseDiv.textContent = response;
+      responseDiv.style.fontStyle = "normal";
+      responseDiv.style.color = "var(--text-primary)";
+      
+      // Scroll to response
+      responseSection.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }, 1500);
   }
 
   applyStyle(styleName) {
@@ -2818,13 +3599,13 @@ Enter your Google Client ID:`;
       contextMenu.id = "tabContextMenu";
       contextMenu.className = "context-menu";
       contextMenu.innerHTML = `
-                <button class="context-menu-item" onclick="window.charliesEditor.renameCurrentDocument()">
+                <button class="context-menu-item" onclick="window.charlesEditor.renameCurrentDocument()">
                     <i class="fas fa-edit"></i> Rename
                 </button>
-                <button class="context-menu-item" onclick="window.charliesEditor.duplicateCurrentDocument()">
+                <button class="context-menu-item" onclick="window.charlesEditor.duplicateCurrentDocument()">
                     <i class="fas fa-copy"></i> Duplicate
                 </button>
-                <button class="context-menu-item" onclick="window.charliesEditor.closeCurrentDocument()">
+                <button class="context-menu-item" onclick="window.charlesEditor.closeCurrentDocument()">
                     <i class="fas fa-times"></i> Close
                 </button>
             `;
@@ -2996,6 +3777,7 @@ function handleOAuthCallback() {
 document.addEventListener("DOMContentLoaded", () => {
   try {
     window.charlesEditor = new CharlesWebEditor();
+    // Alias for backward compatibility with inline handlers
     window.charliesEditor = window.charlesEditor;
 
     // Check for OAuth callback
