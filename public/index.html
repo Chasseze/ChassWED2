@@ -491,47 +491,48 @@
                         </div>
                     </div>
                 </div>
-                </div>        <!-- Status Bar -->
-        <div class="status-bar">
-            <div class="status-info">
-                <div class="status-item">
-                    <i class="fas fa-font"></i>
-                    <span id="currentFont">Arial, 16pt</span>
+            </div>
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <div class="status-info">
+                    <div class="status-item">
+                        <i class="fas fa-font"></i>
+                        <span id="currentFont">Arial, 16pt</span>
+                    </div>
+                    <div class="status-item">
+                        <i class="fas fa-keyboard"></i>
+                        <span
+                            >Words: <span id="wordCount">0</span> | Chars:
+                            <span id="charCount">0</span> |
+                            <span id="readingTime">0 min</span> read</span
+                        >
+                    </div>
+                    <div class="status-item">
+                        <i class="fas fa-save"></i>
+                        <span id="saveStatus">Auto-saved</span>
+                        <span
+                            id="autosaveSpinner"
+                            style="display: none; margin-left: 8px"
+                            ><span class="loading"></span
+                        ></span>
+                    </div>
                 </div>
-                <div class="status-item">
-                    <i class="fas fa-keyboard"></i>
-                    <span
-                        >Words: <span id="wordCount">0</span> | Chars:
-                        <span id="charCount">0</span> |
-                        <span id="readingTime">0 min</span> read</span
-                    >
-                </div>
-                <div class="status-item">
-                    <i class="fas fa-save"></i>
-                    <span id="saveStatus">Auto-saved</span>
-                    <span
-                        id="autosaveSpinner"
-                        style="display: none; margin-left: 8px"
-                        ><span class="loading"></span
-                    ></span>
+                <div class="zoom-control">
+                    <button class="zoom-btn" id="zoomOutBtn" title="Zoom Out">
+                        <i class="fas fa-search-minus"></i>
+                    </button>
+                    <span class="zoom-percent" id="zoomPercent">100%</span>
+                    <button class="zoom-btn" id="zoomInBtn" title="Zoom In">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
                 </div>
             </div>
-            <div class="zoom-control">
-                <button class="zoom-btn" id="zoomOutBtn" title="Zoom Out">
-                    <i class="fas fa-search-minus"></i>
-                </button>
-                <span class="zoom-percent" id="zoomPercent">100%</span>
-                <button class="zoom-btn" id="zoomInBtn" title="Zoom In">
-                    <i class="fas fa-search-plus"></i>
-                </button>
-            </div>
-        </div>
 
-        <!-- Floating Action Button -->
-        <button class="fab" id="helpFab" title="Quick Help">
-            <i class="fas fa-question"></i>
-        </button>
-    </div>
+            <!-- Floating Action Button -->
+            <button class="fab" id="helpFab" title="Quick Help">
+                <i class="fas fa-question"></i>
+            </button>
+        </div>
 
         <!-- Find & Replace Modal -->
         <div class="modal" id="findModal">
@@ -884,13 +885,18 @@
                         <label for="pageSizeSelectModal">Page Size:</label>
                         <select class="toolbar-select" id="pageSizeSelectModal">
                             <option value="a4">A4 (210 × 297 mm)</option>
-                            <option value="letter">Letter (216 × 279 mm)</option>
+                            <option value="letter">
+                                Letter (216 × 279 mm)
+                            </option>
                             <option value="legal">Legal (216 × 356 mm)</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="pageOrientationModal">Orientation:</label>
-                        <select class="toolbar-select" id="pageOrientationModal">
+                        <select
+                            class="toolbar-select"
+                            id="pageOrientationModal"
+                        >
                             <option value="portrait">Portrait</option>
                             <option value="landscape">Landscape</option>
                         </select>
@@ -900,19 +906,39 @@
                         <div class="margin-inputs-modal">
                             <div class="margin-input-modal">
                                 <label>Top</label>
-                                <input type="number" id="marginTopModal" value="25" min="0" />
+                                <input
+                                    type="number"
+                                    id="marginTopModal"
+                                    value="25"
+                                    min="0"
+                                />
                             </div>
                             <div class="margin-input-modal">
                                 <label>Bottom</label>
-                                <input type="number" id="marginBottomModal" value="25" min="0" />
+                                <input
+                                    type="number"
+                                    id="marginBottomModal"
+                                    value="25"
+                                    min="0"
+                                />
                             </div>
                             <div class="margin-input-modal">
                                 <label>Left</label>
-                                <input type="number" id="marginLeftModal" value="25" min="0" />
+                                <input
+                                    type="number"
+                                    id="marginLeftModal"
+                                    value="25"
+                                    min="0"
+                                />
                             </div>
                             <div class="margin-input-modal">
                                 <label>Right</label>
-                                <input type="number" id="marginRightModal" value="25" min="0" />
+                                <input
+                                    type="number"
+                                    id="marginRightModal"
+                                    value="25"
+                                    min="0"
+                                />
                             </div>
                         </div>
                     </div>
@@ -975,7 +1001,7 @@
 
         <!-- Templates Modal -->
         <div class="modal" id="templatesModal">
-            <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-content" style="max-width: 800px">
                 <div class="modal-header">
                     <h3 class="modal-title">Document Templates</h3>
                     <button class="modal-close" id="closeTemplatesModal">
@@ -983,7 +1009,18 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div id="templatesModalList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; padding: 10px;">
+                    <div
+                        id="templatesModalList"
+                        style="
+                            display: grid;
+                            grid-template-columns: repeat(
+                                auto-fill,
+                                minmax(200px, 1fr)
+                            );
+                            gap: 15px;
+                            padding: 10px;
+                        "
+                    >
                         <!-- Templates will be inserted here -->
                     </div>
                 </div>
@@ -997,24 +1034,47 @@
 
         <!-- Advanced Formatting Modal -->
         <div class="modal" id="advancedFormattingModal">
-            <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-content" style="max-width: 600px">
                 <div class="modal-header">
                     <h3 class="modal-title">Advanced Formatting</h3>
-                    <button class="modal-close" id="closeAdvancedFormattingModal">
+                    <button
+                        class="modal-close"
+                        id="closeAdvancedFormattingModal"
+                    >
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
                         <label>Text Effects</label>
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
-                            <button class="btn btn-secondary" id="formatStrikethrough" title="Strikethrough">
-                                <i class="fas fa-strikethrough"></i> Strikethrough
+                        <div
+                            style="
+                                display: flex;
+                                gap: 10px;
+                                flex-wrap: wrap;
+                                margin-top: 10px;
+                            "
+                        >
+                            <button
+                                class="btn btn-secondary"
+                                id="formatStrikethrough"
+                                title="Strikethrough"
+                            >
+                                <i class="fas fa-strikethrough"></i>
+                                Strikethrough
                             </button>
-                            <button class="btn btn-secondary" id="formatSuperscript" title="Superscript">
+                            <button
+                                class="btn btn-secondary"
+                                id="formatSuperscript"
+                                title="Superscript"
+                            >
                                 <i class="fas fa-superscript"></i> Superscript
                             </button>
-                            <button class="btn btn-secondary" id="formatSubscript" title="Subscript">
+                            <button
+                                class="btn btn-secondary"
+                                id="formatSubscript"
+                                title="Subscript"
+                            >
                                 <i class="fas fa-subscript"></i> Subscript
                             </button>
                         </div>
@@ -1032,37 +1092,89 @@
                     </div>
                     <div class="form-group">
                         <label>Paragraph Spacing</label>
-                        <div style="display: flex; gap: 10px; align-items: center;">
-                            <label style="min-width: 80px;">Before:</label>
-                            <input type="number" id="paragraphSpacingBefore" value="0" min="0" max="100" style="flex: 1;" />
+                        <div
+                            style="
+                                display: flex;
+                                gap: 10px;
+                                align-items: center;
+                            "
+                        >
+                            <label style="min-width: 80px">Before:</label>
+                            <input
+                                type="number"
+                                id="paragraphSpacingBefore"
+                                value="0"
+                                min="0"
+                                max="100"
+                                style="flex: 1"
+                            />
                             <span>pt</span>
                         </div>
-                        <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
-                            <label style="min-width: 80px;">After:</label>
-                            <input type="number" id="paragraphSpacingAfter" value="12" min="0" max="100" style="flex: 1;" />
+                        <div
+                            style="
+                                display: flex;
+                                gap: 10px;
+                                align-items: center;
+                                margin-top: 10px;
+                            "
+                        >
+                            <label style="min-width: 80px">After:</label>
+                            <input
+                                type="number"
+                                id="paragraphSpacingAfter"
+                                value="12"
+                                min="0"
+                                max="100"
+                                style="flex: 1"
+                            />
                             <span>pt</span>
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Text Transform</label>
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
-                            <button class="btn btn-secondary" id="formatUppercase" title="UPPERCASE">
+                        <div
+                            style="
+                                display: flex;
+                                gap: 10px;
+                                flex-wrap: wrap;
+                                margin-top: 10px;
+                            "
+                        >
+                            <button
+                                class="btn btn-secondary"
+                                id="formatUppercase"
+                                title="UPPERCASE"
+                            >
                                 UPPERCASE
                             </button>
-                            <button class="btn btn-secondary" id="formatLowercase" title="lowercase">
+                            <button
+                                class="btn btn-secondary"
+                                id="formatLowercase"
+                                title="lowercase"
+                            >
                                 lowercase
                             </button>
-                            <button class="btn btn-secondary" id="formatCapitalize" title="Capitalize">
+                            <button
+                                class="btn btn-secondary"
+                                id="formatCapitalize"
+                                title="Capitalize"
+                            >
                                 Capitalize
                             </button>
                         </div>
                     </div>
                 </div>
                 <div class="modal-actions">
-                    <button class="btn btn-secondary" id="cancelAdvancedFormattingBtn">
+                    <button
+                        class="btn btn-secondary"
+                        id="cancelAdvancedFormattingBtn"
+                    >
                         Close
                     </button>
-                    <button class="btn btn-primary" id="applyAdvancedFormattingBtn">
+                    <button
+                        class="btn btn-primary"
+                        id="applyAdvancedFormattingBtn"
+                    >
                         Apply
                     </button>
                 </div>
@@ -1071,40 +1183,310 @@
 
         <!-- Email Share Modal -->
         <div class="modal" id="emailShareModal">
-            <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-content" style="max-width: 600px">
                 <div class="modal-header">
-                    <h3 class="modal-title">Share via Email</h3>
+                    <h3 class="modal-title">
+                        <i
+                            class="fas fa-share-alt"
+                            style="margin-right: 10px"
+                        ></i
+                        >Share Document
+                    </h3>
                     <button class="modal-close" id="closeEmailShareModal">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
                 <div class="modal-body">
+                    <!-- Email Service Selection -->
+                    <div class="form-group">
+                        <label
+                            style="
+                                font-weight: bold;
+                                margin-bottom: 10px;
+                                display: block;
+                            "
+                            >Choose Email Service:</label
+                        >
+                        <div
+                            id="emailServiceOptions"
+                            style="
+                                display: grid;
+                                grid-template-columns: repeat(
+                                    auto-fit,
+                                    minmax(120px, 1fr)
+                                );
+                                gap: 10px;
+                                margin-bottom: 15px;
+                            "
+                        >
+                            <button
+                                type="button"
+                                class="email-service-btn"
+                                data-service="gmail"
+                                style="
+                                    display: flex;
+                                    flex-direction: column;
+                                    align-items: center;
+                                    padding: 15px;
+                                    border: 2px solid #e5e7eb;
+                                    border-radius: 8px;
+                                    background: white;
+                                    cursor: pointer;
+                                    transition: all 0.2s;
+                                "
+                            >
+                                <i
+                                    class="fab fa-google"
+                                    style="
+                                        font-size: 24px;
+                                        color: #ea4335;
+                                        margin-bottom: 8px;
+                                    "
+                                ></i>
+                                <span style="font-size: 12px; font-weight: 500"
+                                    >Gmail</span
+                                >
+                            </button>
+                            <button
+                                type="button"
+                                class="email-service-btn"
+                                data-service="outlook"
+                                style="
+                                    display: flex;
+                                    flex-direction: column;
+                                    align-items: center;
+                                    padding: 15px;
+                                    border: 2px solid #e5e7eb;
+                                    border-radius: 8px;
+                                    background: white;
+                                    cursor: pointer;
+                                    transition: all 0.2s;
+                                "
+                            >
+                                <i
+                                    class="fab fa-microsoft"
+                                    style="
+                                        font-size: 24px;
+                                        color: #0078d4;
+                                        margin-bottom: 8px;
+                                    "
+                                ></i>
+                                <span style="font-size: 12px; font-weight: 500"
+                                    >Outlook</span
+                                >
+                            </button>
+                            <button
+                                type="button"
+                                class="email-service-btn"
+                                data-service="yahoo"
+                                style="
+                                    display: flex;
+                                    flex-direction: column;
+                                    align-items: center;
+                                    padding: 15px;
+                                    border: 2px solid #e5e7eb;
+                                    border-radius: 8px;
+                                    background: white;
+                                    cursor: pointer;
+                                    transition: all 0.2s;
+                                "
+                            >
+                                <i
+                                    class="fab fa-yahoo"
+                                    style="
+                                        font-size: 24px;
+                                        color: #6001d2;
+                                        margin-bottom: 8px;
+                                    "
+                                ></i>
+                                <span style="font-size: 12px; font-weight: 500"
+                                    >Yahoo</span
+                                >
+                            </button>
+                            <button
+                                type="button"
+                                class="email-service-btn active"
+                                data-service="default"
+                                style="
+                                    display: flex;
+                                    flex-direction: column;
+                                    align-items: center;
+                                    padding: 15px;
+                                    border: 2px solid #667eea;
+                                    border-radius: 8px;
+                                    background: #f0f4ff;
+                                    cursor: pointer;
+                                    transition: all 0.2s;
+                                "
+                            >
+                                <i
+                                    class="fas fa-envelope"
+                                    style="
+                                        font-size: 24px;
+                                        color: #667eea;
+                                        margin-bottom: 8px;
+                                    "
+                                ></i>
+                                <span style="font-size: 12px; font-weight: 500"
+                                    >Default App</span
+                                >
+                            </button>
+                        </div>
+                        <input
+                            type="hidden"
+                            id="selectedEmailService"
+                            value="default"
+                        />
+                    </div>
+
+                    <hr
+                        style="
+                            border: none;
+                            border-top: 1px solid #e5e7eb;
+                            margin: 20px 0;
+                        "
+                    />
+
+                    <!-- Email Details -->
                     <div class="form-group">
                         <label for="emailTo">To:</label>
-                        <input type="email" id="emailTo" placeholder="recipient@example.com" multiple style="width: 100%; padding: 8px;" />
-                        <small style="color: #666; font-size: 12px;">Separate multiple emails with commas</small>
+                        <input
+                            type="email"
+                            id="emailTo"
+                            placeholder="recipient@example.com"
+                            multiple
+                            style="
+                                width: 100%;
+                                padding: 10px;
+                                border: 1px solid #d1d5db;
+                                border-radius: 6px;
+                                font-size: 14px;
+                            "
+                        />
+                        <small style="color: #666; font-size: 12px"
+                            >Separate multiple emails with commas</small
+                        >
                     </div>
                     <div class="form-group">
                         <label for="emailSubject">Subject:</label>
-                        <input type="text" id="emailSubject" placeholder="Document from CharlesWebEditor" style="width: 100%; padding: 8px;" />
+                        <input
+                            type="text"
+                            id="emailSubject"
+                            placeholder="Document from CharlesWebEditor"
+                            style="
+                                width: 100%;
+                                padding: 10px;
+                                border: 1px solid #d1d5db;
+                                border-radius: 6px;
+                                font-size: 14px;
+                            "
+                        />
                     </div>
                     <div class="form-group">
                         <label for="emailMessage">Message:</label>
-                        <textarea id="emailMessage" rows="4" placeholder="Optional message..." style="width: 100%; padding: 8px; resize: vertical;"></textarea>
+                        <textarea
+                            id="emailMessage"
+                            rows="4"
+                            placeholder="Optional message..."
+                            style="
+                                width: 100%;
+                                padding: 10px;
+                                border: 1px solid #d1d5db;
+                                border-radius: 6px;
+                                font-size: 14px;
+                                resize: vertical;
+                            "
+                        ></textarea>
                     </div>
                     <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="emailIncludeDocument" checked />
-                            Include document as HTML attachment
+                        <label
+                            style="
+                                display: flex;
+                                align-items: center;
+                                gap: 8px;
+                                cursor: pointer;
+                            "
+                        >
+                            <input
+                                type="checkbox"
+                                id="emailIncludeDocument"
+                                checked
+                                style="width: 18px; height: 18px"
+                            />
+                            <span>Include document content in email body</span>
                         </label>
                     </div>
+
+                    <hr
+                        style="
+                            border: none;
+                            border-top: 1px solid #e5e7eb;
+                            margin: 20px 0;
+                        "
+                    />
+
+                    <!-- Alternative Options -->
+                    <div class="form-group">
+                        <label
+                            style="
+                                font-weight: bold;
+                                margin-bottom: 10px;
+                                display: block;
+                            "
+                            >Or use these options:</label
+                        >
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap">
+                            <button
+                                type="button"
+                                class="btn btn-secondary"
+                                id="copyToClipboardBtn"
+                                style="
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 6px;
+                                "
+                            >
+                                <i class="fas fa-copy"></i> Copy Content
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-secondary"
+                                id="downloadForEmailBtn"
+                                style="
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 6px;
+                                "
+                            >
+                                <i class="fas fa-download"></i> Download as File
+                            </button>
+                        </div>
+                        <small
+                            style="
+                                color: #666;
+                                font-size: 12px;
+                                margin-top: 8px;
+                                display: block;
+                            "
+                        >
+                            <i class="fas fa-info-circle"></i> Copy content or
+                            download to attach manually to any email client
+                        </small>
+                    </div>
                 </div>
-                <div class="modal-actions">
+                <div
+                    class="modal-actions"
+                    style="display: flex; gap: 10px; justify-content: flex-end"
+                >
                     <button class="btn btn-secondary" id="cancelEmailShareBtn">
                         Cancel
                     </button>
-                    <button class="btn btn-primary" id="sendEmailBtn">
-                        <i class="fas fa-paper-plane"></i> Send Email
+                    <button
+                        class="btn btn-primary"
+                        id="sendEmailBtn"
+                        style="display: flex; align-items: center; gap: 6px"
+                    >
+                        <i class="fas fa-paper-plane"></i> Open Email
                     </button>
                 </div>
             </div>
@@ -1126,14 +1508,27 @@
                 <div class="ai-section">
                     <h4>Writing Analysis</h4>
                     <div class="grammar-status">
-                        <div class="status-indicator" id="grammarStatusIndicator"></div>
-                        <span class="status-text" id="grammarStatusText">Ready to analyze</span>
+                        <div
+                            class="status-indicator"
+                            id="grammarStatusIndicator"
+                        ></div>
+                        <span class="status-text" id="grammarStatusText"
+                            >Ready to analyze</span
+                        >
                     </div>
-                    <button class="ai-btn" id="checkGrammarBtn" style="width: 100%;">
+                    <button
+                        class="ai-btn"
+                        id="checkGrammarBtn"
+                        style="width: 100%"
+                    >
                         <i class="fas fa-spell-check"></i>
                         Check Grammar & Style
                     </button>
-                    <div class="grammar-suggestions" id="grammarSuggestions" style="margin-top: 15px; display: none;">
+                    <div
+                        class="grammar-suggestions"
+                        id="grammarSuggestions"
+                        style="margin-top: 15px; display: none"
+                    >
                         <!-- Suggestions will be added here -->
                     </div>
                 </div>
@@ -1141,13 +1536,27 @@
                 <!-- Text Statistics -->
                 <div class="ai-section">
                     <h4>Document Statistics</h4>
-                    <div id="aiStats" style="font-size: 13px; color: var(--text-secondary);">
+                    <div
+                        id="aiStats"
+                        style="font-size: 13px; color: var(--text-secondary)"
+                    >
                         <div>Words: <strong id="aiWordCount">0</strong></div>
-                        <div>Characters: <strong id="aiCharCount">0</strong></div>
-                        <div>Paragraphs: <strong id="aiParagraphCount">0</strong></div>
-                        <div>Reading Time: <strong id="aiReadingTime">0 min</strong></div>
+                        <div>
+                            Characters: <strong id="aiCharCount">0</strong>
+                        </div>
+                        <div>
+                            Paragraphs: <strong id="aiParagraphCount">0</strong>
+                        </div>
+                        <div>
+                            Reading Time:
+                            <strong id="aiReadingTime">0 min</strong>
+                        </div>
                     </div>
-                    <button class="ai-btn small" id="refreshStatsBtn" style="margin-top: 10px; width: 100%;">
+                    <button
+                        class="ai-btn small"
+                        id="refreshStatsBtn"
+                        style="margin-top: 10px; width: 100%"
+                    >
                         <i class="fas fa-sync-alt"></i>
                         Refresh Stats
                     </button>
@@ -1156,19 +1565,35 @@
                 <!-- Writing Suggestions -->
                 <div class="ai-section">
                     <h4>Writing Suggestions</h4>
-                    <button class="ai-btn" id="improveTextBtn" style="width: 100%; margin-bottom: 8px;">
+                    <button
+                        class="ai-btn"
+                        id="improveTextBtn"
+                        style="width: 100%; margin-bottom: 8px"
+                    >
                         <i class="fas fa-magic"></i>
                         Improve Selected Text
                     </button>
-                    <button class="ai-btn" id="makeShorterBtn" style="width: 100%; margin-bottom: 8px;">
+                    <button
+                        class="ai-btn"
+                        id="makeShorterBtn"
+                        style="width: 100%; margin-bottom: 8px"
+                    >
                         <i class="fas fa-compress"></i>
                         Make Shorter
                     </button>
-                    <button class="ai-btn" id="makeLongerBtn" style="width: 100%; margin-bottom: 8px;">
+                    <button
+                        class="ai-btn"
+                        id="makeLongerBtn"
+                        style="width: 100%; margin-bottom: 8px"
+                    >
                         <i class="fas fa-expand"></i>
                         Make Longer
                     </button>
-                    <button class="ai-btn" id="changeToneBtn" style="width: 100%;">
+                    <button
+                        class="ai-btn"
+                        id="changeToneBtn"
+                        style="width: 100%"
+                    >
                         <i class="fas fa-adjust"></i>
                         Change Tone
                     </button>
@@ -1177,24 +1602,52 @@
                 <!-- Quick Actions -->
                 <div class="ai-section">
                     <h4>Quick Actions</h4>
-                    <button class="ai-btn" id="summarizeBtn" style="width: 100%; margin-bottom: 8px;">
+                    <button
+                        class="ai-btn"
+                        id="summarizeBtn"
+                        style="width: 100%; margin-bottom: 8px"
+                    >
                         <i class="fas fa-file-alt"></i>
                         Summarize Document
                     </button>
-                    <button class="ai-btn" id="generateTitleBtn" style="width: 100%; margin-bottom: 8px;">
+                    <button
+                        class="ai-btn"
+                        id="generateTitleBtn"
+                        style="width: 100%; margin-bottom: 8px"
+                    >
                         <i class="fas fa-heading"></i>
                         Generate Title
                     </button>
-                    <button class="ai-btn" id="expandIdeasBtn" style="width: 100%;">
+                    <button
+                        class="ai-btn"
+                        id="expandIdeasBtn"
+                        style="width: 100%"
+                    >
                         <i class="fas fa-lightbulb"></i>
                         Expand Ideas
                     </button>
                 </div>
 
                 <!-- AI Response Area -->
-                <div class="ai-section" id="aiResponseSection" style="display: none;">
+                <div
+                    class="ai-section"
+                    id="aiResponseSection"
+                    style="display: none"
+                >
                     <h4>AI Response</h4>
-                    <div id="aiResponse" style="background: var(--bg-secondary); padding: 12px; border-radius: 6px; font-size: 13px; line-height: 1.6; color: var(--text-primary); max-height: 200px; overflow-y: auto;">
+                    <div
+                        id="aiResponse"
+                        style="
+                            background: var(--bg-secondary);
+                            padding: 12px;
+                            border-radius: 6px;
+                            font-size: 13px;
+                            line-height: 1.6;
+                            color: var(--text-primary);
+                            max-height: 200px;
+                            overflow-y: auto;
+                        "
+                    >
                         <!-- AI responses will appear here -->
                     </div>
                 </div>
@@ -1203,6 +1656,7 @@
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
         <script src="main.js"></script>
     </body>
 </html>

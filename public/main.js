@@ -1123,21 +1123,27 @@ class CharlesWebEditor {
     }
 
     // Advanced Formatting modal event listeners
-    const closeAdvancedFormattingModal = document.getElementById("closeAdvancedFormattingModal");
+    const closeAdvancedFormattingModal = document.getElementById(
+      "closeAdvancedFormattingModal",
+    );
     if (closeAdvancedFormattingModal) {
       closeAdvancedFormattingModal.addEventListener("click", () => {
         this.hideAdvancedFormattingModal();
       });
     }
 
-    const cancelAdvancedFormattingBtn = document.getElementById("cancelAdvancedFormattingBtn");
+    const cancelAdvancedFormattingBtn = document.getElementById(
+      "cancelAdvancedFormattingBtn",
+    );
     if (cancelAdvancedFormattingBtn) {
       cancelAdvancedFormattingBtn.addEventListener("click", () => {
         this.hideAdvancedFormattingModal();
       });
     }
 
-    const applyAdvancedFormattingBtn = document.getElementById("applyAdvancedFormattingBtn");
+    const applyAdvancedFormattingBtn = document.getElementById(
+      "applyAdvancedFormattingBtn",
+    );
     if (applyAdvancedFormattingBtn) {
       applyAdvancedFormattingBtn.addEventListener("click", () => {
         this.applyAdvancedFormatting();
@@ -1195,7 +1201,9 @@ class CharlesWebEditor {
     }
 
     // Email Share modal event listeners
-    const closeEmailShareModal = document.getElementById("closeEmailShareModal");
+    const closeEmailShareModal = document.getElementById(
+      "closeEmailShareModal",
+    );
     if (closeEmailShareModal) {
       closeEmailShareModal.addEventListener("click", () => {
         this.hideEmailShareModal();
@@ -1296,15 +1304,20 @@ class CharlesWebEditor {
           this.hideTemplatesModal();
         }
       }
-      
+
       // Advanced Formatting modal
-      const advancedFormattingModal = document.getElementById("advancedFormattingModal");
-      if (advancedFormattingModal && advancedFormattingModal.classList.contains("active")) {
+      const advancedFormattingModal = document.getElementById(
+        "advancedFormattingModal",
+      );
+      if (
+        advancedFormattingModal &&
+        advancedFormattingModal.classList.contains("active")
+      ) {
         if (e.target === advancedFormattingModal) {
           this.hideAdvancedFormattingModal();
         }
       }
-      
+
       // Email Share modal
       const emailShareModal = document.getElementById("emailShareModal");
       if (emailShareModal && emailShareModal.classList.contains("active")) {
@@ -2708,14 +2721,14 @@ Enter your Google Client ID:`;
   showTemplatesModal() {
     const modal = document.getElementById("templatesModal");
     const templatesList = document.getElementById("templatesModalList");
-    
+
     if (modal && templatesList) {
       // Populate templates list
       templatesList.innerHTML = `
         ${this.templates
           .map(
             (template) => `
-            <div class="template-item" style="border: 1px solid var(--border-primary); border-radius: 8px; padding: 15px; cursor: pointer; transition: all 0.2s; background: var(--bg-primary);" 
+            <div class="template-item" style="border: 1px solid var(--border-primary); border-radius: 8px; padding: 15px; cursor: pointer; transition: all 0.2s; background: var(--bg-primary);"
                  onclick="window.charlesEditor.applyTemplateFromModal('${template.id}')"
                  onmouseover="this.style.background='var(--bg-secondary)'"
                  onmouseout="this.style.background='var(--bg-primary)'">
@@ -2756,11 +2769,15 @@ Enter your Google Client ID:`;
       // Reset form values
       const lineSpacing = document.getElementById("lineSpacing");
       if (lineSpacing) lineSpacing.value = "2";
-      const paragraphSpacingBefore = document.getElementById("paragraphSpacingBefore");
+      const paragraphSpacingBefore = document.getElementById(
+        "paragraphSpacingBefore",
+      );
       if (paragraphSpacingBefore) paragraphSpacingBefore.value = "0";
-      const paragraphSpacingAfter = document.getElementById("paragraphSpacingAfter");
+      const paragraphSpacingAfter = document.getElementById(
+        "paragraphSpacingAfter",
+      );
       if (paragraphSpacingAfter) paragraphSpacingAfter.value = "12";
-      
+
       modal.classList.add("active");
     }
   }
@@ -2797,7 +2814,7 @@ Enter your Google Client ID:`;
       const range = selection.getRangeAt(0);
       const selectedText = selection.toString();
       let transformedText;
-      
+
       switch (transform) {
         case "uppercase":
           transformedText = selectedText.toUpperCase();
@@ -2806,12 +2823,14 @@ Enter your Google Client ID:`;
           transformedText = selectedText.toLowerCase();
           break;
         case "capitalize":
-          transformedText = selectedText.replace(/\b\w/g, (char) => char.toUpperCase());
+          transformedText = selectedText.replace(/\b\w/g, (char) =>
+            char.toUpperCase(),
+          );
           break;
         default:
           return;
       }
-      
+
       range.deleteContents();
       range.insertNode(document.createTextNode(transformedText));
       this.saveDocumentState();
@@ -2822,18 +2841,23 @@ Enter your Google Client ID:`;
   }
 
   applyAdvancedFormatting() {
-    const paragraphSpacingBefore = document.getElementById("paragraphSpacingBefore");
-    const paragraphSpacingAfter = document.getElementById("paragraphSpacingAfter");
-    
+    const paragraphSpacingBefore = document.getElementById(
+      "paragraphSpacingBefore",
+    );
+    const paragraphSpacingAfter = document.getElementById(
+      "paragraphSpacingAfter",
+    );
+
     if (paragraphSpacingBefore && paragraphSpacingAfter) {
       const before = paragraphSpacingBefore.value;
       const after = paragraphSpacingAfter.value;
-      
+
       // Apply to selected paragraphs or all paragraphs
       const selection = window.getSelection();
       if (selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
-        const paragraphs = range.commonAncestorContainer.parentElement.querySelectorAll("p");
+        const paragraphs =
+          range.commonAncestorContainer.parentElement.querySelectorAll("p");
         paragraphs.forEach((p) => {
           p.style.marginTop = before + "pt";
           p.style.marginBottom = after + "pt";
@@ -2846,7 +2870,7 @@ Enter your Google Client ID:`;
           p.style.marginBottom = after + "pt";
         });
       }
-      
+
       this.saveDocumentState();
       this.showToast("Advanced formatting applied", "success");
       this.hideAdvancedFormattingModal();
@@ -2862,15 +2886,173 @@ Enter your Google Client ID:`;
       if (emailSubject) {
         emailSubject.value = `Document from CharlesWebEditor - ${this.currentDoc.name}`;
       }
-      
+
       // Clear other fields
       const emailTo = document.getElementById("emailTo");
       if (emailTo) emailTo.value = "";
       const emailMessage = document.getElementById("emailMessage");
       if (emailMessage) emailMessage.value = "";
-      
+
+      // Reset selected email service
+      const selectedService = document.getElementById("selectedEmailService");
+      if (selectedService) selectedService.value = "default";
+
+      // Setup email service button listeners
+      this.setupEmailServiceButtons();
+
+      // Setup copy and download buttons
+      this.setupEmailAlternativeButtons();
+
       modal.classList.add("active");
     }
+  }
+
+  setupEmailServiceButtons() {
+    const serviceButtons = document.querySelectorAll(".email-service-btn");
+    const selectedServiceInput = document.getElementById(
+      "selectedEmailService",
+    );
+
+    serviceButtons.forEach((btn) => {
+      // Remove existing listeners by cloning
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+
+      newBtn.addEventListener("click", () => {
+        // Remove active state from all buttons
+        document.querySelectorAll(".email-service-btn").forEach((b) => {
+          b.style.border = "2px solid #e5e7eb";
+          b.style.background = "white";
+          b.classList.remove("active");
+        });
+
+        // Add active state to clicked button
+        newBtn.style.border = "2px solid #667eea";
+        newBtn.style.background = "#f0f4ff";
+        newBtn.classList.add("active");
+
+        // Update hidden input
+        if (selectedServiceInput) {
+          selectedServiceInput.value = newBtn.dataset.service;
+        }
+      });
+    });
+  }
+
+  setupEmailAlternativeButtons() {
+    // Copy to clipboard button
+    const copyBtn = document.getElementById("copyToClipboardBtn");
+    if (copyBtn) {
+      const newCopyBtn = copyBtn.cloneNode(true);
+      copyBtn.parentNode.replaceChild(newCopyBtn, copyBtn);
+
+      newCopyBtn.addEventListener("click", () => {
+        this.copyDocumentToClipboard();
+      });
+    }
+
+    // Download for email button
+    const downloadBtn = document.getElementById("downloadForEmailBtn");
+    if (downloadBtn) {
+      const newDownloadBtn = downloadBtn.cloneNode(true);
+      downloadBtn.parentNode.replaceChild(newDownloadBtn, downloadBtn);
+
+      newDownloadBtn.addEventListener("click", () => {
+        this.downloadDocumentForEmail();
+      });
+    }
+  }
+
+  copyDocumentToClipboard() {
+    const documentText = this.editor.innerText;
+    const emailMessage = document.getElementById("emailMessage");
+    const message = emailMessage ? emailMessage.value : "";
+
+    const textToCopy = message
+      ? `${message}\n\n--- Document Content ---\n\n${documentText}`
+      : documentText;
+
+    // Use modern clipboard API if available
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard
+        .writeText(textToCopy)
+        .then(() => {
+          this.showToast(
+            "Content copied to clipboard! Paste into your email.",
+            "success",
+          );
+        })
+        .catch((err) => {
+          console.error("Clipboard write failed:", err);
+          this.fallbackCopyToClipboard(textToCopy);
+        });
+    } else {
+      this.fallbackCopyToClipboard(textToCopy);
+    }
+  }
+
+  fallbackCopyToClipboard(text) {
+    // Fallback for older browsers
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.style.position = "fixed";
+    textarea.style.left = "-9999px";
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    try {
+      document.execCommand("copy");
+      this.showToast(
+        "Content copied to clipboard! Paste into your email.",
+        "success",
+      );
+    } catch (err) {
+      console.error("Fallback copy failed:", err);
+      this.showToast(
+        "Failed to copy. Please select and copy manually.",
+        "error",
+      );
+    }
+
+    document.body.removeChild(textarea);
+  }
+
+  downloadDocumentForEmail() {
+    const documentContent = this.editor.innerHTML;
+    const docName = this.currentDoc.name || "Document";
+
+    // Create HTML file with proper formatting
+    const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>${docName}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+${documentContent}
+</body>
+</html>`;
+
+    const blob = new Blob([htmlContent], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${docName}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    this.showToast("Document downloaded! Attach it to your email.", "success");
   }
 
   hideEmailShareModal() {
@@ -2884,44 +3066,104 @@ Enter your Google Client ID:`;
     const emailTo = document.getElementById("emailTo");
     const emailSubject = document.getElementById("emailSubject");
     const emailMessage = document.getElementById("emailMessage");
-    const emailIncludeDocument = document.getElementById("emailIncludeDocument");
-    
+    const emailIncludeDocument = document.getElementById(
+      "emailIncludeDocument",
+    );
+    const selectedService = document.getElementById("selectedEmailService");
+
     if (!emailTo || !emailTo.value.trim()) {
       this.showToast("Please enter recipient email address", "warning");
       return;
     }
-    
+
     if (!emailSubject || !emailSubject.value.trim()) {
       this.showToast("Please enter email subject", "warning");
       return;
     }
-    
+
     const recipients = emailTo.value.split(",").map((email) => email.trim());
     const subject = emailSubject.value;
     const message = emailMessage ? emailMessage.value : "";
-    const includeDocument = emailIncludeDocument ? emailIncludeDocument.checked : true;
-    
-    // Create mailto link
-    let mailtoLink = `mailto:${recipients.join(",")}?`;
-    mailtoLink += `subject=${encodeURIComponent(subject)}`;
-    
-    if (message) {
-      mailtoLink += `&body=${encodeURIComponent(message)}`;
-    }
-    
+    const includeDocument = emailIncludeDocument
+      ? emailIncludeDocument.checked
+      : true;
+    const service = selectedService ? selectedService.value : "default";
+
+    // Build email body
+    let body = message;
     if (includeDocument) {
-      const documentContent = this.editor.innerHTML;
       const documentText = this.editor.innerText;
-      const bodyText = message 
+      body = message
         ? `${message}\n\n--- Document Content ---\n\n${documentText}`
         : `--- Document Content ---\n\n${documentText}`;
-      mailtoLink = `mailto:${recipients.join(",")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
     }
-    
-    // Open email client
-    window.location.href = mailtoLink;
-    
-    this.showToast("Opening email client...", "success");
+
+    // Truncate body if too long for URL (keep under 1800 chars for safety)
+    const maxBodyLength = 1800;
+    let truncatedBody = body;
+    let wasTruncated = false;
+    if (body.length > maxBodyLength) {
+      truncatedBody =
+        body.substring(0, maxBodyLength) +
+        "\n\n[Content truncated. Use 'Copy Content' or 'Download as File' for full document.]";
+      wasTruncated = true;
+    }
+
+    // Build URL based on selected service
+    let emailUrl = "";
+    const encodedSubject = encodeURIComponent(subject);
+    const encodedBody = encodeURIComponent(truncatedBody);
+    const recipientList = recipients.join(",");
+
+    switch (service) {
+      case "gmail":
+        // Gmail compose URL
+        emailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(recipientList)}&su=${encodedSubject}&body=${encodedBody}`;
+        break;
+
+      case "outlook":
+        // Outlook.com compose URL
+        emailUrl = `https://outlook.live.com/mail/0/deeplink/compose?to=${encodeURIComponent(recipientList)}&subject=${encodedSubject}&body=${encodedBody}`;
+        break;
+
+      case "yahoo":
+        // Yahoo Mail compose URL
+        emailUrl = `https://compose.mail.yahoo.com/?to=${encodeURIComponent(recipientList)}&subject=${encodedSubject}&body=${encodedBody}`;
+        break;
+
+      case "default":
+      default:
+        // Default mailto link for native email client
+        emailUrl = `mailto:${recipientList}?subject=${encodedSubject}&body=${encodedBody}`;
+        break;
+    }
+
+    // Open the email URL
+    if (service === "default") {
+      // For mailto, use location.href
+      window.location.href = emailUrl;
+    } else {
+      // For web services, open in new tab
+      window.open(emailUrl, "_blank");
+    }
+
+    // Show appropriate message
+    const serviceNames = {
+      gmail: "Gmail",
+      outlook: "Outlook",
+      yahoo: "Yahoo Mail",
+      default: "your email client",
+    };
+
+    if (wasTruncated) {
+      this.showToast(
+        `Opening ${serviceNames[service]}... Document was truncated. Use 'Copy Content' for full text.`,
+        "warning",
+      );
+    } else {
+      this.showToast(`Opening ${serviceNames[service]}...`, "success");
+    }
+
     this.hideEmailShareModal();
   }
 
@@ -2942,7 +3184,7 @@ Enter your Google Client ID:`;
     if (panel) {
       panel.classList.add("visible");
       this.updateAIStats();
-      
+
       // Update stats when editor content changes
       if (!this.aiStatsUpdateInterval) {
         this.aiStatsUpdateInterval = setInterval(() => {
@@ -2958,7 +3200,7 @@ Enter your Google Client ID:`;
     const panel = document.getElementById("aiAssistantPanel");
     if (panel) {
       panel.classList.remove("visible");
-      
+
       // Clear update interval when panel is closed
       if (this.aiStatsUpdateInterval) {
         clearInterval(this.aiStatsUpdateInterval);
@@ -2966,7 +3208,6 @@ Enter your Google Client ID:`;
       }
     }
   }
-
 
   updateAIStats() {
     const text = this.editor.innerText || "";
@@ -3010,22 +3251,27 @@ Enter your Google Client ID:`;
         statusIndicator.className = "status-indicator success";
         statusText.textContent = "No issues found!";
         suggestionsDiv.style.display = "block";
-        suggestionsDiv.innerHTML = '<div class="no-suggestions">✨ Your text looks great! No suggestions at this time.</div>';
+        suggestionsDiv.innerHTML =
+          '<div class="no-suggestions">✨ Your text looks great! No suggestions at this time.</div>';
       } else {
         statusIndicator.className = "status-indicator warning";
-        statusText.textContent = `Found ${suggestions.length} suggestion${suggestions.length > 1 ? 's' : ''}`;
+        statusText.textContent = `Found ${suggestions.length} suggestion${suggestions.length > 1 ? "s" : ""}`;
         suggestionsDiv.style.display = "block";
-        suggestionsDiv.innerHTML = suggestions.map((suggestion, index) => `
+        suggestionsDiv.innerHTML = suggestions
+          .map(
+            (suggestion, index) => `
           <div class="grammar-suggestion">
             <div class="suggestion-type">
               <i class="fas fa-${suggestion.icon}"></i>
               ${suggestion.type}
             </div>
             <div class="suggestion-message">${suggestion.message}</div>
-            ${suggestion.suggestion ? `<div style="color: var(--text-secondary); font-size: 12px; margin-top: 4px;">Suggestion: "${suggestion.suggestion}"</div>` : ''}
-            ${suggestion.action ? `<button class="apply-suggestion-btn" onclick="window.charlesEditor.applySuggestion(${index})">Apply</button>` : ''}
+            ${suggestion.suggestion ? `<div style="color: var(--text-secondary); font-size: 12px; margin-top: 4px;">Suggestion: "${suggestion.suggestion}"</div>` : ""}
+            ${suggestion.action ? `<button class="apply-suggestion-btn" onclick="window.charlesEditor.applySuggestion(${index})">Apply</button>` : ""}
           </div>
-        `).join("");
+        `,
+          )
+          .join("");
       }
 
       checkBtn.disabled = false;
@@ -3034,25 +3280,28 @@ Enter your Google Client ID:`;
 
   analyzeText(text) {
     const suggestions = [];
-    
+
     // Check for common issues
     // 1. Check for repeated words
     const words = text.split(/\s+/);
     for (let i = 0; i < words.length - 1; i++) {
-      if (words[i].toLowerCase() === words[i + 1].toLowerCase() && words[i].length > 2) {
+      if (
+        words[i].toLowerCase() === words[i + 1].toLowerCase() &&
+        words[i].length > 2
+      ) {
         suggestions.push({
           type: "Repetition",
           icon: "redo",
           message: `Repeated word: "${words[i]}"`,
           suggestion: `Consider removing the duplicate "${words[i]}"`,
-          action: "remove"
+          action: "remove",
         });
         break; // Only show one repetition suggestion
       }
     }
 
     // 2. Check for very long sentences (over 50 words)
-    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0);
     sentences.forEach((sentence, index) => {
       const wordCount = sentence.trim().split(/\s+/).length;
       if (wordCount > 50) {
@@ -3060,7 +3309,7 @@ Enter your Google Client ID:`;
           type: "Style",
           icon: "edit",
           message: `Long sentence (${wordCount} words) - consider breaking it into shorter sentences`,
-          suggestion: "Break into 2-3 shorter sentences for better readability"
+          suggestion: "Break into 2-3 shorter sentences for better readability",
         });
       }
     });
@@ -3072,7 +3321,7 @@ Enter your Google Client ID:`;
         type: "Style",
         icon: "magic",
         message: "Consider using active voice for more engaging writing",
-        suggestion: "Rewrite sentences to use active voice where possible"
+        suggestion: "Rewrite sentences to use active voice where possible",
       });
     }
 
@@ -3083,7 +3332,7 @@ Enter your Google Client ID:`;
         icon: "spell-check",
         message: 'Possible typo: "teh" should be "the"',
         suggestion: "the",
-        action: "replace"
+        action: "replace",
       });
     }
 
@@ -3113,21 +3362,21 @@ Enter your Google Client ID:`;
   improveText(text) {
     // Basic text improvements (in a real app, this would use AI)
     let improved = text;
-    
+
     // Remove extra spaces
     improved = improved.replace(/\s+/g, " ");
-    
+
     // Capitalize first letter
     improved = improved.trim();
     if (improved.length > 0) {
       improved = improved.charAt(0).toUpperCase() + improved.slice(1);
     }
-    
+
     // Ensure proper punctuation
     if (!/[.!?]$/.test(improved.trim())) {
       improved = improved.trim() + ".";
     }
-    
+
     return improved;
   }
 
@@ -3146,17 +3395,21 @@ Enter your Google Client ID:`;
 
   shortenText(text) {
     // Remove filler words and simplify (basic implementation)
-    const fillerWords = /\b(very|really|quite|rather|pretty|somewhat|extremely|incredibly)\s+/gi;
+    const fillerWords =
+      /\b(very|really|quite|rather|pretty|somewhat|extremely|incredibly)\s+/gi;
     let shortened = text.replace(fillerWords, "");
-    
+
     // Remove redundant phrases
-    shortened = shortened.replace(/\b(due to the fact that|because of the fact that)\b/gi, "because");
+    shortened = shortened.replace(
+      /\b(due to the fact that|because of the fact that)\b/gi,
+      "because",
+    );
     shortened = shortened.replace(/\b(at this point in time)\b/gi, "now");
     shortened = shortened.replace(/\b(in order to)\b/gi, "to");
-    
+
     // Clean up extra spaces
     shortened = shortened.replace(/\s+/g, " ").trim();
-    
+
     return shortened || text; // Return original if too short
   }
 
@@ -3176,16 +3429,16 @@ Enter your Google Client ID:`;
   expandText(text) {
     // Add descriptive words and expand phrases (basic implementation)
     let expanded = text;
-    
+
     // Expand common abbreviations
     expanded = expanded.replace(/\b(etc\.)\b/gi, "and so on");
     expanded = expanded.replace(/\b(i\.e\.)\b/gi, "that is");
     expanded = expanded.replace(/\b(e\.g\.)\b/gi, "for example");
-    
+
     // Add descriptive adjectives where appropriate
     expanded = expanded.replace(/\b(important)\b/gi, "significantly important");
     expanded = expanded.replace(/\b(good)\b/gi, "quite good");
-    
+
     return expanded;
   }
 
@@ -3216,15 +3469,15 @@ Enter your Google Client ID:`;
 
   createSummary(text) {
     // Basic summarization (first and last sentences + key points)
-    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 10);
+    const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 10);
     if (sentences.length <= 3) {
       return text; // Too short to summarize
     }
-    
+
     const firstSentence = sentences[0].trim();
     const lastSentence = sentences[sentences.length - 1].trim();
     const middleSentence = sentences[Math.floor(sentences.length / 2)].trim();
-    
+
     return `${firstSentence}. ${middleSentence}. ${lastSentence}.`;
   }
 
@@ -3247,7 +3500,7 @@ Enter your Google Client ID:`;
     if (firstSentence.length <= 60) {
       return firstSentence;
     }
-    
+
     // Create title from first few words
     const words = firstSentence.split(/\s+/).slice(0, 8);
     return words.join(" ") + "...";
@@ -3268,21 +3521,21 @@ Enter your Google Client ID:`;
   showAIResponse(loadingMessage, callback) {
     const responseSection = document.getElementById("aiResponseSection");
     const responseDiv = document.getElementById("aiResponse");
-    
+
     if (!responseSection || !responseDiv) return;
-    
+
     responseSection.style.display = "block";
     responseDiv.textContent = loadingMessage;
     responseDiv.style.fontStyle = "italic";
     responseDiv.style.color = "var(--text-secondary)";
-    
+
     // Simulate AI processing
     setTimeout(() => {
       const response = callback();
       responseDiv.textContent = response;
       responseDiv.style.fontStyle = "normal";
       responseDiv.style.color = "var(--text-primary)";
-      
+
       // Scroll to response
       responseSection.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }, 1500);
@@ -3550,14 +3803,63 @@ Enter your Google Client ID:`;
     input.onchange = (e) => {
       const file = e.target.files[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const content = event.target.result;
-          this.editor.innerHTML = content;
-          this.saveDocumentState();
-          this.showToast(`Opened "${file.name}" successfully`, "success");
-        };
-        reader.readAsText(file);
+        const fileName = file.name.toLowerCase();
+
+        // Check if it's a DOCX file
+        if (fileName.endsWith(".docx")) {
+          // Handle DOCX files with mammoth.js
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const arrayBuffer = event.target.result;
+
+            // Check if mammoth is available
+            if (typeof mammoth === "undefined") {
+              this.showToast(
+                "DOCX parser not loaded. Please refresh the page.",
+                "error",
+              );
+              return;
+            }
+
+            // Convert DOCX to HTML using mammoth.js
+            mammoth
+              .convertToHtml({ arrayBuffer: arrayBuffer })
+              .then((result) => {
+                const html = result.value; // The generated HTML
+                const messages = result.messages; // Any messages such as warnings
+
+                // Insert the converted HTML into the editor
+                this.editor.innerHTML = html;
+                this.saveDocumentState();
+
+                // Show success message
+                this.showToast(`Opened "${file.name}" successfully`, "success");
+
+                // Log any warnings from mammoth
+                if (messages.length > 0) {
+                  console.log("Mammoth conversion messages:", messages);
+                }
+              })
+              .catch((error) => {
+                console.error("Error reading DOCX file:", error);
+                this.showToast(
+                  "Failed to read DOCX file. Please try again.",
+                  "error",
+                );
+              });
+          };
+          reader.readAsArrayBuffer(file);
+        } else {
+          // Handle TXT and HTML files as plain text
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const content = event.target.result;
+            this.editor.innerHTML = content;
+            this.saveDocumentState();
+            this.showToast(`Opened "${file.name}" successfully`, "success");
+          };
+          reader.readAsText(file);
+        }
       }
     };
 

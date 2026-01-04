@@ -2658,6 +2658,67 @@ table tr:nth-child(even) {
 }
 
 /* Email Sharing Styles */
+.email-service-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.email-service-btn:hover {
+    border-color: #667eea;
+    background: #f8f9ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.email-service-btn.active,
+.email-service-btn:focus {
+    border-color: #667eea;
+    background: #f0f4ff;
+    outline: none;
+}
+
+.email-service-btn i {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.email-service-btn span {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+#emailServiceOptions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+}
+
+/* Copy and Download buttons in email modal */
+#copyToClipboardBtn,
+#downloadForEmailBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+#copyToClipboardBtn:hover,
+#downloadForEmailBtn:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-1px);
+}
+
 .radio-group {
     display: flex;
     flex-direction: column;
