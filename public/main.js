@@ -1008,6 +1008,27 @@ class CharlesWebEditor {
       printBtn.addEventListener("click", () => window.print());
     }
 
+    // New header buttons
+    const exportBtn = document.getElementById("exportBtn");
+    if (exportBtn) {
+      exportBtn.addEventListener("click", () => this.showExportModal());
+    }
+
+    const emailBtn = document.getElementById("emailBtn");
+    if (emailBtn) {
+      emailBtn.addEventListener("click", () => this.showEmailModal());
+    }
+
+    const shareBtn = document.getElementById("shareBtn");
+    if (shareBtn) {
+      shareBtn.addEventListener("click", () => this.showShareModal());
+    }
+
+    const templateManagerBtn = document.getElementById("templateManagerBtn");
+    if (templateManagerBtn) {
+      templateManagerBtn.addEventListener("click", () => this.showTemplateManagerModal());
+    }
+
     // Page Layout button
     const pageLayoutBtn = document.getElementById("pageLayoutBtn");
     if (pageLayoutBtn) {
@@ -1224,6 +1245,77 @@ class CharlesWebEditor {
       });
     }
 
+    // Export Modal event listeners (Header button)
+    const closeExportModal = document.getElementById("closeExportModal");
+    if (closeExportModal) {
+      closeExportModal.addEventListener("click", () => {
+        this.hideExportModal();
+      });
+    }
+
+    // Email Modal event listeners (Header button)
+    const closeEmailModal = document.getElementById("closeEmailModal");
+    if (closeEmailModal) {
+      closeEmailModal.addEventListener("click", () => {
+        this.hideEmailModal();
+      });
+    }
+
+    const cancelEmailBtn = document.getElementById("cancelEmailBtn");
+    if (cancelEmailBtn) {
+      cancelEmailBtn.addEventListener("click", () => {
+        this.hideEmailModal();
+      });
+    }
+
+    const sendEmailBtnHeader = document.getElementById("sendEmailBtn");
+    if (sendEmailBtnHeader) {
+      // Clone to replace existing listener
+      const newBtn = sendEmailBtnHeader.cloneNode(true);
+      sendEmailBtnHeader.parentNode.replaceChild(newBtn, sendEmailBtnHeader);
+
+      newBtn.addEventListener("click", () => {
+        this.sendEmailFromHeader();
+      });
+    }
+
+    // Share Modal event listeners (Header button)
+    const closeShareLinkModal = document.getElementById("closeShareLinkModal");
+    if (closeShareLinkModal) {
+      closeShareLinkModal.addEventListener("click", () => {
+        this.hideShareModal();
+      });
+    }
+
+    const cancelShareBtn = document.getElementById("cancelShareBtn");
+    if (cancelShareBtn) {
+      cancelShareBtn.addEventListener("click", () => {
+        this.hideShareModal();
+      });
+    }
+
+    const copyShareLinkBtn = document.getElementById("copyShareLinkBtn");
+    if (copyShareLinkBtn) {
+      copyShareLinkBtn.addEventListener("click", () => {
+        this.copyShareLink();
+      });
+    }
+
+    // Template Manager Modal event listeners (Header button)
+    const closeTemplateManagerModal = document.getElementById("closeTemplateManagerModal");
+    if (closeTemplateManagerModal) {
+      closeTemplateManagerModal.addEventListener("click", () => {
+        this.hideTemplateManagerModal();
+      });
+    }
+
+    const saveAsTemplateBtn = document.getElementById("saveAsTemplateBtn");
+    if (saveAsTemplateBtn) {
+      saveAsTemplateBtn.addEventListener("click", () => {
+        this.saveCurrentAsTemplate();
+      });
+    }
+
     // AI Assistant panel event listeners
     const closeAIAssistantBtn = document.getElementById("closeAIAssistantBtn");
     if (closeAIAssistantBtn) {
@@ -1323,6 +1415,38 @@ class CharlesWebEditor {
       if (emailShareModal && emailShareModal.classList.contains("active")) {
         if (e.target === emailShareModal) {
           this.hideEmailShareModal();
+        }
+      }
+
+      // Export modal (Header)
+      const exportModal = document.getElementById("exportModal");
+      if (exportModal && exportModal.classList.contains("active")) {
+        if (e.target === exportModal) {
+          this.hideExportModal();
+        }
+      }
+
+      // Email modal (Header)
+      const emailModal = document.getElementById("emailModal");
+      if (emailModal && emailModal.classList.contains("active")) {
+        if (e.target === emailModal) {
+          this.hideEmailModal();
+        }
+      }
+
+      // Share Link modal (Header)
+      const shareLinkModal = document.getElementById("shareLinkModal");
+      if (shareLinkModal && shareLinkModal.classList.contains("active")) {
+        if (e.target === shareLinkModal) {
+          this.hideShareModal();
+        }
+      }
+
+      // Template Manager modal (Header)
+      const templateManagerModal = document.getElementById("templateManagerModal");
+      if (templateManagerModal && templateManagerModal.classList.contains("active")) {
+        if (e.target === templateManagerModal) {
+          this.hideTemplateManagerModal();
         }
       }
     });
@@ -2603,6 +2727,11 @@ Enter your Google Client ID:`;
   updateTemplatesList() {
     const templatesList = document.getElementById("templatesList");
 
+    // Guard against missing element - templatesList may not exist in all views
+    if (!templatesList) {
+      return;
+    }
+
     templatesList.innerHTML = `
             <div class="template-grid">
                 ${this.templates
@@ -3165,6 +3294,341 @@ ${documentContent}
     }
 
     this.hideEmailShareModal();
+  }
+
+  // Export Modal Functions (Header Button)
+  showExportModal() {
+    const modal = document.getElementById("exportModal");
+    if (modal) {
+      modal.classList.add("active");
+
+      // Setup export format button listeners
+      this.setupExportFormatButtons();
+    }
+  }
+
+  hideExportModal() {
+    const modal = document.getElementById("exportModal");
+    if (modal) {
+      modal.classList.remove("active");
+    }
+  }
+
+  setupExportFormatButtons() {
+    const formatButtons = document.querySelectorAll(".export-format-btn");
+
+    formatButtons.forEach((btn) => {
+      // Remove existing listeners by cloning
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+
+      newBtn.addEventListener("click", () => {
+        const format = newBtn.dataset.format;
+        this.exportDocument(format);
+        this.hideExportModal();
+      });
+    });
+  }
+
+  exportDocument(format) {
+    switch (format) {
+      case "pdf":
+        this.exportToPDF();
+        break;
+      case "docx":
+        this.exportToDOCX();
+        break;
+      case "markdown":
+        this.exportToMarkdown();
+        break;
+      case "html":
+        this.exportToHTML();
+        break;
+      case "txt":
+        this.exportToPlainText();
+        break;
+      default:
+        this.showToast("Export format not supported", "error");
+    }
+  }
+
+  exportToMarkdown() {
+    const html = this.editor.innerHTML;
+    let markdown = "";
+
+    // Create a temporary div to parse HTML
+    const temp = document.createElement("div");
+    temp.innerHTML = html;
+
+    // Convert HTML to Markdown
+    temp.querySelectorAll("*").forEach((element) => {
+      const text = element.textContent || "";
+
+      if (element.tagName === "H1") {
+        markdown += `# ${text}\n\n`;
+      } else if (element.tagName === "H2") {
+        markdown += `## ${text}\n\n`;
+      } else if (element.tagName === "H3") {
+        markdown += `### ${text}\n\n`;
+      } else if (element.tagName === "P") {
+        markdown += `${text}\n\n`;
+      } else if (element.tagName === "STRONG" || element.tagName === "B") {
+        markdown += `**${text}**`;
+      } else if (element.tagName === "EM" || element.tagName === "I") {
+        markdown += `*${text}*`;
+      } else if (element.tagName === "LI") {
+        markdown += `- ${text}\n`;
+      }
+    });
+
+    const blob = new Blob([markdown], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${this.currentDoc.name || "document"}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    this.showToast("Exported as Markdown", "success");
+  }
+
+  exportToHTML() {
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${this.currentDoc.name || "Document"}</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  ${this.editor.innerHTML}
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${this.currentDoc.name || "document"}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    this.showToast("Exported as HTML", "success");
+  }
+
+  exportToPlainText() {
+    const text = this.editor.innerText;
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${this.currentDoc.name || "document"}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    this.showToast("Exported as Plain Text", "success");
+  }
+
+  // Email Modal Functions (Header Button)
+  showEmailModal() {
+    const modal = document.getElementById("emailModal");
+    if (modal) {
+      // Set default subject
+      const emailSubject = document.getElementById("emailSubject");
+      if (emailSubject) {
+        emailSubject.value = `Document from CharlesWebEditor - ${this.currentDoc.name}`;
+      }
+
+      // Set document name for attachment preview
+      const currentDocName = document.getElementById("currentDocName");
+      if (currentDocName) {
+        currentDocName.textContent = this.currentDoc.name || "Document";
+      }
+
+      modal.classList.add("active");
+    }
+  }
+
+  hideEmailModal() {
+    const modal = document.getElementById("emailModal");
+    if (modal) {
+      modal.classList.remove("active");
+    }
+  }
+
+  // Share Modal Functions (Header Button)
+  showShareModal() {
+    const modal = document.getElementById("shareLinkModal");
+    if (modal) {
+      // Generate a shareable link (in a real app, this would create a server-side link)
+      const shareId = Math.random().toString(36).substring(2, 15);
+      const shareLink = `https://charleswed.app/shared/${shareId}`;
+
+      const shareLinkInput = document.getElementById("shareLinkInput");
+      if (shareLinkInput) {
+        shareLinkInput.value = shareLink;
+      }
+
+      modal.classList.add("active");
+    }
+  }
+
+  hideShareModal() {
+    const modal = document.getElementById("shareLinkModal");
+    if (modal) {
+      modal.classList.remove("active");
+    }
+  }
+
+  // Template Manager Modal Functions (Header Button)
+  showTemplateManagerModal() {
+    const modal = document.getElementById("templateManagerModal");
+    if (modal) {
+      this.updateTemplateManagerList();
+      modal.classList.add("active");
+    }
+  }
+
+  hideTemplateManagerModal() {
+    const modal = document.getElementById("templateManagerModal");
+    if (modal) {
+      modal.classList.remove("active");
+    }
+  }
+
+  updateTemplateManagerList() {
+    const list = document.getElementById("templateManagerList");
+    if (!list) return;
+
+    if (this.templates.length === 0) {
+      list.innerHTML = `
+        <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+          <i class="fas fa-folder-open" style="font-size: 48px; margin-bottom: 16px; opacity: 0.3;"></i>
+          <p>No templates saved yet</p>
+          <p style="font-size: 14px;">Save your current document as a template to get started</p>
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML = this.templates
+      .map(
+        (template, index) => `
+      <div class="template-item" data-template-id="${index}">
+        <div class="template-item-header">
+          <div class="template-item-title">${template.name}</div>
+          <div class="template-item-actions">
+            <button class="template-action-btn" onclick="window.charlesEditor.applyTemplateById(${index})" title="Apply Template">
+              <i class="fas fa-check"></i>
+            </button>
+            <button class="template-action-btn" onclick="window.charlesEditor.deleteTemplate(${index})" title="Delete Template">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+        <div class="template-item-preview">${template.content.substring(0, 100)}...</div>
+      </div>
+    `,
+      )
+      .join("");
+  }
+
+  applyTemplateById(templateId) {
+    if (this.templates[templateId]) {
+      this.editor.innerHTML = this.templates[templateId].content;
+      this.saveDocumentState();
+      this.showToast(`Template "${this.templates[templateId].name}" applied`, "success");
+      this.hideTemplateManagerModal();
+    }
+  }
+
+  saveCurrentAsTemplate() {
+    const templateName = prompt("Enter a name for this template:");
+    if (templateName && templateName.trim()) {
+      const template = {
+        name: templateName.trim(),
+        content: this.editor.innerHTML,
+        created: new Date().toISOString()
+      };
+
+      this.templates.push(template);
+      this.saveTemplates();
+      this.updateTemplateManagerList();
+      this.showToast(`Template "${templateName}" saved successfully`, "success");
+    }
+  }
+
+  sendEmailFromHeader() {
+    const emailTo = document.getElementById("emailTo");
+    const emailSubject = document.getElementById("emailSubject");
+    const emailMessage = document.getElementById("emailMessage");
+
+    if (!emailTo || !emailTo.value) {
+      this.showToast("Please enter a recipient email address", "error");
+      return;
+    }
+
+    // Get document content
+    const documentText = this.editor.innerText;
+    const subject = emailSubject ? emailSubject.value : `Document from CharlesWebEditor - ${this.currentDoc.name}`;
+    const message = emailMessage ? emailMessage.value : "";
+
+    // Build email body
+    const body = message
+      ? `${message}\n\n--- Document Content ---\n\n${documentText}`
+      : documentText;
+
+    // Create mailto link
+    const mailtoLink = `mailto:${emailTo.value}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    // Open default email client
+    window.location.href = mailtoLink;
+
+    this.showToast("Opening email client...", "success");
+    this.hideEmailModal();
+  }
+
+  copyShareLink() {
+    const shareLinkInput = document.getElementById("shareLinkInput");
+    if (shareLinkInput) {
+      shareLinkInput.select();
+
+      // Use modern clipboard API if available
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard
+          .writeText(shareLinkInput.value)
+          .then(() => {
+            this.showToast("Share link copied to clipboard!", "success");
+          })
+          .catch((err) => {
+            console.error("Clipboard write failed:", err);
+            this.showToast("Failed to copy link. Please copy manually.", "error");
+          });
+      } else {
+        // Fallback for older browsers
+        try {
+          document.execCommand("copy");
+          this.showToast("Share link copied to clipboard!", "success");
+        } catch (err) {
+          console.error("Copy failed:", err);
+          this.showToast("Failed to copy link. Please copy manually.", "error");
+        }
+      }
+    }
   }
 
   // AI Assistant Panel Functions
@@ -4118,4 +4582,481 @@ window.addEventListener("error", (event) => {
 // Handle unhandled promise rejections
 window.addEventListener("unhandledrejection", (event) => {
   console.error("Unhandled promise rejection:", event.reason);
+});
+
+// ========================================
+// ENHANCED FEATURES IMPLEMENTATION
+// ========================================
+
+// Format Painter Functionality
+class FormatPainter {
+  constructor() {
+    this.copiedFormat = null;
+    this.isActive = false;
+    this.formatPainterBtn = document.getElementById('formatPainterBtn');
+    this.init();
+  }
+
+  init() {
+    if (this.formatPainterBtn) {
+      this.formatPainterBtn.addEventListener('click', () => {
+        this.toggleFormatPainter();
+      });
+    }
+
+    // Keyboard shortcut Ctrl+Shift+C
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+        e.preventDefault();
+        this.copyFormat();
+      }
+      if (e.ctrlKey && e.shiftKey && e.key === 'V') {
+        e.preventDefault();
+        this.applyFormat();
+      }
+    });
+  }
+
+  toggleFormatPainter() {
+    if (!this.isActive) {
+      this.copyFormat();
+    } else {
+      this.deactivate();
+    }
+  }
+
+  copyFormat() {
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      const container = range.commonAncestorContainer;
+      const element = container.nodeType === 3 ? container.parentNode : container;
+
+      // Copy computed styles
+      const computedStyle = window.getComputedStyle(element);
+      this.copiedFormat = {
+        fontFamily: computedStyle.fontFamily,
+        fontSize: computedStyle.fontSize,
+        fontWeight: computedStyle.fontWeight,
+        fontStyle: computedStyle.fontStyle,
+        textDecoration: computedStyle.textDecoration,
+        color: computedStyle.color,
+        backgroundColor: computedStyle.backgroundColor,
+      };
+
+      this.activate();
+      this.showToast('Format copied! Click text to apply.');
+    }
+  }
+
+  activate() {
+    this.isActive = true;
+    if (this.formatPainterBtn) {
+      this.formatPainterBtn.classList.add('format-painter-active');
+    }
+    document.getElementById('editor').style.cursor = 'crosshair';
+
+    // Add click listener to apply format
+    this.applyHandler = () => this.applyFormat();
+    document.getElementById('editor').addEventListener('click', this.applyHandler);
+  }
+
+  deactivate() {
+    this.isActive = false;
+    if (this.formatPainterBtn) {
+      this.formatPainterBtn.classList.remove('format-painter-active');
+    }
+    document.getElementById('editor').style.cursor = 'text';
+    if (this.applyHandler) {
+      document.getElementById('editor').removeEventListener('click', this.applyHandler);
+    }
+  }
+
+  applyFormat() {
+    if (!this.copiedFormat) return;
+
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      const span = document.createElement('span');
+      
+      span.style.fontFamily = this.copiedFormat.fontFamily;
+      span.style.fontSize = this.copiedFormat.fontSize;
+      span.style.fontWeight = this.copiedFormat.fontWeight;
+      span.style.fontStyle = this.copiedFormat.fontStyle;
+      span.style.textDecoration = this.copiedFormat.textDecoration;
+      span.style.color = this.copiedFormat.color;
+      span.style.backgroundColor = this.copiedFormat.backgroundColor;
+
+      try {
+        range.surroundContents(span);
+        this.showToast('Format applied successfully!');
+      } catch (e) {
+        console.warn('Could not apply format:', e);
+      }
+    }
+
+    this.deactivate();
+  }
+
+  showToast(message) {
+    if (window.charlesEditor) {
+      window.charlesEditor.showToast(message, 'success');
+    }
+  }
+}
+
+// Enhanced Statistics Dashboard
+class StatsDashboard {
+  constructor(editor) {
+    this.editor = editor;
+    this.init();
+  }
+
+  init() {
+    // Update stats whenever editor content changes
+    if (this.editor) {
+      this.editor.addEventListener('input', () => {
+        this.updateStats();
+      });
+    }
+  }
+
+  updateStats() {
+    const text = this.editor.innerText || '';
+    const words = text.trim() ? text.trim().split(/\s+/) : [];
+    const wordCount = words.length;
+    const charCount = text.length;
+    const paragraphs = this.editor.querySelectorAll('p').length || (text ? 1 : 0);
+    const sentences = text.split(/[.!?]+/).filter(s => s.trim()).length;
+    const readingTime = Math.ceil(wordCount / 200);
+    const avgWordLength = wordCount > 0 ? Math.round(text.replace(/\s/g, '').length / wordCount) : 0;
+
+    // Update stat cards
+    this.updateElement('statsWords', wordCount);
+    this.updateElement('statsChars', charCount);
+    this.updateElement('statsParagraphs', paragraphs);
+    this.updateElement('statsReadingTime', readingTime + ' min');
+    this.updateElement('statsSentences', sentences);
+    this.updateElement('statsAvgWordLen', avgWordLength);
+
+    // Update progress bars
+    const wordsTarget = 500;
+    const charsTarget = 3000;
+    const wordsProgress = Math.min((wordCount / wordsTarget) * 100, 100);
+    const charsProgress = Math.min((charCount / charsTarget) * 100, 100);
+
+    this.updateBar('statsWordsBar', wordsProgress);
+    this.updateBar('statsCharsBar', charsProgress);
+  }
+
+  updateElement(id, value) {
+    const element = document.getElementById(id);
+    if (element) {
+      element.textContent = value;
+    }
+  }
+
+  updateBar(id, percentage) {
+    const bar = document.getElementById(id);
+    if (bar) {
+      bar.style.width = percentage + '%';
+    }
+  }
+}
+
+// Context Menu
+class ContextMenu {
+  constructor() {
+    this.contextMenu = document.getElementById('contextMenu');
+    this.init();
+  }
+
+  init() {
+    // Show context menu on right-click in editor
+    const editor = document.getElementById('editor');
+    if (editor) {
+      editor.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        this.show(e.pageX, e.pageY);
+      });
+    }
+
+    // Hide context menu on click elsewhere
+    document.addEventListener('click', () => {
+      this.hide();
+    });
+
+    // Handle context menu item clicks
+    if (this.contextMenu) {
+      this.contextMenu.querySelectorAll('.context-menu-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const action = item.getAttribute('data-action');
+          this.handleAction(action);
+          this.hide();
+        });
+      });
+    }
+  }
+
+  show(x, y) {
+    if (!this.contextMenu) return;
+
+    this.contextMenu.style.left = x + 'px';
+    this.contextMenu.style.top = y + 'px';
+    this.contextMenu.classList.add('active');
+
+    // Adjust position if menu goes off screen
+    const rect = this.contextMenu.getBoundingClientRect();
+    if (rect.right > window.innerWidth) {
+      this.contextMenu.style.left = (x - rect.width) + 'px';
+    }
+    if (rect.bottom > window.innerHeight) {
+      this.contextMenu.style.top = (y - rect.height) + 'px';
+    }
+  }
+
+  hide() {
+    if (this.contextMenu) {
+      this.contextMenu.classList.remove('active');
+    }
+  }
+
+  handleAction(action) {
+    switch (action) {
+      case 'cut':
+        document.execCommand('cut');
+        break;
+      case 'copy':
+        document.execCommand('copy');
+        break;
+      case 'paste':
+        document.execCommand('paste');
+        break;
+      case 'selectAll':
+        document.execCommand('selectAll');
+        break;
+      case 'bold':
+        document.execCommand('bold');
+        break;
+      case 'italic':
+        document.execCommand('italic');
+        break;
+      case 'underline':
+        document.execCommand('underline');
+        break;
+      case 'formatPainter':
+        if (window.formatPainter) {
+          window.formatPainter.toggleFormatPainter();
+        }
+        break;
+    }
+  }
+}
+
+// Autocomplete Feature
+class Autocomplete {
+  constructor(editor) {
+    this.editor = editor;
+    this.dropdown = document.getElementById('autocompleteDropdown');
+    this.suggestions = [
+      'However',
+      'Therefore',
+      'Furthermore',
+      'Nevertheless',
+      'Moreover',
+      'Consequently',
+      'In addition',
+      'On the other hand',
+      'For example',
+      'In conclusion',
+      'Specifically',
+      'Generally speaking',
+      'According to',
+      'As a result',
+      'In other words'
+    ];
+    this.isVisible = false;
+    this.selectedIndex = -1;
+    this.init();
+  }
+
+  init() {
+    if (!this.editor || !this.dropdown) return;
+
+    // Listen for input in the editor
+    this.editor.addEventListener('input', (e) => {
+      this.handleInput(e);
+    });
+
+    // Listen for keyboard navigation
+    this.editor.addEventListener('keydown', (e) => {
+      if (this.isVisible) {
+        this.handleKeydown(e);
+      }
+    });
+
+    // Hide dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!this.dropdown.contains(e.target) && e.target !== this.editor) {
+        this.hide();
+      }
+    });
+  }
+
+  handleInput(e) {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    const textNode = range.startContainer;
+
+    if (textNode.nodeType !== Node.TEXT_NODE) return;
+
+    const text = textNode.textContent;
+    const cursorPos = range.startOffset;
+
+    // Get the word being typed
+    const beforeCursor = text.substring(0, cursorPos);
+    const words = beforeCursor.split(/\s+/);
+    const currentWord = words[words.length - 1];
+
+    // Show suggestions if word is at least 2 characters
+    if (currentWord.length >= 2) {
+      const matches = this.suggestions.filter(suggestion =>
+        suggestion.toLowerCase().startsWith(currentWord.toLowerCase())
+      );
+
+      if (matches.length > 0) {
+        this.show(matches, currentWord);
+      } else {
+        this.hide();
+      }
+    } else {
+      this.hide();
+    }
+  }
+
+  show(suggestions, partialWord) {
+    if (!this.dropdown) return;
+
+    this.dropdown.innerHTML = suggestions.map((suggestion, index) => `
+      <div class="autocomplete-item ${index === this.selectedIndex ? 'selected' : ''}"
+           data-index="${index}"
+           data-suggestion="${suggestion}">
+        <strong>${suggestion.substring(0, partialWord.length)}</strong>${suggestion.substring(partialWord.length)}
+      </div>
+    `).join('');
+
+    // Position dropdown near cursor
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+
+      this.dropdown.style.left = rect.left + 'px';
+      this.dropdown.style.top = (rect.bottom + 5) + 'px';
+    }
+
+    this.dropdown.classList.add('active');
+    this.isVisible = true;
+    this.selectedIndex = -1;
+
+    // Add click listeners to suggestions
+    this.dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
+      item.addEventListener('click', () => {
+        this.applySuggestion(item.dataset.suggestion);
+      });
+    });
+  }
+
+  hide() {
+    if (this.dropdown) {
+      this.dropdown.classList.remove('active');
+      this.isVisible = false;
+      this.selectedIndex = -1;
+    }
+  }
+
+  handleKeydown(e) {
+    const items = this.dropdown.querySelectorAll('.autocomplete-item');
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      this.selectedIndex = Math.min(this.selectedIndex + 1, items.length - 1);
+      this.updateSelection(items);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      this.selectedIndex = Math.max(this.selectedIndex - 1, -1);
+      this.updateSelection(items);
+    } else if (e.key === 'Enter' || e.key === 'Tab') {
+      if (this.selectedIndex >= 0 && items[this.selectedIndex]) {
+        e.preventDefault();
+        const suggestion = items[this.selectedIndex].dataset.suggestion;
+        this.applySuggestion(suggestion);
+      }
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      this.hide();
+    }
+  }
+
+  updateSelection(items) {
+    items.forEach((item, index) => {
+      if (index === this.selectedIndex) {
+        item.classList.add('selected');
+      } else {
+        item.classList.remove('selected');
+      }
+    });
+  }
+
+  applySuggestion(suggestion) {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    const textNode = range.startContainer;
+
+    if (textNode.nodeType !== Node.TEXT_NODE) return;
+
+    const text = textNode.textContent;
+    const cursorPos = range.startOffset;
+
+    // Get the word being typed
+    const beforeCursor = text.substring(0, cursorPos);
+    const afterCursor = text.substring(cursorPos);
+    const words = beforeCursor.split(/\s+/);
+    const currentWord = words[words.length - 1];
+
+    // Replace the partial word with the suggestion
+    const newBefore = beforeCursor.substring(0, beforeCursor.length - currentWord.length);
+    textNode.textContent = newBefore + suggestion + ' ' + afterCursor;
+
+    // Move cursor after the inserted suggestion
+    const newPos = newBefore.length + suggestion.length + 1;
+    range.setStart(textNode, newPos);
+    range.setEnd(textNode, newPos);
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    this.hide();
+  }
+}
+
+// Initialize all enhanced features
+document.addEventListener('DOMContentLoaded', () => {
+  // Wait a bit for the main editor to initialize
+  setTimeout(() => {
+    const editor = document.getElementById('editor');
+    if (editor) {
+      window.formatPainter = new FormatPainter();
+      window.statsDashboard = new StatsDashboard(editor);
+      window.contextMenu = new ContextMenu();
+      window.autocomplete = new Autocomplete(editor);
+
+      console.log('✨ Enhanced features initialized successfully!');
+    }
+  }, 500);
 });
