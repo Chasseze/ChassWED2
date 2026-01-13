@@ -3483,7 +3483,99 @@ ${documentContent}
         shareLinkInput.value = shareLink;
       }
 
+      // Set up share platform button handlers
+      this.setupSharePlatformHandlers(shareLink);
+
       modal.classList.add("active");
+    }
+  }
+
+  setupSharePlatformHandlers(shareLink) {
+    const platformBtns = document.querySelectorAll('.share-platform-btn');
+    let docTitle = 'Document';
+    try {
+      const activeDoc = this.getActiveDocument();
+      if (activeDoc && activeDoc.name) {
+        docTitle = activeDoc.name;
+      }
+    } catch (e) {
+      console.log('Could not get active document name');
+    }
+    const shareText = `Check out this document: ${docTitle}`;
+
+    platformBtns.forEach(btn => {
+      // Remove existing listeners by cloning
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+
+      newBtn.addEventListener('click', () => {
+        const platform = newBtn.dataset.platform;
+        this.shareToSocialPlatform(platform, shareLink, shareText, docTitle);
+      });
+    });
+  }
+
+  shareToSocialPlatform(platform, shareLink, shareText, docTitle) {
+    const encodedLink = encodeURIComponent(shareLink);
+    const encodedText = encodeURIComponent(shareText);
+    const encodedTitle = encodeURIComponent(docTitle);
+
+    let shareUrl = '';
+
+    switch (platform) {
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedLink}&quote=${encodedText}`;
+        window.open(shareUrl, '_blank', 'width=600,height=400');
+        this.showToast('Opening Facebook...', 'info');
+        break;
+
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?url=${encodedLink}&text=${encodedText}`;
+        window.open(shareUrl, '_blank', 'width=600,height=400');
+        this.showToast('Opening X (Twitter)...', 'info');
+        break;
+
+      case 'whatsapp':
+        shareUrl = `https://api.whatsapp.com/send?text=${encodedText}%20${encodedLink}`;
+        window.open(shareUrl, '_blank', 'width=600,height=400');
+        this.showToast('Opening WhatsApp...', 'info');
+        break;
+
+      case 'linkedin':
+        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedLink}`;
+        window.open(shareUrl, '_blank', 'width=600,height=400');
+        this.showToast('Opening LinkedIn...', 'info');
+        break;
+
+      case 'telegram':
+        shareUrl = `https://t.me/share/url?url=${encodedLink}&text=${encodedText}`;
+        window.open(shareUrl, '_blank', 'width=600,height=400');
+        this.showToast('Opening Telegram...', 'info');
+        break;
+
+      case 'copy':
+        this.copyShareLink(shareLink);
+        break;
+
+      default:
+        console.warn('Unknown platform:', platform);
+    }
+  }
+
+  copyShareLink(shareLink) {
+    const linkToCopy = shareLink || document.getElementById("shareLinkInput")?.value;
+    if (linkToCopy) {
+      navigator.clipboard.writeText(linkToCopy).then(() => {
+        this.showToast("Link copied to clipboard!", "success");
+      }).catch(err => {
+        // Fallback for older browsers
+        const input = document.getElementById("shareLinkInput");
+        if (input) {
+          input.select();
+          document.execCommand('copy');
+          this.showToast("Link copied to clipboard!", "success");
+        }
+      });
     }
   }
 

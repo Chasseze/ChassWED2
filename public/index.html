@@ -8,8 +8,8 @@
             rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         />
-        <link rel="stylesheet" href="style.css?v=1767506540" />
-        <link rel="stylesheet" href="icon-fallback.css?v=1767506540" />
+        <link rel="stylesheet" href="style.css?v=1767506541" />
+        <link rel="stylesheet" href="icon-fallback.css?v=1767506541" />
     </head>
     <body>
         <!-- Welcome Screen -->
@@ -947,7 +947,7 @@
             </div>
         </div>
 
-        <!-- Share Link Modal -->
+        <!-- Share Modal -->
         <div class="modal" id="shareLinkModal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -957,16 +957,37 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="share-options">
-                        <div class="share-option selected" data-permission="view">
-                            <i class="fas fa-eye"></i>
-                            <div class="share-option-label">View Only</div>
-                            <div class="share-option-desc">Can read document</div>
+                    <p>Share your document via social media or copy the link:</p>
+                    <div class="share-options-grid">
+                        <div class="share-platform-btn" data-platform="facebook">
+                            <div class="share-platform-icon facebook"><i class="fab fa-facebook-f"></i></div>
+                            <div class="share-platform-name">Facebook</div>
+                            <div class="share-platform-desc">Share on Facebook</div>
                         </div>
-                        <div class="share-option" data-permission="edit">
-                            <i class="fas fa-edit"></i>
-                            <div class="share-option-label">Can Edit</div>
-                            <div class="share-option-desc">Can make changes</div>
+                        <div class="share-platform-btn" data-platform="twitter">
+                            <div class="share-platform-icon twitter"><i class="fab fa-x-twitter"></i></div>
+                            <div class="share-platform-name">X (Twitter)</div>
+                            <div class="share-platform-desc">Post on X</div>
+                        </div>
+                        <div class="share-platform-btn" data-platform="whatsapp">
+                            <div class="share-platform-icon whatsapp"><i class="fab fa-whatsapp"></i></div>
+                            <div class="share-platform-name">WhatsApp</div>
+                            <div class="share-platform-desc">Send via WhatsApp</div>
+                        </div>
+                        <div class="share-platform-btn" data-platform="linkedin">
+                            <div class="share-platform-icon linkedin"><i class="fab fa-linkedin-in"></i></div>
+                            <div class="share-platform-name">LinkedIn</div>
+                            <div class="share-platform-desc">Share professionally</div>
+                        </div>
+                        <div class="share-platform-btn" data-platform="telegram">
+                            <div class="share-platform-icon telegram"><i class="fab fa-telegram-plane"></i></div>
+                            <div class="share-platform-name">Telegram</div>
+                            <div class="share-platform-desc">Send via Telegram</div>
+                        </div>
+                        <div class="share-platform-btn" data-platform="copy">
+                            <div class="share-platform-icon copy"><i class="fas fa-link"></i></div>
+                            <div class="share-platform-name">Copy Link</div>
+                            <div class="share-platform-desc">Copy to clipboard</div>
                         </div>
                     </div>
                     <div class="share-link-container">
@@ -975,9 +996,6 @@
                 </div>
                 <div class="modal-actions">
                     <button class="btn btn-secondary" id="cancelShareBtn">Close</button>
-                    <button class="btn btn-primary" id="copyShareLinkBtn">
-                        <i class="fas fa-copy"></i> Copy Link
-                    </button>
                 </div>
             </div>
         </div>
@@ -1891,6 +1909,6 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
-        <script src="main.js?v=1767506540"></script>
+        <script src="main.js?v=1767506541"></script>
     </body>
 </html>
