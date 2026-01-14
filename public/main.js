@@ -4263,57 +4263,364 @@ ${documentContent}
   }
 
   exportToPDF() {
-    this.showToast("Exporting to PDF...", "success");
+    this.showToast("Exporting to PDF...", "info");
 
     try {
       const { jsPDF } = window.jspdf;
-      const doc = new jsPDF("p", "mm", "a4");
-
-      // Get the editor content as text
-      const textContent =
-        this.editor.innerText || this.editor.textContent || "";
-      const lines = doc.splitTextToSize(textContent, 190);
-
-      let yPosition = 20;
-      const pageHeight = 277;
-
-      lines.forEach((line) => {
-        if (yPosition > pageHeight - 20) {
-          doc.addPage();
-          yPosition = 20;
+      const doc = new jsPDF("p", "pt", "a4");
+      
+      // Get the editor element
+      const editorContent = this.editor;
+      
+      // Create a clone of the editor content for PDF generation
+      const clone = editorContent.cloneNode(true);
+      
+      // Create a temporary container with proper styling
+      const tempContainer = document.createElement('div');
+      tempContainer.style.cssText = `
+        position: absolute;
+        left: -9999px;
+        top: 0;
+        width: 595px;
+        padding: 40px;
+        background: white;
+        font-family: 'Times New Roman', serif;
+        font-size: 12pt;
+        line-height: 1.5;
+        color: black;
+      `;
+      tempContainer.innerHTML = clone.innerHTML;
+      document.body.appendChild(tempContainer);
+      
+      // Use html2canvas approach via jsPDF html method if available
+      // Otherwise fall back to formatted text extraction
+      doc.html(tempContainer, {
+        callback: (doc) => {
+          document.body.removeChild(tempContainer);
+          doc.save((this.currentDoc.name || "document") + ".pdf");
+          this.showToast("PDF exported successfully!", "success");
+        },
+        x: 40,
+        y: 40,
+        width: 515,
+        windowWidth: 595,
+        html2canvas: {
+          scale: 0.75,
+          useCORS: true,
+          logging: false
         }
-        doc.text(line, 10, yPosition);
-        yPosition += 7;
       });
+    } catch (error) {
+      console.error("PDF export error:", error);
+      // Fallback to basic text export
+      this.exportToPDFFallback();
+    }
+  }
 
+  exportToPDFFallback() {
+    try {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF("p", "pt", "a4");
+      
+      // Get computed styles from editor
+      const editorStyles = window.getComputedStyle(this.editor);
+      const fontFamily = editorStyles.fontFamily.includes('Times') ? 'times' : 'helvetica';
+      
+      doc.setFont(fontFamily, 'normal');
+      doc.setFontSize(12);
+      
+      // Process the HTML content to preserve some formatting
+      const content = this.editor.innerHTML;
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = content;
+      
+      let yPosition = 50;
+      const pageHeight = 792; // A4 height in points
+      const pageWidth = 515; // Usable width
+      const lineHeight = 16;
+      const margin = 40;
+      
+      // Process each element
+      const processNode = (node) => {
+        if (yPosition > pageHeight - 50) {
+          doc.addPage();
+          yPosition = 50;
+        }
+        
+        if (node.nodeType === Node.TEXT_NODE) {
+          const text = node.textContent.trim();
+          if (text) {
+            const lines = doc.splitTextToSize(text, pageWidth);
+            lines.forEach(line => {
+              if (yPosition > pageHeight - 50) {
+                doc.addPage();
+                yPosition = 50;
+              }
+              doc.text(line, margin, yPosition);
+              yPosition += lineHeight;
+            });
+          }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          const tagName = node.tagName.toLowerCase();
+          
+          // Handle headings
+          if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tagName)) {
+            const sizes = { h1: 24, h2: 20, h3: 16, h4: 14, h5: 12, h6: 11 };
+            doc.setFontSize(sizes[tagName] || 12);
+            doc.setFont(fontFamily, 'bold');
+            yPosition += 10;
+          }
+          
+          // Handle bold
+          if (tagName === 'b' || tagName === 'strong') {
+            doc.setFont(fontFamily, 'bold');
+          }
+          
+          // Handle italic
+          if (tagName === 'i' || tagName === 'em') {
+            doc.setFont(fontFamily, 'italic');
+          }
+          
+          // Process children
+          node.childNodes.forEach(child => processNode(child));
+          
+          // Reset styles after headings
+          if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tagName)) {
+            doc.setFontSize(12);
+            doc.setFont(fontFamily, 'normal');
+            yPosition += 8;
+          }
+          
+          // Add line break after block elements
+          if (['p', 'div', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li'].includes(tagName)) {
+            yPosition += lineHeight * 0.5;
+          }
+          
+          // Reset font style
+          if (['b', 'strong', 'i', 'em'].includes(tagName)) {
+            doc.setFont(fontFamily, 'normal');
+          }
+        }
+      };
+      
+      tempDiv.childNodes.forEach(node => processNode(node));
+      
       doc.save((this.currentDoc.name || "document") + ".pdf");
       this.showToast("PDF exported successfully!", "success");
     } catch (error) {
-      console.error("PDF export error:", error);
+      console.error("PDF fallback export error:", error);
       this.showToast("PDF export failed. Please try again.", "error");
     }
   }
 
   exportToDOCX() {
-    this.showToast("Exporting to DOCX...", "success");
+    this.showToast("Exporting to DOCX...", "info");
 
     try {
       const content = this.editor.innerHTML;
-      const blob = new Blob([content], { type: "text/html" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = (this.currentDoc.name || "document") + ".html";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      this.showToast("Document exported successfully!", "success");
+      const docName = this.currentDoc.name || "document";
+      
+      // Create a proper DOCX file using Office Open XML format
+      // This creates a minimal but valid DOCX structure
+      const JSZip = window.JSZip;
+      
+      if (typeof JSZip === 'undefined') {
+        // Fallback: Create an HTML file that Word can open
+        this.exportToDOCXFallback(content, docName);
+        return;
+      }
+      
+      const zip = new JSZip();
+      
+      // Convert HTML to simple Word XML
+      const wordContent = this.htmlToWordML(content);
+      
+      // [Content_Types].xml
+      zip.file("[Content_Types].xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>`);
+      
+      // _rels/.rels
+      zip.folder("_rels").file(".rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`);
+      
+      // word/document.xml
+      zip.folder("word").file("document.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:body>
+    ${wordContent}
+    <w:sectPr>
+      <w:pgSz w:w="12240" w:h="15840"/>
+      <w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440"/>
+    </w:sectPr>
+  </w:body>
+</w:document>`);
+      
+      // word/_rels/document.xml.rels
+      zip.folder("word").folder("_rels").file("document.xml.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+</Relationships>`);
+      
+      // Generate the DOCX file
+      zip.generateAsync({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" })
+        .then((blob) => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = docName + ".docx";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          this.showToast("DOCX exported successfully!", "success");
+        })
+        .catch((error) => {
+          console.error("DOCX generation error:", error);
+          this.exportToDOCXFallback(content, docName);
+        });
+        
     } catch (error) {
       console.error("DOCX export error:", error);
-      this.showToast("Export failed. Please try again.", "error");
+      this.exportToDOCXFallback(this.editor.innerHTML, this.currentDoc.name || "document");
     }
+  }
+
+  htmlToWordML(html) {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    
+    let wordML = '';
+    
+    const processNode = (node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent;
+        if (text.trim()) {
+          return `<w:r><w:t xml:space="preserve">${this.escapeXml(text)}</w:t></w:r>`;
+        }
+        return '';
+      }
+      
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const tagName = node.tagName.toLowerCase();
+        let content = '';
+        let runProps = '';
+        
+        // Process children first
+        node.childNodes.forEach(child => {
+          content += processNode(child);
+        });
+        
+        // Apply formatting based on tag
+        if (tagName === 'b' || tagName === 'strong') {
+          // Wrap content with bold formatting
+          return content.replace(/<w:r>/g, '<w:r><w:rPr><w:b/></w:rPr>');
+        }
+        
+        if (tagName === 'i' || tagName === 'em') {
+          return content.replace(/<w:r>/g, '<w:r><w:rPr><w:i/></w:rPr>');
+        }
+        
+        if (tagName === 'u') {
+          return content.replace(/<w:r>/g, '<w:r><w:rPr><w:u w:val="single"/></w:rPr>');
+        }
+        
+        // Block elements become paragraphs
+        if (['p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li'].includes(tagName)) {
+          let pProps = '';
+          
+          // Heading styles
+          if (tagName.startsWith('h')) {
+            const level = tagName.charAt(1);
+            pProps = `<w:pPr><w:pStyle w:val="Heading${level}"/></w:pPr>`;
+          }
+          
+          return `<w:p>${pProps}${content}</w:p>`;
+        }
+        
+        if (tagName === 'br') {
+          return '<w:p></w:p>';
+        }
+        
+        if (tagName === 'ul' || tagName === 'ol') {
+          return content;
+        }
+        
+        return content;
+      }
+      
+      return '';
+    };
+    
+    tempDiv.childNodes.forEach(node => {
+      wordML += processNode(node);
+    });
+    
+    // If no paragraphs were created, wrap in a paragraph
+    if (!wordML.includes('<w:p>')) {
+      wordML = `<w:p><w:r><w:t>${this.escapeXml(tempDiv.textContent)}</w:t></w:r></w:p>`;
+    }
+    
+    return wordML;
+  }
+
+  escapeXml(text) {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+  }
+
+  exportToDOCXFallback(content, docName) {
+    // Create an HTML file with proper Word-compatible structure
+    const wordHtml = `<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" 
+      xmlns:w="urn:schemas-microsoft-com:office:word" 
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <!--[if gte mso 9]>
+  <xml>
+    <w:WordDocument>
+      <w:View>Print</w:View>
+      <w:Zoom>100</w:Zoom>
+    </w:WordDocument>
+  </xml>
+  <![endif]-->
+  <style>
+    @page { size: 8.5in 11in; margin: 1in; }
+    body { font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.5; }
+    h1 { font-size: 24pt; font-weight: bold; }
+    h2 { font-size: 18pt; font-weight: bold; }
+    h3 { font-size: 14pt; font-weight: bold; }
+    p { margin: 0 0 10pt 0; }
+  </style>
+</head>
+<body>
+${content}
+</body>
+</html>`;
+    
+    const blob = new Blob([wordHtml], { 
+      type: "application/vnd.ms-word;charset=utf-8" 
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = docName + ".doc";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    this.showToast("Document exported as .doc format", "success");
   }
 
   changeLanguage(lang) {
