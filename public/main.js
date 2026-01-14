@@ -4267,52 +4267,73 @@ ${documentContent}
 
     try {
       const { jsPDF } = window.jspdf;
-      const doc = new jsPDF("p", "pt", "a4");
       
-      // Get the editor element
-      const editorContent = this.editor;
-      
-      // Create a clone of the editor content for PDF generation
-      const clone = editorContent.cloneNode(true);
-      
-      // Create a temporary container with proper styling
+      // Create a temporary container for rendering
       const tempContainer = document.createElement('div');
       tempContainer.style.cssText = `
-        position: absolute;
-        left: -9999px;
+        position: fixed;
+        left: 0;
         top: 0;
-        width: 595px;
-        padding: 40px;
+        width: 8.5in;
+        min-height: 11in;
+        padding: 0.75in;
         background: white;
-        font-family: 'Times New Roman', serif;
+        font-family: 'Times New Roman', Times, serif;
         font-size: 12pt;
-        line-height: 1.5;
+        line-height: 1.6;
         color: black;
+        z-index: -9999;
+        box-sizing: border-box;
       `;
-      tempContainer.innerHTML = clone.innerHTML;
+      tempContainer.innerHTML = this.editor.innerHTML;
       document.body.appendChild(tempContainer);
       
-      // Use html2canvas approach via jsPDF html method if available
-      // Otherwise fall back to formatted text extraction
-      doc.html(tempContainer, {
-        callback: (doc) => {
+      // Use html2canvas to capture the content as an image
+      if (typeof html2canvas !== 'undefined') {
+        html2canvas(tempContainer, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+          width: tempContainer.offsetWidth,
+          height: Math.max(tempContainer.offsetHeight, 1056) // At least one page height
+        }).then((canvas) => {
           document.body.removeChild(tempContainer);
+          
+          const imgData = canvas.toDataURL('image/png');
+          const imgWidth = 595.28; // A4 width in points
+          const pageHeight = 841.89; // A4 height in points
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+          
+          const doc = new jsPDF('p', 'pt', 'a4');
+          let heightLeft = imgHeight;
+          let position = 0;
+          
+          // Add first page
+          doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+          
+          // Add additional pages if content is longer than one page
+          while (heightLeft > 0) {
+            position = heightLeft - imgHeight;
+            doc.addPage();
+            doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+          }
+          
           doc.save((this.currentDoc.name || "document") + ".pdf");
           this.showToast("PDF exported successfully!", "success");
-        },
-        x: 40,
-        y: 40,
-        width: 515,
-        windowWidth: 595,
-        html2canvas: {
-          scale: 0.75,
-          useCORS: true,
-          logging: false
-        }
-      });
+        }).catch((error) => {
+          document.body.removeChild(tempContainer);
+          console.error("html2canvas error:", error);
+          this.exportToPDFFallback();
+        });
+      } else {
+        document.body.removeChild(tempContainer);
+        this.exportToPDFFallback();
+      }
     } catch (error) {
       console.error("PDF export error:", error);
-      // Fallback to basic text export
       this.exportToPDFFallback();
     }
   }
