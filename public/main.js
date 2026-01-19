@@ -33,6 +33,9 @@ class CharlesWebEditor {
     this.spellCheckEnabled = false;
     this.selectedImage = null;
     this.recentDocuments = [];
+    this.hasUnsavedChanges = false;
+    this.autoSaveTimer = null;
+    this.debounceDelay = 2000; // 2 seconds debounce for auto-save
 
     // Templates - Merged old and new templates
     this.templates = [
@@ -797,8 +800,24 @@ class CharlesWebEditor {
     // Setup event listeners
     this.setupEventListeners();
 
-    // Auto-save interval
-    setInterval(() => this.autoSave(), 10000);
+    // Auto-save interval (backup - saves every 30 seconds if user is idle)
+    setInterval(() => {
+      if (this.hasUnsavedChanges) {
+        this.autoSave();
+      }
+    }, 30000);
+    
+    // Warn before leaving if there are unsaved changes
+    window.addEventListener('beforeunload', (e) => {
+      if (this.hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    });
+    
+    // Setup drag and drop for file opening
+    this.setupDragAndDrop();
 
     // Auto-start editor after 5 seconds for better UX
     setTimeout(() => {
@@ -2551,6 +2570,7 @@ Enter your Google Client ID:`;
       this.currentDoc.name,
     );
     this.currentDoc.lastSave = new Date();
+    this.hasUnsavedChanges = false;
     this.updateSaveStatus("Auto-saved");
 
     // Save to recent documents
@@ -4181,21 +4201,135 @@ ${documentContent}
     }, 500);
   }
 
+  setupDragAndDrop() {
+    // Prevent default drag behaviors on the page
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      document.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }, false);
+    });
+
+    // Highlight drop zone when dragging over
+    ['dragenter', 'dragover'].forEach(eventName => {
+      document.addEventListener(eventName, () => {
+        if (this.editor) {
+          this.editor.classList.add('drag-over');
+        }
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      document.addEventListener(eventName, () => {
+        if (this.editor) {
+          this.editor.classList.remove('drag-over');
+        }
+      }, false);
+    });
+
+    // Handle dropped files
+    document.addEventListener('drop', (e) => {
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        const file = files[0];
+        this.handleDroppedFile(file);
+      }
+    }, false);
+  }
+
+  handleDroppedFile(file) {
+    const fileName = file.name.toLowerCase();
+    
+    if (fileName.endsWith('.txt') || fileName.endsWith('.html') || fileName.endsWith('.docx')) {
+      this.showToast(`Opening ${file.name}...`, 'info');
+      const reader = new FileReader();
+      
+      if (fileName.endsWith('.docx')) {
+        reader.onload = (e) => {
+          const arrayBuffer = e.target.result;
+          if (typeof mammoth !== 'undefined') {
+            mammoth.convertToHtml({ arrayBuffer: arrayBuffer })
+              .then((result) => {
+                this.editor.innerHTML = result.value;
+                this.saveDocumentState();
+                this.showToast(`${file.name} opened successfully!`, 'success');
+              })
+              .catch((error) => {
+                this.showToast(`Failed to open ${file.name}. Please try again.`, 'error');
+                console.error("Error reading DOCX file:", error);
+              });
+          } else {
+            this.showToast('DOCX parser not loaded. Please refresh the page.', 'error');
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      } else {
+        reader.onload = (e) => {
+          this.editor.innerHTML = e.target.result;
+          this.saveDocumentState();
+          this.showToast(`${file.name} opened successfully!`, 'success');
+        };
+        reader.readAsText(file);
+      }
+    } else {
+      this.showToast('Please drop a .txt, .html, or .docx file', 'warning');
+    }
+  }
+
   handleEditorInput() {
     this.updateWordCount();
-    this.saveDocumentState();
+    this.hasUnsavedChanges = true;
+    this.updateSaveStatus("Unsaved changes");
+    
+    // Debounced auto-save - only saves after user stops typing for 2 seconds
+    if (this.autoSaveTimer) {
+      clearTimeout(this.autoSaveTimer);
+    }
+    this.autoSaveTimer = setTimeout(() => {
+      this.saveDocumentState();
+      this.hasUnsavedChanges = false;
+    }, this.debounceDelay);
   }
 
   showToast(message, type = "success") {
     const toast = document.getElementById("toast");
     const toastMessage = document.getElementById("toastMessage");
 
-    toastMessage.textContent = message;
-    toast.className = `toast ${type} active`;
+    if (toast && toastMessage) {
+      toastMessage.textContent = message;
+      toast.className = `toast ${type} active`;
 
-    setTimeout(() => {
-      toast.classList.remove("active");
-    }, 3000);
+      setTimeout(() => {
+        toast.classList.remove("active");
+      }, 3000);
+    }
+  }
+
+  showExportProgress(format) {
+    // Create or update export progress indicator
+    let progressIndicator = document.getElementById("exportProgress");
+    if (!progressIndicator) {
+      progressIndicator = document.createElement("div");
+      progressIndicator.id = "exportProgress";
+      progressIndicator.className = "export-progress";
+      progressIndicator.innerHTML = `
+        <div class="export-progress-content">
+          <div class="export-progress-spinner"></div>
+          <span class="export-progress-text">Exporting ${format}...</span>
+        </div>
+      `;
+      document.body.appendChild(progressIndicator);
+    } else {
+      progressIndicator.querySelector(".export-progress-text").textContent = `Exporting ${format}...`;
+      progressIndicator.style.display = "flex";
+    }
+  }
+
+  hideExportProgress() {
+    const progressIndicator = document.getElementById("exportProgress");
+    if (progressIndicator) {
+      progressIndicator.style.display = "none";
+    }
   }
 
   executeCommand(command, value = null) {
@@ -4264,6 +4398,7 @@ ${documentContent}
 
   exportToPDF() {
     this.showToast("Exporting to PDF...", "info");
+    this.showExportProgress("PDF");
 
     try {
       const { jsPDF } = window.jspdf;
@@ -4322,23 +4457,29 @@ ${documentContent}
           }
           
           doc.save((this.currentDoc.name || "document") + ".pdf");
+          this.hideExportProgress();
           this.showToast("PDF exported successfully!", "success");
         }).catch((error) => {
           document.body.removeChild(tempContainer);
+          this.hideExportProgress();
+          this.showToast("PDF export failed. The document may be too large. Trying alternative method...", "warning");
           console.error("html2canvas error:", error);
           this.exportToPDFFallback();
         });
       } else {
         document.body.removeChild(tempContainer);
+        this.hideExportProgress();
         this.exportToPDFFallback();
       }
     } catch (error) {
+      this.hideExportProgress();
       console.error("PDF export error:", error);
       this.exportToPDFFallback();
     }
   }
 
   exportToPDFFallback() {
+    this.showExportProgress("PDF");
     try {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF("p", "pt", "a4");
@@ -4427,22 +4568,24 @@ ${documentContent}
       tempDiv.childNodes.forEach(node => processNode(node));
       
       doc.save((this.currentDoc.name || "document") + ".pdf");
+      this.hideExportProgress();
       this.showToast("PDF exported successfully!", "success");
     } catch (error) {
+      this.hideExportProgress();
       console.error("PDF fallback export error:", error);
-      this.showToast("PDF export failed. Please try again.", "error");
+      this.showToast("PDF export failed. The document may be too complex. Please try exporting as DOCX instead.", "error");
     }
   }
 
   exportToDOCX() {
     this.showToast("Exporting to DOCX...", "info");
+    this.showExportProgress("DOCX");
 
     try {
       const content = this.editor.innerHTML;
       const docName = this.currentDoc.name || "document";
       
       // Create a proper DOCX file using Office Open XML format
-      // This creates a minimal but valid DOCX structure
       const JSZip = window.JSZip;
       
       if (typeof JSZip === 'undefined') {
@@ -4453,15 +4596,17 @@ ${documentContent}
       
       const zip = new JSZip();
       
-      // Convert HTML to simple Word XML
+      // Convert HTML to WordML
       const wordContent = this.htmlToWordML(content);
       
-      // [Content_Types].xml
+      // [Content_Types].xml - Complete with all required parts
       zip.file("[Content_Types].xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
   <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
   <Default Extension="xml" ContentType="application/xml"/>
   <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+  <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
+  <Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/>
 </Types>`);
       
       // _rels/.rels
@@ -4470,21 +4615,111 @@ ${documentContent}
   <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
 </Relationships>`);
       
+      // word/styles.xml - Required by MS Word
+      zip.folder("word").file("styles.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:style w:type="paragraph" w:styleId="Normal">
+    <w:name w:val="Normal"/>
+    <w:qFormat/>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Heading1">
+    <w:name w:val="heading 1"/>
+    <w:basedOn w:val="Normal"/>
+    <w:next w:val="Normal"/>
+    <w:qFormat/>
+    <w:pPr>
+      <w:keepNext/>
+      <w:spacing w:before="480" w:after="0"/>
+      <w:outlineLvl w:val="0"/>
+    </w:pPr>
+    <w:rPr>
+      <w:b/>
+      <w:sz w:val="32"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Heading2">
+    <w:name w:val="heading 2"/>
+    <w:basedOn w:val="Normal"/>
+    <w:next w:val="Normal"/>
+    <w:qFormat/>
+    <w:pPr>
+      <w:keepNext/>
+      <w:spacing w:before="240" w:after="0"/>
+      <w:outlineLvl w:val="1"/>
+    </w:pPr>
+    <w:rPr>
+      <w:b/>
+      <w:sz w:val="28"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Heading3">
+    <w:name w:val="heading 3"/>
+    <w:basedOn w:val="Normal"/>
+    <w:next w:val="Normal"/>
+    <w:qFormat/>
+    <w:pPr>
+      <w:keepNext/>
+      <w:spacing w:before="240" w:after="0"/>
+      <w:outlineLvl w:val="2"/>
+    </w:pPr>
+    <w:rPr>
+      <w:b/>
+      <w:sz w:val="24"/>
+    </w:rPr>
+  </w:style>
+</w:styles>`);
+      
       // word/document.xml
       zip.folder("word").file("document.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
   <w:body>
     ${wordContent}
     <w:sectPr>
       <w:pgSz w:w="12240" w:h="15840"/>
       <w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440"/>
+      <w:cols w:space="720"/>
+      <w:docGrid w:linePitch="360"/>
     </w:sectPr>
   </w:body>
 </w:document>`);
       
+      // word/numbering.xml - Required for lists to work properly
+      zip.folder("word").file("numbering.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:abstractNum w:abstractNumId="0">
+    <w:multiLevelType w:val="hybridMultilevel"/>
+    <w:lvl w:ilvl="0">
+      <w:start w:val="1"/>
+      <w:numFmt w:val="decimal"/>
+      <w:lvlText w:val="%1."/>
+      <w:lvlJc w:val="left"/>
+    </w:lvl>
+  </w:abstractNum>
+  <w:abstractNum w:abstractNumId="1">
+    <w:multiLevelType w:val="hybridMultilevel"/>
+    <w:lvl w:ilvl="0">
+      <w:start w:val="1"/>
+      <w:numFmt w:val="bullet"/>
+      <w:lvlText w:val="•"/>
+      <w:lvlJc w:val="left"/>
+      <w:pPr>
+        <w:ind w:left="720" w:hanging="360"/>
+      </w:pPr>
+    </w:lvl>
+  </w:abstractNum>
+  <w:num w:numId="1">
+    <w:abstractNumId w:val="0"/>
+  </w:num>
+  <w:num w:numId="2">
+    <w:abstractNumId w:val="1"/>
+  </w:num>
+</w:numbering>`);
+      
       // word/_rels/document.xml.rels
       zip.folder("word").folder("_rels").file("document.xml.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>
 </Relationships>`);
       
       // Generate the DOCX file
@@ -4498,9 +4733,12 @@ ${documentContent}
           a.click();
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
+          this.hideExportProgress();
           this.showToast("DOCX exported successfully!", "success");
         })
         .catch((error) => {
+          this.hideExportProgress();
+          this.showToast("DOCX export failed. Trying alternative format...", "warning");
           console.error("DOCX generation error:", error);
           this.exportToDOCXFallback(content, docName);
         });
@@ -4516,12 +4754,105 @@ ${documentContent}
     tempDiv.innerHTML = html;
     
     let wordML = '';
+    let listLevel = 0;
+    let listId = 1;
     
-    const processNode = (node) => {
+    // Helper function to build run properties from a text node
+    const buildRunProps = (textNode) => {
+      let props = [];
+      let current = textNode.parentNode;
+      let hasBold = false, hasItalic = false, hasUnderline = false;
+      
+      // Check parent nodes for formatting
+      while (current && current !== tempDiv) {
+        const tag = current.tagName ? current.tagName.toLowerCase() : '';
+        if ((tag === 'b' || tag === 'strong') && !hasBold) {
+          props.push('<w:b/>');
+          hasBold = true;
+        } else if ((tag === 'i' || tag === 'em') && !hasItalic) {
+          props.push('<w:i/>');
+          hasItalic = true;
+        } else if (tag === 'u' && !hasUnderline) {
+          props.push('<w:u w:val="single"/>');
+          hasUnderline = true;
+        }
+        current = current.parentNode;
+      }
+      
+      return props.length > 0 ? `<w:rPr>${props.join('')}</w:rPr>` : '';
+    };
+    
+    // Helper to get text color
+    const getColor = (node) => {
+      let current = node;
+      while (current && current !== tempDiv) {
+        if (current.style && current.style.color) {
+          const color = current.style.color;
+          // Convert rgb/rgba to hex
+          const rgbMatch = color.match(/\d+/g);
+          if (rgbMatch && rgbMatch.length >= 3) {
+            const hex = rgbMatch.slice(0, 3).map(n => {
+              const hex = parseInt(n).toString(16);
+              return hex.length === 1 ? '0' + hex : hex;
+            }).join('');
+            return `<w:color w:val="${hex.toUpperCase()}"/>`;
+          }
+        }
+        current = current.parentNode;
+      }
+      return '';
+    };
+    
+    // Helper to get font size
+    const getFontSize = (node) => {
+      let current = node;
+      while (current && current !== tempDiv) {
+        if (current.style && current.style.fontSize) {
+          const size = parseInt(current.style.fontSize);
+          if (size) {
+            // Convert px to half-points (Word uses half-points)
+            const halfPoints = Math.round(size * 0.75 * 2);
+            return `<w:sz w:val="${halfPoints}"/>`;
+          }
+        }
+        current = current.parentNode;
+      }
+      return '';
+    };
+    
+    const processNode = (node, inList = false) => {
       if (node.nodeType === Node.TEXT_NODE) {
         const text = node.textContent;
-        if (text.trim()) {
-          return `<w:r><w:t xml:space="preserve">${this.escapeXml(text)}</w:t></w:r>`;
+        if (text.trim() || text === '\n') {
+          // Get formatting from parent elements
+          let runProps = '';
+          const parent = node.parentNode;
+          
+          if (parent) {
+            const rPr = buildRunProps(node);
+            const color = getColor(parent);
+            const size = getFontSize(parent);
+            
+            if (rPr || color || size) {
+              // Combine all properties
+              let allProps = '';
+              if (rPr) {
+                allProps = rPr.replace('</w:rPr>', '');
+              } else {
+                allProps = '<w:rPr>';
+              }
+              allProps += color + size;
+              if (allProps !== '<w:rPr>') {
+                runProps = allProps + '</w:rPr>';
+              }
+            }
+          }
+          
+          // Handle text - preserve spaces and newlines
+          const escapedText = this.escapeXml(text);
+          if (escapedText.trim()) {
+            return `<w:r>${runProps}<w:t xml:space="preserve">${escapedText}</w:t></w:r>`;
+          }
         }
         return '';
       }
@@ -4529,61 +4860,91 @@ ${documentContent}
       if (node.nodeType === Node.ELEMENT_NODE) {
         const tagName = node.tagName.toLowerCase();
         let content = '';
-        let runProps = '';
         
-        // Process children first
-        node.childNodes.forEach(child => {
-          content += processNode(child);
+        // Process children
+        Array.from(node.childNodes).forEach(child => {
+          if (tagName === 'ul' || tagName === 'ol') {
+            content += processNode(child, true);
+          } else {
+            content += processNode(child, inList);
+          }
         });
         
-        // Apply formatting based on tag
-        if (tagName === 'b' || tagName === 'strong') {
-          // Wrap content with bold formatting
-          return content.replace(/<w:r>/g, '<w:r><w:rPr><w:b/></w:rPr>');
-        }
-        
-        if (tagName === 'i' || tagName === 'em') {
-          return content.replace(/<w:r>/g, '<w:r><w:rPr><w:i/></w:rPr>');
-        }
-        
-        if (tagName === 'u') {
-          return content.replace(/<w:r>/g, '<w:r><w:rPr><w:u w:val="single"/></w:rPr>');
-        }
-        
-        // Block elements become paragraphs
-        if (['p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li'].includes(tagName)) {
-          let pProps = '';
-          
-          // Heading styles
-          if (tagName.startsWith('h')) {
-            const level = tagName.charAt(1);
-            pProps = `<w:pPr><w:pStyle w:val="Heading${level}"/></w:pPr>`;
+        // Handle block elements
+        if (['p', 'div'].includes(tagName)) {
+          if (!content.trim()) {
+            return '<w:p><w:r><w:t></w:t></w:r></w:p>';
           }
-          
-          return `<w:p>${pProps}${content}</w:p>`;
+          return `<w:p>${content}</w:p>`;
         }
         
-        if (tagName === 'br') {
-          return '<w:p></w:p>';
+        // Handle headings
+        if (tagName.match(/^h[1-6]$/)) {
+          const level = tagName.charAt(1);
+          return `<w:p><w:pPr><w:pStyle w:val="Heading${level}"/></w:pPr>${content}</w:p>`;
         }
         
+        // Handle list items
+        if (tagName === 'li') {
+          const isOrdered = node.parentNode && node.parentNode.tagName.toLowerCase() === 'ol';
+          const numId = isOrdered ? 1 : 2;
+          return `<w:p><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="${numId}"/></w:numPr></w:pPr>${content}</w:p>`;
+        }
+        
+        // Handle lists - just return content, formatting handled in li
         if (tagName === 'ul' || tagName === 'ol') {
           return content;
         }
         
+        // Handle line breaks
+        if (tagName === 'br') {
+          return '<w:br/>';
+        }
+        
+        // Handle tables
+        if (tagName === 'table') {
+          let tableContent = '<w:tbl><w:tblPr><w:tblW w:w="0" w:type="auto"/></w:tblPr><w:tblGrid>';
+          // Add grid columns (simplified - assume 3 columns)
+          tableContent += '<w:gridCol w:w="2000"/><w:gridCol w:w="2000"/><w:gridCol w:w="2000"/>';
+          tableContent += '</w:tblGrid>';
+          
+          Array.from(node.querySelectorAll('tr')).forEach(row => {
+            tableContent += '<w:tr>';
+            Array.from(row.querySelectorAll('td, th')).forEach(cell => {
+              const cellContent = Array.from(cell.childNodes).map(child => processNode(child)).join('');
+              const isHeader = cell.tagName.toLowerCase() === 'th';
+              tableContent += `<w:tc><w:tcPr><w:tcW w:w="2000" w:type="dxa"/></w:tcPr><w:p>${cellContent || '<w:r><w:t></w:t></w:r>'}</w:p></w:tc>`;
+            });
+            tableContent += '</w:tr>';
+          });
+          
+          tableContent += '</w:tbl>';
+          return tableContent;
+        }
+        
+        // Inline formatting elements - just return content (formatting handled in text nodes)
+        if (['b', 'strong', 'i', 'em', 'u', 'span', 'a'].includes(tagName)) {
+          return content;
+        }
+        
+        // Default: return content
         return content;
       }
       
       return '';
     };
     
-    tempDiv.childNodes.forEach(node => {
-      wordML += processNode(node);
+    // Process all top-level nodes
+    Array.from(tempDiv.childNodes).forEach(node => {
+      const result = processNode(node);
+      if (result) {
+        wordML += result;
+      }
     });
     
-    // If no paragraphs were created, wrap in a paragraph
-    if (!wordML.includes('<w:p>')) {
-      wordML = `<w:p><w:r><w:t>${this.escapeXml(tempDiv.textContent)}</w:t></w:r></w:p>`;
+    // If no content, create empty paragraph
+    if (!wordML.trim()) {
+      wordML = '<w:p><w:r><w:t></w:t></w:r></w:p>';
     }
     
     return wordML;
@@ -4599,6 +4960,7 @@ ${documentContent}
   }
 
   exportToDOCXFallback(content, docName) {
+    this.hideExportProgress();
     // Create an HTML file with proper Word-compatible structure
     const wordHtml = `<!DOCTYPE html>
 <html xmlns:o="urn:schemas-microsoft-com:office:office" 
