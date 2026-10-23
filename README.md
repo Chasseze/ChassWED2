@@ -15,11 +15,11 @@ Open [localhost:3000](http://localhost:3000). To use the current preview port:
 PORT=3007 npm start
 ```
 
-PDF and DOCX export need this Node server. PDF export uses the Chromium installed by Puppeteer; install its browser with `npx puppeteer browsers install chrome` if it is missing. HTML, Markdown, text export, editing and browser recovery run in the frontend. Word import and HTML sanitization libraries are bundled locally in `public/vendor/`, with their licenses.
+PDF export needs this Node server. Word export creates a real DOCX on the device and also works on static hosting. PDF export uses the Chromium installed by Puppeteer; install its browser with `npx puppeteer browsers install chrome` if it is missing. Word, HTML, Markdown, text export, editing and browser recovery run in the frontend. Word import, Word export and HTML sanitization libraries are bundled locally in `public/vendor/`, with their licenses.
 
 ## Editing
 
-- The document title stays beside WebEditor. Choose another open document from that dropdown; press F2 to rename it, or right-click it (Shift+F10 from the keyboard) to duplicate or close it.
+- The document title stays beside WebEditor. Choose another open document from that dropdown; press F2 to rename it. The tiny × beside the title closes the selected document after saving its browser recovery copy. It is disabled when only one document remains. Right-click the title (Shift+F10 from the keyboard) to duplicate or close it.
 - All new formatting and layout controls live in the second toolbar. Controls wrap individually at smaller widths.
 - Paragraph styles, font and point size, alignment, lists, indentation and line spacing act on the selection or current paragraph. Formatting preserves the selection when opening controls.
 - Insert a table, then place the caret in a cell and use Table tools to add or remove rows and columns. Undo restores table edits.
@@ -35,13 +35,13 @@ Editing saves automatically after a two-second pause, with a periodic backup att
 
 The status bar distinguishes browser recovery from a downloaded file. If storage fails, it keeps the in-memory document and asks for a file copy; it never frees space by deleting other documents. Browser recovery is scoped to the browser profile and origin (hostname and port). Clearing browser site data removes recovery copies, so use Save/Export for independent files.
 
-Save uses the browser's file picker when supported and a format chooser otherwise. Export supports real PDF, DOCX, HTML, Markdown and plain text. PDF/DOCX service failures show an error and recommend HTML or Print instead of producing a misleading fallback file. HTML preserves WebEditor's page settings and headers/footers when reopened. Word import preserves supported document content; advanced Word features, exact fonts, page setup and headers/footers may differ. This is a continuous editing canvas, not Word's complete pagination engine.
+On desktop, Save uses the browser's file picker when supported. Phones and narrow screens show a format chooser, then a file-ready dialog. Save / share file opens the system share chooser when the device supports that file type; use Save to Files or another offered destination. Download file remains available if sharing is unsupported, fails or is cancelled. The browser and OS control which folders and destinations are available. File generation finishes before the share button is shown, so the system chooser starts from a fresh user tap. Export supports real PDF, DOCX, HTML, Markdown and plain text. PDF service failures show an error and recommend HTML or Print instead of producing a misleading fallback file. HTML preserves WebEditor's page settings and headers/footers when reopened. Word import preserves supported document content; advanced Word features, exact fonts, page setup and headers/footers may differ. This is a continuous editing canvas, not Word's complete pagination engine.
 
 Send a copy offers text copying, HTML download and native file sharing where available. Email opens a draft with plain text; it does not send mail automatically or attach a PDF. No public sharing links or Google Drive autosave are implemented.
 
 ## Implementation and checks
 
-`public/main.js` coordinates the existing app. `public/editor/` separates editing commands, recovery storage, layout, export, templates, enhancements and workspace UI. `workspace.css` owns compact UI and canvas overrides; legacy styles remain in `style.css`. Server-side export sanitization and page settings live in `lib/document-export.js`.
+`public/main.js` coordinates the existing app. `public/editor/` separates editing commands, recovery storage, layout, export, templates, enhancements and workspace UI. `workspace.css` owns compact UI and canvas overrides; legacy styles remain in `style.css`. Server-side export sanitization and page settings live in `lib/document-export.js`. `browser/word-export.mjs` creates Word files locally; rebuild its committed browser bundle with `npm run build:word` after changes. The build is also run before tests.
 
 ```sh
 npm test

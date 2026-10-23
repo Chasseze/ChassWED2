@@ -337,3 +337,10 @@ button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-
 
 .sidebar .template-item { width: 100%; text-align: left; font-family: inherit; color: var(--text-primary); }
 .sidebar #templatesList { display: grid; gap: 5px; }
+
+/* Keep the requested close action beside the current document title. */
+.document-close-btn { flex: 0 0 24px; width: 24px; height: 28px; padding: 0; margin-left: -8px; border: 0; border-radius: 4px; color: white; background: transparent; font: 300 20px/1 "Segoe UI",Arial,sans-serif; cursor: pointer; }
+.document-close-btn:hover:not(:disabled) { background: #ffffff26; }
+.document-close-btn:disabled { opacity: .3; cursor: default; }
+@media (pointer: coarse) { .document-close-btn { flex-basis: 36px; width: 36px; min-height: 36px; } }
+.ready-file-name { overflow-wrap: anywhere; padding: 10px; background: var(--bg-secondary); border-radius: 4px; }

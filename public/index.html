@@ -10,7 +10,7 @@
         />
         <link rel="stylesheet" href="style.css?v=1767506541" />
         <link rel="stylesheet" href="icon-fallback.css?v=1767506541" />
-        <link rel="stylesheet" href="editor/workspace.css?v=20261022" />
+        <link rel="stylesheet" href="editor/workspace.css?v=20261023" />
     </head>
     <body>
         <!-- Welcome Screen -->
@@ -51,6 +51,7 @@
                     <select id="headerDocumentTitle" class="header-document-title" aria-label="Document title" title="Current document — choose to switch documents; F2 to rename">
                         <option value="doc1">Document 1</option>
                     </select>
+                    <button id="closeDocumentBtn" class="document-close-btn" type="button" aria-label="Close current document" title="Close current document" disabled><span aria-hidden="true">×</span></button>
                 </div>
                 <div class="header-controls">
                     <button
@@ -970,7 +971,7 @@
         <div class="modal" id="saveModal">
             <div class="modal-content" style="max-width: 480px">
                 <div class="modal-header">
-                    <h2><i class="fas fa-save"></i> Save to Local Drive</h2>
+                    <h2><i class="fas fa-save"></i> Save a file copy</h2>
                     <button class="close-btn" id="closeSaveModal">
                         <i class="fas fa-times"></i>
                     </button>
@@ -984,7 +985,7 @@
                         "
                     >
                         Choose a format to download a file copy.
-                        PDF and Word exports use the local export service. You can also save HTML, Markdown, or text.
+                        Word files are created on your device. On a phone, choose Save / share file or Download after the file is ready. PDF export uses the export service; Print can also save a PDF.
                     </p>
 
                     <!-- Primary formats -->
@@ -1998,13 +1999,14 @@
 
         <script src="vendor/purify.min.js"></script>
         <script src="vendor/mammoth.browser.min.js"></script>
-        <script src="editor/templates.js?v=20261022"></script>
-        <script src="editor/commands.js?v=20261022"></script>
-        <script src="editor/storage.js?v=20261022"></script>
-        <script src="editor/layout.js?v=20261022"></script>
-        <script src="editor/exports.js?v=20261022"></script>
-        <script src="editor/workspace.js?v=20261022"></script>
-        <script src="main.js?v=20261022-workspace"></script>
-        <script src="editor/enhancements.js?v=20261022"></script>
+        <script src="editor/templates.js?v=20261023"></script>
+        <script src="editor/commands.js?v=20261023"></script>
+        <script src="editor/storage.js?v=20261023"></script>
+        <script src="editor/layout.js?v=20261023"></script>
+        <script src="vendor/word-export.bundle.js?v=20261023"></script>
+        <script src="editor/exports.js?v=20261023"></script>
+        <script src="editor/workspace.js?v=20261023"></script>
+        <script src="main.js?v=20261023-workspace"></script>
+        <script src="editor/enhancements.js?v=20261023"></script>
     </body>
 </html>

@@ -31,18 +31,37 @@ class EditorExports {
   }
   async blob(format,snapshot=null){
     const data=snapshot?.payload||this.payload();
-    if(format==='docx'||format==='pdf')return this.serverBlob(format,data);
+    if(format==='docx'){if(!window.WebEditorWord)throw new Error('Word saving has not loaded. Refresh the app and try again.');return WebEditorWord.toBlob(data);}
+    if(format==='pdf')return this.serverBlob(format,data);
     if(format==='html')return new Blob([this.html(data)],{type:'text/html;charset=utf-8'});
     if(format==='markdown'||format==='md')return new Blob([snapshot?.markdown??this.markdown()],{type:'text/markdown;charset=utf-8'});
     return new Blob([snapshot?.text??this.app.editor.innerText],{type:'text/plain;charset=utf-8'});
   }
   filename(ext){return (this.app.currentDoc.name||'Document').replace(/[\\/:*?"<>|\u0000-\u001f]/g,'_').replace(/\.(docx|pdf|html?|md|txt)$/i,'')+'.'+ext;}
-  download(blob,name){const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=name;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);this.app.showToast('Download prepared: '+name,'success');}
+  download(blob,name){const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=name;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);this.app.showToast('Download prepared: '+name,'success');}
+  useFileActions(){return matchMedia('(pointer: coarse)').matches||matchMedia('(max-width: 640px)').matches||(!window.showSaveFilePicker&&typeof navigator.share==='function');}
+  preparedFile(blob,name,snapshot){
+    const file=new File([blob],name,{type:blob.type}),body=document.createElement('div');
+    let shareable=false;try{shareable=!!(navigator.share&&navigator.canShare?.({files:[file]}));}catch(_){}
+    const filename=document.createElement('p');filename.className='ready-file-name';filename.textContent=name;
+    const instructions=document.createElement('p');instructions.textContent=shareable?'Choose Save / share file to open your phone’s system chooser. Select Save to Files or another location offered by your device. You can also download the file.':'Download the file, then use your browser’s Downloads or Files app to open or move it. Available folders depend on your browser and device.';
+    body.append(filename,instructions);
+    const actions=[];
+    if(shareable)actions.push({label:'Save / share file…',primary:true,run:async modal=>{
+      try{await navigator.share({files:[file],title:snapshot.name});modal.classList.remove('active');if(this.app.currentDocId===snapshot.id)this.app.updateSaveStatus('File passed to system chooser');}
+      catch(error){if(error.name!=='AbortError')this.app.showToast('The system chooser could not open. Use Download file instead.','warning');}
+    }});
+    actions.push({label:'Download file',primary:!shareable,run:modal=>{this.download(blob,name);modal.classList.remove('active');if(this.app.currentDocId===snapshot.id)this.app.updateSaveStatus('Download requested');}});
+    return this.app.workspace.dialog('Your file is ready',body,actions);
+  }
   async export(format){
     const snapshot=this.snapshot(),id=snapshot.id,name=this.filename(format==='markdown'?'md':format);
     this.app.showExportProgress(format.toUpperCase());
-    try{const blob=await this.blob(format,snapshot);this.download(blob,name);if(this.app.currentDocId===id)this.app.updateSaveStatus('Downloaded a copy');return blob;}
-    catch(error){this.app.showToast(error.message,'error');throw error;}
+    try{const blob=await this.blob(format,snapshot);
+      if(this.useFileActions())this.preparedFile(blob,name,snapshot);
+      else{this.download(blob,name);if(this.app.currentDocId===id)this.app.updateSaveStatus('Downloaded a copy');}
+      return blob;
+    }catch(error){this.app.showToast(error.message,'error');throw error;}
     finally{this.app.hideExportProgress();}
   }
 }

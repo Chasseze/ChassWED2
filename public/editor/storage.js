@@ -100,6 +100,7 @@ class WebEditorStorage {
       const close = document.createElement('button'); close.className = 'tab-close'; close.textContent = '×'; close.title = 'Close document';
       tab.append(title, close); tabs.append(tab);
     }
+    this.app.workspace?.syncDocumentClose();
   }
   apply(state) {
     const app = this.app;

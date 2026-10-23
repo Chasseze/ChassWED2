@@ -3,6 +3,7 @@ class EditorWorkspace {
   init(){
     const app=this.app,toolbar=document.querySelector('.toolbar');
     const title=document.getElementById('headerDocumentTitle');
+    document.getElementById('closeDocumentBtn').addEventListener('click',()=>app.closeDocument(app.currentDocId));this.syncDocumentClose();
     const documentActions=(x,y)=>{const tab=[...document.querySelectorAll('#documentTabs .tab')].find(tab=>tab.dataset.docId===app.currentDocId);if(tab){app.showTabContextMenu(tab,x,y);document.querySelector('#tabContextMenu button')?.focus();}};
     document.addEventListener('keydown',event=>{if(event.key==='Escape'&&document.getElementById('tabContextMenu')?.style.display==='block'){app.hideTabContextMenu();title.focus();}});
     title.title='Current document — choose to switch; F2 to rename; right-click for duplicate or close';
@@ -45,6 +46,12 @@ class EditorWorkspace {
     const language=WebEditorStorage.get('editor_language')||'en';document.getElementById('languageSelect').value=language;app.changeLanguage(language);
     this.installDialogAccessibility();this.loadCustomTemplates();this.renderHistory();app.updateOutline();app.layout.render();
     document.getElementById('saveStatus').title='Automatic recovery is stored in this browser. Use Save or Export for a file copy.';
+  }
+  syncDocumentClose(){
+    const button=document.getElementById('closeDocumentBtn');if(!button)return;
+    button.disabled=Object.keys(this.app.documents).length<2||!!this.app.closingDocuments?.has(this.app.currentDocId);
+    button.title=this.app.closingDocuments?.has(this.app.currentDocId)?'Saving before closing…':button.disabled?'Keep at least one document open':'Close '+this.app.currentDoc.name;
+    button.setAttribute('aria-label',button.disabled?'Close document — keep at least one open':'Close '+this.app.currentDoc.name);
   }
   syncFormatting(){
     const app=this.app,selection=getSelection();if(!selection.rangeCount||!app.commands.root().contains(selection.anchorNode))return;

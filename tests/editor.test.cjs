@@ -58,6 +58,31 @@ test('custom templates are keyboard accessible and survive saving without execut
  const e=environment();try{const {app,w}=e;await app.storage.initialize();app.templates.push({id:'custom-test',name:'<script>bad()</script>',description:'Saved',content:'<h2>Reusable</h2>',custom:true,icon:'fas fa-file-alt'});app.updateTemplatesList();const buttons=w.document.querySelectorAll('#templatesList button');assert.equal(buttons.length,app.templates.length);assert.equal(w.document.querySelector('#templatesList script'),null);buttons[buttons.length-1].click();assert.equal(app.editor.querySelector('h2').textContent,'Reusable');app.undo();assert.equal(app.editor.querySelector('h2'),null);
  }finally{e.close();}
 });
+test('closing two selected documents leaves the remaining document and its content active',async()=>{
+ const e=environment();try{const {app,w}=e;await app.storage.initialize();app.workspace.init();
+ app.editor.innerHTML='<p>Keep this one</p>';await app.saveDocumentState();const keep=app.currentDocId;
+ app.addNewDocument();const second=app.currentDocId;await app.saveDocumentState();app.addNewDocument();const third=app.currentDocId;await app.saveDocumentState();
+ assert.equal(w.document.getElementById('closeDocumentBtn').disabled,false);await app.closeDocument(third);app.switchDocument(second);await app.closeDocument(second);
+ assert.equal(app.currentDocId,keep);assert.equal(app.editor.textContent,'Keep this one');assert.equal(Object.keys(app.documents).length,1);assert.equal(w.document.getElementById('closeDocumentBtn').disabled,true);assert(app.storage.records.has(third));assert(app.storage.records.has(second));
+ }finally{e.close();}
+});
+test('failed recovery saving keeps a closing document open',async()=>{
+ const e=environment();try{const {app}=e;await app.storage.initialize();app.addNewDocument();await app.saveDocumentState();const id=app.currentDocId;app.saveDocumentState=async()=>false;await app.closeDocument(id);assert.equal(app.currentDocId,id);assert(app.documents[id]);
+ }finally{e.close();}
+});
+test('Word files are generated without an API, including rich content, images and page settings',async()=>{
+ const e=environment();try{const {app,w}=e;await app.storage.initialize();const word=await import('../browser/word-export.mjs');w.WebEditorWord={toBlob:data=>word.toBlob(data,w.document)};
+ app.editor.innerHTML='<h1>Phone document</h1><p><strong>Bold</strong> <em>italic</em> <span style="font-size:14pt;color:#123456">styled</span></p><ol><li>First</li><li>Second<ul><li>Nested</li></ul></li></ol><table><tr><td>Cell text</td><td>Another cell</td></tr></table><img alt="Dot" width="1" height="1" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6K0sAAAAASUVORK5CYII=">';
+ app.currentDoc.layout={size:'letter',orientation:'landscape',top:20,right:21,bottom:22,left:23};w.document.getElementById('pageHeaderContent').innerHTML='<p>Letterhead</p>';w.document.getElementById('pageFooterContent').innerHTML='<p>Page <span class="hf-page-num">1</span></p>';
+ const blob=await app.exports.blob('docx');assert.match(blob.type,/officedocument.wordprocessingml/);const zip=await require('jszip').loadAsync(await blob.arrayBuffer());const xml=await zip.file('word/document.xml').async('string');assert.match(xml,/Phone document/);assert.match(xml,/w:b/);assert.match(xml,/w:i/);assert.match(xml,/w:sz w:val="28"/);assert.match(xml,/123456/);assert.match(xml,/w:orient="landscape"/);assert.match(xml,/Cell text/);assert.match(xml,/w:numPr/);assert(zip.file(/word\/media\//).length);assert.match(await zip.file('word/header1.xml').async('string'),/Letterhead/);assert.match(await zip.file('word/footer1.xml').async('string'),/PAGE/);
+ const imported=await require('mammoth').convertToHtml({buffer:Buffer.from(await blob.arrayBuffer())});assert.match(imported.value,/Phone document/);assert.match(imported.value,/<table>/);assert.match(imported.value,/Dot/);
+ }finally{e.close();}
+});
+test('mobile prepared files require a fresh tap for sharing and keep download available after cancellation',async()=>{
+ const e=environment();try{const {app,w}=e;await app.storage.initialize();w.File=global.File;let shared=0;w.navigator.canShare=()=>true;w.navigator.share=()=>{shared++;return Promise.reject(new w.DOMException('Cancelled','AbortError'));};
+ const modal=app.exports.preparedFile(new Blob(['test'],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'}),'Phone.docx',{id:app.currentDocId,name:'Phone'});assert.equal(shared,0);const buttons=[...modal.querySelectorAll('button')];buttons.find(b=>b.textContent==='Save / share file…').click();assert.equal(shared,1);await Promise.resolve();assert(modal.classList.contains('active'));assert(buttons.some(b=>b.textContent==='Download file'));assert.equal(app.exports.useFileActions(),true);
+ }finally{e.close();}
+});
 test('export API produces real DOCX and PDF with page geometry and rejects invalid input',async()=>{
  const app=require('../server');const server=app.listen(0);await new Promise(resolve=>server.once('listening',resolve));const url='http://127.0.0.1:'+server.address().port;
  try{const payload={filename:'Review',html:'<h1>Export verification</h1><p><strong>Bold text</strong></p><table><tr><td>Cell content</td></tr></table>',headerHtml:'<p>Letterhead</p>',footerHtml:'<p>Footer</p>',layout:{size:'letter',orientation:'landscape',top:20,right:20,bottom:20,left:20}};

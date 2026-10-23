@@ -1196,12 +1196,19 @@ class CharlesWebEditor {
   this.updateSaveStatus(this.currentDoc.dirty ? "Unsaved changes" : this.currentDoc.lastSave ? "Saved in this browser" : "Not saved yet");
 }
 
-  closeDocument(id) {
-  if (!this.documents[id]) return;
-  if (Object.keys(this.documents).length === 1) return this.showToast("Keep at least one document open.", "info");
-  if (this.currentDocId === id) this.switchDocument(Object.keys(this.documents).find(key=>key!==id));
-  delete this.documents[id]; this.storage.rebuildTabs(); this.storage.persistSession();
-}
+  async closeDocument(id) {
+    if (!this.documents[id]) return;
+    if (Object.keys(this.documents).length === 1) return this.showToast("Keep at least one document open.", "info");
+    this.closingDocuments ||= new Set();if(this.closingDocuments.has(id))return;
+    this.closingDocuments.add(id);this.workspace.syncDocumentClose();
+    try{
+      if(this.currentDocId===id){if(!await this.saveDocumentState())return this.showToast('This document could not be saved in the browser. Keep it open and download a file copy.','warning');}
+      else if(this.documents[id].dirty)return this.showToast('This document has unsaved changes. Open it and save a copy before closing.','warning');
+      if(Object.keys(this.documents).length<2||!this.documents[id])return;
+      if(this.currentDocId===id)this.switchDocument(Object.keys(this.documents).find(key=>key!==id));
+      delete this.documents[id];this.storage.rebuildTabs();this.storage.persistSession();
+    }finally{this.closingDocuments.delete(id);this.workspace.syncDocumentClose();}
+  }
 
   saveDocumentState(recordHistory = true) { return this.storage.save(recordHistory); }
 
@@ -2485,7 +2492,7 @@ class CharlesWebEditor {
   saveDocument() { this.saveDocumentState();if(this.fileHandles?.[this.currentDocId])return this.saveToExistingHandle(this.fileHandles[this.currentDocId]);return this.saveWithFilePicker(); }
 
   async saveWithFilePicker() {
- if(!window.showSaveFilePicker)return this.showSaveModal();
+ if(this.exports.useFileActions()||!window.showSaveFilePicker)return this.showSaveModal();
  const snapshot=this.exports.snapshot();
  try{const handle=await window.showSaveFilePicker({suggestedName:this.exports.filename("docx"),types:[{description:"Word document",accept:{"application/vnd.openxmlformats-officedocument.wordprocessingml.document":[".docx"]}},{description:"PDF",accept:{"application/pdf":[".pdf"]}},{description:"HTML",accept:{"text/html":[".html"]}},{description:"Markdown",accept:{"text/markdown":[".md"]}},{description:"Text",accept:{"text/plain":[".txt"]}}]});this.fileHandles||={};this.fileHandles[snapshot.id]=handle;return this.saveToExistingHandle(handle,snapshot);}catch(error){if(error.name!=="AbortError")this.showToast("File save failed. Try Export or another location.","error");}
 }
