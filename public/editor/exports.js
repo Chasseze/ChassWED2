@@ -26,7 +26,7 @@ class EditorExports {
     const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),30000);
     try{const response=await fetch('/api/export/'+format,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:controller.signal});
       if(!response.ok)throw new Error(await response.text()||'Export failed');
-      const expected=format==='pdf'?'application/pdf':'officedocument.wordprocessingml';if(!(response.headers.get('content-type')||'').includes(expected))throw new Error('PDF and Word export need a running export server. Use Print to save a PDF, or download HTML. This hosting site has no export server configured.');return await response.blob();
+      const expected=format==='pdf'?'application/pdf':'officedocument.wordprocessingml';if(!(response.headers.get('content-type')||'').includes(expected))throw new Error('PDF export needs a running export server. Use Print to save a PDF, or download a Word file instead. This hosting site has no PDF export server configured.');return await response.blob();
     }catch(error){throw new Error(error.name==='AbortError'?'Export took too long. Try Print to PDF or save HTML.':error.message||'Export service unavailable. Run the local server, or save HTML.');}finally{clearTimeout(timeout);}
   }
   async blob(format,snapshot=null){
