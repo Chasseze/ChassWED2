@@ -3,13 +3,14 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>CharlesWebEditor | Advanced Web Text Editor</title>
+        <title>WebEditor | Advanced Web Text Editor</title>
         <link
             rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         />
         <link rel="stylesheet" href="style.css?v=1767506541" />
         <link rel="stylesheet" href="icon-fallback.css?v=1767506541" />
+        <link rel="stylesheet" href="editor/workspace.css?v=20261022" />
     </head>
     <body>
         <!-- Welcome Screen -->
@@ -17,7 +18,7 @@
             <div class="welcome-logo">
                 <i class="fas fa-file-word"></i>
             </div>
-            <h1 class="welcome-title">CharlesWebEditor</h1>
+            <h1 class="welcome-title">WebEditor</h1>
             <p class="welcome-subtitle">
                 A professional-grade web-based text editor with all the features
                 you need for document creation, editing, and formatting.
@@ -42,9 +43,14 @@
         >
             <!-- Header -->
             <div class="header">
-                <div class="logo">
-                    <i class="fas fa-file-word"></i>
-                    <span class="logo-text">CharlesWebEditor</span>
+                <div class="header-identity">
+                    <div class="logo">
+                        <i class="fas fa-file-word"></i>
+                        <span class="logo-text">WebEditor</span>
+                    </div>
+                    <select id="headerDocumentTitle" class="header-document-title" aria-label="Document title" title="Current document — choose to switch documents; F2 to rename">
+                        <option value="doc1">Document 1</option>
+                    </select>
                 </div>
                 <div class="header-controls">
                     <button
@@ -55,10 +61,6 @@
                         <i class="fas fa-moon" id="themeIcon"></i>
                         <span>Theme</span>
                     </button>
-                    <button class="header-btn" id="saveCloud">
-                        <i class="fab fa-google-drive"></i>
-                        <span>Google Drive</span>
-                    </button>
                     <button class="header-btn" id="exportBtn">
                         <i class="fas fa-file-export"></i>
                         <span>Export</span>
@@ -67,13 +69,17 @@
                         <i class="fas fa-envelope"></i>
                         <span>Email</span>
                     </button>
-                    <button class="header-btn" id="shareBtn">
+                    <button class="header-btn" id="shareBtn" title="Send a document copy">
                         <i class="fas fa-share-alt"></i>
-                        <span>Share</span>
+                        <span>Send copy</span>
                     </button>
                     <button class="header-btn" id="templateManagerBtn">
                         <i class="fas fa-layer-group"></i>
                         <span>Templates</span>
+                    </button>
+                    <button class="header-btn" id="focusModeBtn" title="Focus Mode (Ctrl+Shift+F)">
+                        <i class="fas fa-eye"></i>
+                        <span>Focus</span>
                     </button>
                     <button class="header-btn" id="printBtn">
                         <i class="fas fa-print"></i>
@@ -82,7 +88,7 @@
                 </div>
             </div>
             <!-- Tabs -->
-            <div class="tabs-container">
+            <div class="tabs-container" hidden>
                 <div class="tabs" id="documentTabs">
                     <div class="tab active" data-doc-id="doc1">
                         <i class="fas fa-file-alt"></i>
@@ -152,9 +158,9 @@
                     <select class="toolbar-select" id="fontSize">
                         <option value="8pt">8</option>
                         <option value="10pt">10</option>
-                        <option value="12pt">12</option>
+                        <option value="12pt" selected>12</option>
                         <option value="14pt">14</option>
-                        <option value="16pt" selected>16</option>
+                        <option value="16pt">16</option>
                         <option value="18pt">18</option>
                         <option value="24pt">24</option>
                         <option value="36pt">36</option>
@@ -342,10 +348,10 @@
                     <button
                         class="toolbar-btn clickable ai-toggle-btn"
                         id="aiAssistantBtn"
-                        title="AI Assistant"
+                        title="Local writing tools"
                     >
                         <i class="fas fa-robot"></i>
-                        <span>AI</span>
+                        <span>Writing</span>
                     </button>
                 </div>
                 <!-- Templates -->
@@ -378,10 +384,62 @@
                         title="Share via Email"
                     >
                         <i class="fas fa-envelope"></i>
-                        <span>Share</span>
+                        <span>Send copy</span>
+                    </button>
+                </div>
+                <!-- Text-to-Speech & Dictation -->
+                <div class="toolbar-group">
+                    <button
+                        class="toolbar-btn clickable"
+                        id="ttsBtn"
+                        title="Read Aloud — reads selected text or full document"
+                    >
+                        <i class="fas fa-volume-up"></i>
+                        <span>Read</span>
+                    </button>
+                    <button
+                        class="toolbar-btn clickable"
+                        id="dictateBtn"
+                        title="Voice Dictation — speak to type"
+                    >
+                        <i class="fas fa-microphone"></i>
+                        <span>Dictate</span>
+                    </button>
+                </div>
+                <!-- Header & Footer -->
+                <div class="toolbar-group">
+                    <button
+                        class="toolbar-btn clickable"
+                        id="headerFooterBtn"
+                        title="Edit Header & Footer"
+                    >
+                        <i class="fas fa-ruler-horizontal"></i>
+                        <span>H/F</span>
                     </button>
                 </div>
             </div>
+
+            <!-- Header & Footer Edit Toolbar -->
+            <div class="hf-edit-toolbar" id="hfEditToolbar">
+                <span class="hf-editing-label" id="hfEditingLabel">
+                    <i class="fas fa-heading"></i> Editing: Header
+                </span>
+                <div class="hf-tool-btns">
+                    <button class="hf-tool-btn" id="hfPageNumBtn">
+                        <i class="fas fa-hashtag"></i> Page #
+                    </button>
+                    <button class="hf-tool-btn" id="hfDateBtn">
+                        <i class="fas fa-calendar-alt"></i> Date
+                    </button>
+                    <button class="hf-tool-btn" id="hfSwitchBtn">
+                        <i class="fas fa-arrow-down"></i> Switch to Footer
+                    </button>
+                    <button class="hf-tool-btn hf-close-btn" id="hfCloseBtn">
+                        <i class="fas fa-times"></i> Close Header &amp; Footer
+                    </button>
+                </div>
+            </div>
+
             <!-- Main Content -->
             <div class="main-content">
                 <!-- Sidebar -->
@@ -396,6 +454,9 @@
                         <div class="sidebar-tab" data-tab="recent">Recent</div>
                         <div class="sidebar-tab" data-tab="stats">
                             <i class="fas fa-chart-bar"></i> Stats
+                        </div>
+                        <div class="sidebar-tab" data-tab="outline">
+                            <i class="fas fa-list-ul"></i> Outline
                         </div>
                     </div>
                     <div class="sidebar-content" id="sidebarContent">
@@ -434,44 +495,85 @@
                             </div>
                         </div>
                         <!-- Enhanced Statistics Tab -->
-                        <div class="sidebar-tab-content" data-tab="stats">
-                            <div class="sidebar-section">
-                                <h3><i class="fas fa-chart-bar"></i> Document Analytics</h3>
-                                <div class="stats-dashboard" id="statsDashboard">
+                        <div class="sidebar-tab-content" data-tab="stats">                            <div class="sidebar-section">
+                                <h3>
+                                    <i class="fas fa-chart-bar"></i> Statistics
+                                </h3>
+                                <div
+                                    class="stats-dashboard"
+                                    id="statsDashboard"
+                                >
                                     <div class="stat-card">
                                         <div class="stat-label">Words</div>
-                                        <div class="stat-value" id="statsWords">0</div>
-                                        <div class="stat-bar">
-                                            <div class="stat-bar-fill" id="statsWordsBar" style="width: 0%"></div>
+                                        <div class="stat-value" id="statsWords">
+                                            0
                                         </div>
-                                        <div class="stat-hint">Target: 500</div>
                                     </div>
-                                    <div class="stat-card">
+                                    <div class="stat-card" title="Characters, including spaces">
                                         <div class="stat-label">Characters</div>
-                                        <div class="stat-value" id="statsChars">0</div>
-                                        <div class="stat-bar">
-                                            <div class="stat-bar-fill" id="statsCharsBar" style="width: 0%"></div>
+                                        <div class="stat-value" id="statsChars">
+                                            0
                                         </div>
-                                        <div class="stat-hint">With spaces</div>
+                                        <div class="stat-hint">Including spaces</div>
                                     </div>
                                     <div class="stat-card">
                                         <div class="stat-label">Paragraphs</div>
-                                        <div class="stat-value" id="statsParagraphs">0</div>
+                                        <div
+                                            class="stat-value"
+                                            id="statsParagraphs"
+                                        >
+                                            0
+                                        </div>
                                     </div>
-                                    <div class="stat-card">
-                                        <div class="stat-label">Reading Time</div>
-                                        <div class="stat-value" id="statsReadingTime">0 min</div>
-                                        <div class="stat-hint">~200 words/min</div>
+                                    <div class="stat-card" title="Estimated reading time at 200 words per minute">
+                                        <div class="stat-label">
+                                            Read time
+                                        </div>
+                                        <div
+                                            class="stat-value"
+                                            id="statsReadingTime"
+                                        >
+                                            0 min
+                                        </div>
+                                        <div class="stat-hint">
+                                            At 200 words/min
+                                        </div>
                                     </div>
                                     <div class="stat-card">
                                         <div class="stat-label">Sentences</div>
-                                        <div class="stat-value" id="statsSentences">0</div>
+                                        <div
+                                            class="stat-value"
+                                            id="statsSentences"
+                                        >
+                                            0
+                                        </div>
                                     </div>
-                                    <div class="stat-card">
-                                        <div class="stat-label">Avg Word Length</div>
-                                        <div class="stat-value" id="statsAvgWordLen">0</div>
-                                        <div class="stat-hint">characters</div>
+                                    <div class="stat-card" title="Average number of letters per word">
+                                        <div class="stat-label">
+                                            Avg. word
+                                        </div>
+                                        <div
+                                            class="stat-value"
+                                            id="statsAvgWordLen"
+                                        >
+                                            0
+                                        </div>
+                                        <div class="stat-hint">Letters per word</div>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Document Outline Tab -->
+                        <div class="sidebar-tab-content" data-tab="outline">
+                            <div class="sidebar-section">
+                                <div class="outline-header">
+                                    <h3><i class="fas fa-list-ul"></i> Document Outline</h3>
+                                    <button class="btn btn-secondary btn-sm" id="insertTOCBtn" title="Insert Table of Contents at cursor">
+                                        <i class="fas fa-list-ol"></i> TOC
+                                    </button>
+                                </div>
+                                <div id="outlineList">
+                                    <div class="empty-outline">No headings found.<br><small>Use Heading styles to build your outline.</small></div>
                                 </div>
                             </div>
                         </div>
@@ -482,71 +584,28 @@
                     <!-- SCROLLABLE CONTAINER ADDED HERE -->
                     <div class="page-container" id="pageContainer">
                         <div class="page a4" id="page">
-                            <div
-                                id="editor"
-                                contenteditable="true"
-                                spellcheck="false"
-                            >
-                                <h1>Welcome to CharlesWebEditor</h1>
-                                <p>
-                                    This is a
-                                    <strong
-                                        >professional-grade text editor</strong
-                                    >
-                                    built with modern web technologies. It
-                                    combines the power of traditional word
-                                    processors with the convenience of web
-                                    applications.
-                                </p>
-                                <p>
-                                    You can use all the toolbar buttons to
-                                    format your text, insert images and tables,
-                                    and much more.
-                                </p>
-                                <h2>Key Features:</h2>
-                                <ul>
-                                    <li>
-                                        Multiple document tabs for working with
-                                        several files
-                                    </li>
-                                    <li>
-                                        Image insertion with drag-and-drop
-                                        positioning
-                                    </li>
-                                    <li>
-                                        Table creation with customizable rows
-                                        and columns
-                                    </li>
-                                    <li>
-                                        Advanced find and replace functionality
-                                    </li>
-                                    <li>
-                                        Spell checking in multiple languages
-                                    </li>
-                                    <li>
-                                        Undo/Redo with complete history tracking
-                                    </li>
-                                    <li>
-                                        Export documents to PDF and DOCX formats
-                                    </li>
-                                    <li>
-                                        Cloud storage integration for backup
-                                    </li>
-                                    <li>
-                                        Page layout options including margins
-                                        and orientation
-                                    </li>
-                                </ul>
-                                <p>
-                                    Start typing to experience the smooth
-                                    editing workflow. The editor automatically
-                                    saves your work as you type.
-                                </p>
-                                <p>
-                                    Try scrolling with your mouse wheel or
-                                    touchpad – the editor now has smooth scroll
-                                    bars for better navigation!
-                                </p>
+                            <!-- Page Header Zone -->
+                            <div class="page-header-zone" id="pageHeaderZone">
+                                <div
+                                    class="page-hf-content"
+                                    id="pageHeaderContent"
+                                    contenteditable="false"
+                                    data-empty="true"
+                                    data-placeholder="Header — double-click to edit"
+                                ></div>
+                                <div class="hf-divider"></div>
+                            </div>
+                            <div id="editor" contenteditable="true" spellcheck="true" aria-label="Document content"><p><br></p></div>
+                            <!-- Page Footer Zone -->
+                            <div class="page-footer-zone" id="pageFooterZone">
+                                <div class="hf-divider"></div>
+                                <div
+                                    class="page-hf-content"
+                                    id="pageFooterContent"
+                                    contenteditable="false"
+                                    data-empty="true"
+                                    data-placeholder="Footer — double-click to edit"
+                                ></div>
                             </div>
                         </div>
                     </div>
@@ -557,7 +616,7 @@
                 <div class="status-info">
                     <div class="status-item">
                         <i class="fas fa-font"></i>
-                        <span id="currentFont">Arial, 16pt</span>
+                        <span id="currentFont">Arial, 12pt</span>
                     </div>
                     <div class="status-item">
                         <i class="fas fa-keyboard"></i>
@@ -569,7 +628,7 @@
                     </div>
                     <div class="status-item">
                         <i class="fas fa-save"></i>
-                        <span id="saveStatus">Auto-saved</span>
+                        <span id="saveStatus">Not saved yet</span>
                         <span
                             id="autosaveSpinner"
                             style="display: none; margin-left: 8px"
@@ -592,6 +651,43 @@
             <button class="fab" id="helpFab" title="Quick Help">
                 <i class="fas fa-question"></i>
             </button>
+
+            <!-- Focus Mode Exit Button -->
+            <button class="focus-mode-exit" id="focusModeExitBtn">
+                <i class="fas fa-compress-alt"></i> Exit Focus Mode
+            </button>
+
+            <!-- Text-to-Speech Control Panel -->
+            <div class="tts-panel" id="ttsPanel">
+                <span class="tts-status" id="ttsStatus">
+                    <i class="fas fa-volume-up"></i> Reading...
+                </span>
+                <div class="tts-controls">
+                    <button class="tts-btn" id="ttsPauseBtn" title="Pause / Resume">
+                        <i class="fas fa-pause" id="ttsPauseIcon"></i>
+                    </button>
+                    <button class="tts-btn" id="ttsStopBtn" title="Stop reading">
+                        <i class="fas fa-stop"></i>
+                    </button>
+                    <select class="tts-speed-select" id="ttsSpeed" title="Reading speed">
+                        <option value="0.5">0.5×</option>
+                        <option value="0.75">0.75×</option>
+                        <option value="1" selected>1×</option>
+                        <option value="1.25">1.25×</option>
+                        <option value="1.5">1.5×</option>
+                        <option value="2">2×</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Voice Dictation Indicator -->
+            <div class="dictation-indicator" id="dictationIndicator">
+                <span class="dictation-pulse"></span>
+                <span class="dictation-text" id="dictationInterim">Listening...</span>
+                <button class="dictation-stop-btn" id="dictationStopBtn">
+                    <i class="fas fa-stop"></i> Stop
+                </button>
+            </div>
         </div>
 
         <!-- Find & Replace Modal -->
@@ -677,7 +773,7 @@
         <div class="modal" id="helpModal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <div class="modal-title">CharlesWebEditor Help</div>
+                    <div class="modal-title">WebEditor Help</div>
                     <button class="modal-close" id="closeHelpModal">
                         &times;
                     </button>
@@ -790,11 +886,7 @@
                             </li>
                             <li>
                                 <strong>Auto-Save</strong> - Your work is
-                                automatically saved every 10 seconds
-                            </li>
-                            <li>
-                                <strong>Cloud Storage</strong> - Save documents
-                                to OneDrive for backup
+                                automatically saved in this browser after you pause typing
                             </li>
                             <li>
                                 <strong>Export Options</strong> - Export to PDF
@@ -874,6 +966,178 @@
             </div>
         </div>
 
+        <!-- Save to Local Drive Modal -->
+        <div class="modal" id="saveModal">
+            <div class="modal-content" style="max-width: 480px">
+                <div class="modal-header">
+                    <h2><i class="fas fa-save"></i> Save to Local Drive</h2>
+                    <button class="close-btn" id="closeSaveModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p
+                        style="
+                            margin-bottom: 20px;
+                            color: #555;
+                            font-size: 14px;
+                        "
+                    >
+                        Choose a format to download a file copy.
+                        PDF and Word exports use the local export service. You can also save HTML, Markdown, or text.
+                    </p>
+
+                    <!-- Primary formats -->
+                    <div
+                        style="
+                            display: grid;
+                            grid-template-columns: 1fr 1fr;
+                            gap: 14px;
+                            margin-bottom: 20px;
+                        "
+                    >
+                        <button
+                            class="save-fmt-btn"
+                            data-format="docx"
+                            style="
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                gap: 8px;
+                                padding: 20px 12px;
+                                border: 2px solid #2b579a;
+                                border-radius: 10px;
+                                background: #f0f4ff;
+                                cursor: pointer;
+                                transition: all 0.2s;
+                            "
+                        >
+                            <i
+                                class="fas fa-file-word"
+                                style="font-size: 36px; color: #2b579a"
+                            ></i>
+                            <strong style="font-size: 14px; color: #2b579a"
+                                >Word Document</strong
+                            >
+                            <small style="color: #666">.docx</small>
+                        </button>
+                        <button
+                            class="save-fmt-btn"
+                            data-format="pdf"
+                            style="
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                gap: 8px;
+                                padding: 20px 12px;
+                                border: 2px solid #c53030;
+                                border-radius: 10px;
+                                background: #fff5f5;
+                                cursor: pointer;
+                                transition: all 0.2s;
+                            "
+                        >
+                            <i
+                                class="fas fa-file-pdf"
+                                style="font-size: 36px; color: #c53030"
+                            ></i>
+                            <strong style="font-size: 14px; color: #c53030"
+                                >PDF Document</strong
+                            >
+                            <small style="color: #666">.pdf</small>
+                        </button>
+                    </div>
+
+                    <!-- Secondary formats -->
+                    <p style="font-size: 12px; color: #999; margin-bottom: 8px">
+                        Other formats:
+                    </p>
+                    <div
+                        style="
+                            display: grid;
+                            grid-template-columns: 1fr 1fr 1fr;
+                            gap: 10px;
+                        "
+                    >
+                        <button
+                            class="save-fmt-btn"
+                            data-format="html"
+                            style="
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                gap: 6px;
+                                padding: 14px 10px;
+                                border: 1px solid #667eea;
+                                border-radius: 8px;
+                                background: #f7f8ff;
+                                cursor: pointer;
+                                transition: all 0.2s;
+                            "
+                        >
+                            <i
+                                class="fab fa-html5"
+                                style="font-size: 26px; color: #667eea"
+                            ></i>
+                            <span style="font-size: 13px">HTML File</span>
+                            <small style="color: #888">.html</small>
+                        </button>
+                        <button
+                            class="save-fmt-btn"
+                            data-format="md"
+                            style="
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                gap: 6px;
+                                padding: 14px 10px;
+                                border: 1px solid #38a169;
+                                border-radius: 8px;
+                                background: #f0fff4;
+                                cursor: pointer;
+                                transition: all 0.2s;
+                            "
+                        >
+                            <i
+                                class="fab fa-markdown"
+                                style="font-size: 26px; color: #38a169"
+                            ></i>
+                            <span style="font-size: 13px">Markdown</span>
+                            <small style="color: #888">.md</small>
+                        </button>
+                        <button
+                            class="save-fmt-btn"
+                            data-format="txt"
+                            style="
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                gap: 6px;
+                                padding: 14px 10px;
+                                border: 1px solid #718096;
+                                border-radius: 8px;
+                                background: #f9fafb;
+                                cursor: pointer;
+                                transition: all 0.2s;
+                            "
+                        >
+                            <i
+                                class="fas fa-file-alt"
+                                style="font-size: 26px; color: #718096"
+                            ></i>
+                            <span style="font-size: 13px">Plain Text</span>
+                            <small style="color: #888">.txt</small>
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="cancelSaveModal">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Export Modal -->
         <div class="modal" id="exportModal">
             <div class="modal-content">
@@ -887,27 +1151,39 @@
                     <p>Choose your export format:</p>
                     <div class="export-options-grid">
                         <div class="export-format-btn" data-format="pdf">
-                            <div class="export-format-icon pdf"><i class="fas fa-file-pdf"></i></div>
+                            <div class="export-format-icon pdf">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
                             <div class="export-format-name">PDF</div>
-                            <div class="export-format-desc">Portable Document</div>
+                            <div class="export-format-desc">
+                                Portable Document
+                            </div>
                         </div>
                         <div class="export-format-btn" data-format="docx">
-                            <div class="export-format-icon docx"><i class="fas fa-file-word"></i></div>
+                            <div class="export-format-icon docx">
+                                <i class="fas fa-file-word"></i>
+                            </div>
                             <div class="export-format-name">DOCX</div>
                             <div class="export-format-desc">Microsoft Word</div>
                         </div>
                         <div class="export-format-btn" data-format="markdown">
-                            <div class="export-format-icon markdown"><i class="fab fa-markdown"></i></div>
+                            <div class="export-format-icon markdown">
+                                <i class="fab fa-markdown"></i>
+                            </div>
                             <div class="export-format-name">Markdown</div>
                             <div class="export-format-desc">MD Format</div>
                         </div>
                         <div class="export-format-btn" data-format="html">
-                            <div class="export-format-icon html"><i class="fab fa-html5"></i></div>
+                            <div class="export-format-icon html">
+                                <i class="fab fa-html5"></i>
+                            </div>
                             <div class="export-format-name">HTML</div>
                             <div class="export-format-desc">Web Page</div>
                         </div>
                         <div class="export-format-btn" data-format="txt">
-                            <div class="export-format-icon txt"><i class="fas fa-file-alt"></i></div>
+                            <div class="export-format-icon txt">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
                             <div class="export-format-name">TXT</div>
                             <div class="export-format-desc">Plain Text</div>
                         </div>
@@ -927,80 +1203,46 @@
                 </div>
                 <div class="modal-body">
                     <form class="email-form" id="emailForm">
-                        <input type="email" id="emailTo" placeholder="Recipient email" required />
-                        <input type="text" id="emailSubject" placeholder="Subject" value="Document from CharlesWebEditor" />
-                        <textarea id="emailMessage" placeholder="Optional message..."></textarea>
+                        <input
+                            type="email"
+                            id="emailTo"
+                            placeholder="Recipient email"
+                            required
+                        />
+                        <input
+                            type="text"
+                            id="emailSubject"
+                            placeholder="Subject"
+                            value="Document from WebEditor"
+                        />
+                        <textarea
+                            id="emailMessage"
+                            placeholder="Optional message..."
+                        ></textarea>
                         <div class="email-preview">
-                            <div class="email-preview-label">Attachment:</div>
-                            <div class="email-attachments" id="emailAttachments">
-                                <i class="fas fa-paperclip"></i> <span id="currentDocName">Document</span>.pdf
+                            <div class="email-preview-label">Document content is included as plain text:</div>
+                            <div
+                                class="email-attachments"
+                                id="emailAttachments"
+                            >
+                                <i class="fas fa-paperclip"></i>
+                                <span id="currentDocName">Document</span>
                             </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-actions">
-                    <button class="btn btn-secondary" id="cancelEmailBtn">Cancel</button>
+                    <button class="btn btn-secondary" id="cancelEmailBtn">
+                        Cancel
+                    </button>
                     <button class="btn btn-primary" id="sendEmailBtn">
-                        <i class="fas fa-paper-plane"></i> Send Email
+                        <i class="fas fa-paper-plane"></i> Open email draft
                     </button>
                 </div>
             </div>
         </div>
 
         <!-- Share Modal -->
-        <div class="modal" id="shareLinkModal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2><i class="fas fa-share-alt"></i> Share Document</h2>
-                    <button class="close-btn" id="closeShareLinkModal">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p>Share your document via social media or copy the link:</p>
-                    <div class="share-options-grid">
-                        <div class="share-platform-btn" data-platform="facebook">
-                            <div class="share-platform-icon facebook"><i class="fab fa-facebook-f"></i></div>
-                            <div class="share-platform-name">Facebook</div>
-                            <div class="share-platform-desc">Share on Facebook</div>
-                        </div>
-                        <div class="share-platform-btn" data-platform="twitter">
-                            <div class="share-platform-icon twitter"><i class="fab fa-x-twitter"></i></div>
-                            <div class="share-platform-name">X (Twitter)</div>
-                            <div class="share-platform-desc">Post on X</div>
-                        </div>
-                        <div class="share-platform-btn" data-platform="whatsapp">
-                            <div class="share-platform-icon whatsapp"><i class="fab fa-whatsapp"></i></div>
-                            <div class="share-platform-name">WhatsApp</div>
-                            <div class="share-platform-desc">Send via WhatsApp</div>
-                        </div>
-                        <div class="share-platform-btn" data-platform="linkedin">
-                            <div class="share-platform-icon linkedin"><i class="fab fa-linkedin-in"></i></div>
-                            <div class="share-platform-name">LinkedIn</div>
-                            <div class="share-platform-desc">Share professionally</div>
-                        </div>
-                        <div class="share-platform-btn" data-platform="telegram">
-                            <div class="share-platform-icon telegram"><i class="fab fa-telegram-plane"></i></div>
-                            <div class="share-platform-name">Telegram</div>
-                            <div class="share-platform-desc">Send via Telegram</div>
-                        </div>
-                        <div class="share-platform-btn" data-platform="copy">
-                            <div class="share-platform-icon copy"><i class="fas fa-link"></i></div>
-                            <div class="share-platform-name">Copy Link</div>
-                            <div class="share-platform-desc">Copy to clipboard</div>
-                        </div>
-                    </div>
-                    <div class="share-link-container">
-                        <input type="text" class="share-link-input" id="shareLinkInput" readonly value="https://charleswed.app/shared/abc123" />
-                    </div>
-                </div>
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" id="cancelShareBtn">Close</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Template Manager Modal -->
         <div class="modal" id="templateManagerModal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1010,7 +1252,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="modal-actions" style="margin-bottom: 16px;">
+                    <div class="modal-actions" style="margin-bottom: 16px">
                         <button class="btn btn-primary" id="saveAsTemplateBtn">
                             <i class="fas fa-save"></i> Save Current as Template
                         </button>
@@ -1557,10 +1799,10 @@
 
                     <!-- Email Details -->
                     <div class="form-group">
-                        <label for="emailTo">To:</label>
+                        <label for="shareEmailTo">To:</label>
                         <input
                             type="email"
-                            id="emailTo"
+                            id="shareEmailTo"
                             placeholder="recipient@example.com"
                             multiple
                             style="
@@ -1576,11 +1818,11 @@
                         >
                     </div>
                     <div class="form-group">
-                        <label for="emailSubject">Subject:</label>
+                        <label for="shareEmailSubject">Subject:</label>
                         <input
                             type="text"
-                            id="emailSubject"
-                            placeholder="Document from CharlesWebEditor"
+                            id="shareEmailSubject"
+                            placeholder="Document from WebEditor"
                             style="
                                 width: 100%;
                                 padding: 10px;
@@ -1591,9 +1833,9 @@
                         />
                     </div>
                     <div class="form-group">
-                        <label for="emailMessage">Message:</label>
+                        <label for="shareEmailMessage">Message:</label>
                         <textarea
-                            id="emailMessage"
+                            id="shareEmailMessage"
                             rows="4"
                             placeholder="Optional message..."
                             style="
@@ -1691,7 +1933,7 @@
                     </button>
                     <button
                         class="btn btn-primary"
-                        id="sendEmailBtn"
+                        id="sendEmailShareBtn"
                         style="display: flex; align-items: center; gap: 6px"
                     >
                         <i class="fas fa-paper-plane"></i> Open Email
@@ -1700,166 +1942,14 @@
             </div>
         </div>
 
-        <!-- AI Assistant Panel -->
-        <div class="ai-assistant-panel" id="aiAssistantPanel">
-            <div class="ai-assistant-header">
-                <h3>
-                    <i class="fas fa-robot"></i>
-                    AI Assistant
-                </h3>
-                <button class="ai-close-btn" id="closeAIAssistantBtn">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="ai-assistant-content">
-                <!-- Grammar & Writing Check -->
-                <div class="ai-section">
-                    <h4>Writing Analysis</h4>
-                    <div class="grammar-status">
-                        <div
-                            class="status-indicator"
-                            id="grammarStatusIndicator"
-                        ></div>
-                        <span class="status-text" id="grammarStatusText"
-                            >Ready to analyze</span
-                        >
-                    </div>
-                    <button
-                        class="ai-btn"
-                        id="checkGrammarBtn"
-                        style="width: 100%"
-                    >
-                        <i class="fas fa-spell-check"></i>
-                        Check Grammar & Style
-                    </button>
-                    <div
-                        class="grammar-suggestions"
-                        id="grammarSuggestions"
-                        style="margin-top: 15px; display: none"
-                    >
-                        <!-- Suggestions will be added here -->
-                    </div>
-                </div>
-
-                <!-- Text Statistics -->
-                <div class="ai-section">
-                    <h4>Document Statistics</h4>
-                    <div
-                        id="aiStats"
-                        style="font-size: 13px; color: var(--text-secondary)"
-                    >
-                        <div>Words: <strong id="aiWordCount">0</strong></div>
-                        <div>
-                            Characters: <strong id="aiCharCount">0</strong>
-                        </div>
-                        <div>
-                            Paragraphs: <strong id="aiParagraphCount">0</strong>
-                        </div>
-                        <div>
-                            Reading Time:
-                            <strong id="aiReadingTime">0 min</strong>
-                        </div>
-                    </div>
-                    <button
-                        class="ai-btn small"
-                        id="refreshStatsBtn"
-                        style="margin-top: 10px; width: 100%"
-                    >
-                        <i class="fas fa-sync-alt"></i>
-                        Refresh Stats
-                    </button>
-                </div>
-
-                <!-- Writing Suggestions -->
-                <div class="ai-section">
-                    <h4>Writing Suggestions</h4>
-                    <button
-                        class="ai-btn"
-                        id="improveTextBtn"
-                        style="width: 100%; margin-bottom: 8px"
-                    >
-                        <i class="fas fa-magic"></i>
-                        Improve Selected Text
-                    </button>
-                    <button
-                        class="ai-btn"
-                        id="makeShorterBtn"
-                        style="width: 100%; margin-bottom: 8px"
-                    >
-                        <i class="fas fa-compress"></i>
-                        Make Shorter
-                    </button>
-                    <button
-                        class="ai-btn"
-                        id="makeLongerBtn"
-                        style="width: 100%; margin-bottom: 8px"
-                    >
-                        <i class="fas fa-expand"></i>
-                        Make Longer
-                    </button>
-                    <button
-                        class="ai-btn"
-                        id="changeToneBtn"
-                        style="width: 100%"
-                    >
-                        <i class="fas fa-adjust"></i>
-                        Change Tone
-                    </button>
-                </div>
-
-                <!-- Quick Actions -->
-                <div class="ai-section">
-                    <h4>Quick Actions</h4>
-                    <button
-                        class="ai-btn"
-                        id="summarizeBtn"
-                        style="width: 100%; margin-bottom: 8px"
-                    >
-                        <i class="fas fa-file-alt"></i>
-                        Summarize Document
-                    </button>
-                    <button
-                        class="ai-btn"
-                        id="generateTitleBtn"
-                        style="width: 100%; margin-bottom: 8px"
-                    >
-                        <i class="fas fa-heading"></i>
-                        Generate Title
-                    </button>
-                    <button
-                        class="ai-btn"
-                        id="expandIdeasBtn"
-                        style="width: 100%"
-                    >
-                        <i class="fas fa-lightbulb"></i>
-                        Expand Ideas
-                    </button>
-                </div>
-
-                <!-- AI Response Area -->
-                <div
-                    class="ai-section"
-                    id="aiResponseSection"
-                    style="display: none"
-                >
-                    <h4>AI Response</h4>
-                    <div
-                        id="aiResponse"
-                        style="
-                            background: var(--bg-secondary);
-                            padding: 12px;
-                            border-radius: 6px;
-                            font-size: 13px;
-                            line-height: 1.6;
-                            color: var(--text-primary);
-                            max-height: 200px;
-                            overflow-y: auto;
-                        "
-                    >
-                        <!-- AI responses will appear here -->
-                    </div>
-                </div>
-            </div>
+        <div class="ai-assistant-panel" id="aiAssistantPanel" aria-label="Writing tools">
+          <div class="ai-assistant-header"><h3>Writing tools</h3><button class="ai-close-btn" id="closeAIAssistantBtn" aria-label="Close writing tools">×</button></div>
+          <div class="ai-assistant-content">
+            <p class="writing-tools-note">Local checks for repeated words, extra spaces, and common typos. These rules do not replace a full grammar review.</p>
+            <div class="ai-section"><h4>Check text</h4><div class="grammar-status"><div class="status-indicator" id="grammarStatusIndicator"></div><span id="grammarStatusText">Ready to check</span></div><button class="ai-btn" id="checkGrammarBtn">Check document</button><div id="grammarSuggestions" class="grammar-suggestions"></div></div>
+            <div class="ai-section"><h4>Selected text</h4><button class="ai-btn" id="improveTextBtn">Preview cleanup</button><button class="ai-btn" id="makeShorterBtn">Preview shorter wording</button></div>
+            <div class="ai-section"><h4>Statistics</h4><p>Words: <span id="aiWordCount">0</span></p><p>Characters: <span id="aiCharCount">0</span></p><p>Paragraphs: <span id="aiParagraphCount">0</span></p><p>Read time: <span id="aiReadingTime">0 min</span></p><button class="ai-btn" id="refreshStatsBtn">Refresh</button></div>
+          </div>
         </div>
 
         <!-- Autocomplete Dropdown -->
@@ -1906,11 +1996,15 @@
             </div>
         </div>
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
-        <script src="main.js?v=1767506700"></script>
+        <script src="vendor/purify.min.js"></script>
+        <script src="vendor/mammoth.browser.min.js"></script>
+        <script src="editor/templates.js?v=20261022"></script>
+        <script src="editor/commands.js?v=20261022"></script>
+        <script src="editor/storage.js?v=20261022"></script>
+        <script src="editor/layout.js?v=20261022"></script>
+        <script src="editor/exports.js?v=20261022"></script>
+        <script src="editor/workspace.js?v=20261022"></script>
+        <script src="main.js?v=20261022-workspace"></script>
+        <script src="editor/enhancements.js?v=20261022"></script>
     </body>
 </html>

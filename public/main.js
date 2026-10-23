@@ -5,8 +5,8 @@
 class CharlesWebEditor {
   constructor() {
     // Version information
-    this.version = "1.1.0";
-    this.releaseDate = "2024";
+    this.version = "1.2.0";
+    this.releaseDate = "2026";
 
     // State variables
     this.currentDocId = "doc1";
@@ -29,764 +29,35 @@ class CharlesWebEditor {
 
     // State variables
     this.zoomLevel = 100;
-    this.currentTheme = localStorage.getItem("editor_theme") || "light";
-    this.spellCheckEnabled = false;
+    this.currentTheme = WebEditorStorage.get("editor_theme") || "light";
+    this.spellCheckEnabled = true;
     this.selectedImage = null;
     this.recentDocuments = [];
     this.hasUnsavedChanges = false;
     this.autoSaveTimer = null;
-    this.debounceDelay = 2000; // 2 seconds debounce for auto-save
+    this.debounceDelay = 2000;
+
+    // Text-to-Speech state
+    this.ttsActive = false;
+    this.currentUtterance = null;
+
+    // Voice dictation state
+    this.dictationActive = false;
+    this.recognition = null;
+    this.dictationRange = null;
+
+    // Header & Footer state
+    this.hfEditMode = false;
+    this.hfActiveZone = "header";
 
     // Templates - Merged old and new templates
-    this.templates = [
-      {
-        id: "blank",
-        name: "Blank Document",
-        description: "Start with a clean slate",
-        icon: "fas fa-file",
-        content: "<p>Start typing here...</p>",
-      },
-      {
-        id: "resume",
-        name: "Professional Resume",
-        description: "Modern resume template",
-        icon: "fas fa-user-tie",
-        content: `
-                    <h1>John Doe</h1>
-                    <p><strong>Email:</strong> john.doe@email.com | <strong>Phone:</strong> (555) 123-4567 | <strong>LinkedIn:</strong> linkedin.com/in/johndoe</p>
+    this.templates = WebEditorTemplates.map(template => ({...template}));
 
-                    <h2>Professional Summary</h2>
-                    <p>Results-driven professional with 5+ years of experience in [industry]. Proven track record of [key achievement]. Seeking to leverage skills in [area] to drive success at [company].</p>
-
-                    <h2>Experience</h2>
-                    <p><strong>Senior Position</strong> - Company Name (2020-Present)</p>
-                    <ul>
-                        <li>Achievement 1 with measurable results</li>
-                        <li>Achievement 2 that improved processes</li>
-                        <li>Achievement 3 demonstrating leadership</li>
-                    </ul>
-
-                    <p><strong>Previous Position</strong> - Company Name (2018-2020)</p>
-                    <ul>
-                        <li>Relevant responsibility and accomplishment</li>
-                        <li>Another key achievement</li>
-                    </ul>
-
-                    <h2>Education</h2>
-                    <p><strong>Bachelor's Degree</strong> - University Name (2014-2018)</p>
-                    <p>Major: [Field of Study] | GPA: 3.8</p>
-
-                    <h2>Skills</h2>
-                    <p><strong>Technical:</strong> Skill 1, Skill 2, Skill 3, Skill 4</p>
-                    <p><strong>Soft:</strong> Communication, Leadership, Problem-solving, Teamwork</p>
-                `,
-      },
-      {
-        id: "letter",
-        name: "Business Letter",
-        description: "Professional letter format",
-        icon: "fas fa-envelope",
-        content: `
-                    <p style="text-align: right; margin-bottom: 20px;">
-                        Your Name<br>
-                        Your Address<br>
-                        City, State ZIP Code<br>
-                        Your Email<br>
-                        Your Phone Number<br>
-                        Date
-                    </p>
-
-                    <p style="margin-bottom: 20px;">
-                        Recipient Name<br>
-                        Recipient Title<br>
-                        Company Name<br>
-                        Company Address<br>
-                        City, State ZIP Code
-                    </p>
-
-                    <p>Dear [Recipient Name],</p>
-
-                    <p>I am writing to [purpose of letter]. [Opening paragraph explaining the context and main point].</p>
-
-                    <p>[Second paragraph with supporting details, evidence, or additional information relevant to your purpose].</p>
-
-                    <p>[Third paragraph for further explanation, next steps, or call to action].</p>
-
-                    <p>Thank you for your time and consideration. I look forward to [expected outcome or next step].</p>
-
-                    <p style="margin-top: 30px;">Sincerely,</p>
-
-                    <p style="margin-top: 20px;">Your Name</p>
-                    <p style="margin-top: 20px;">Your Title (if applicable)</p>
-                `,
-      },
-      {
-        id: "report",
-        name: "Project Report",
-        description: "Structured report format",
-        icon: "fas fa-chart-bar",
-        content: `
-                    <h1>Project Report: [Project Title]</h1>
-
-                    <p><strong>Date:</strong> [Date]<br>
-                    <strong>Prepared by:</strong> [Your Name]<br>
-                    <strong>Department:</strong> [Department]</p>
-
-                    <h2>Executive Summary</h2>
-                    <p>[Brief overview of the project, objectives, methodology, and key findings. This section should provide a complete picture in 2-3 paragraphs.]</p>
-
-                    <h2>Introduction</h2>
-                    <p>[Background information, project scope, and objectives. Explain why this project was initiated and what it aims to achieve.]</p>
-
-                    <h2>Findings</h2>
-                    <ul>
-                        <li>Key finding 1 with supporting data</li>
-                        <li>Key finding 2 with supporting data</li>
-                        <li>Key finding 3 with supporting data</li>
-                    </ul>
-
-                    <h2>Recommendations</h2>
-                    <ol>
-                        <li>Recommendation 1 with implementation details</li>
-                        <li>Recommendation 2 with implementation details</li>
-                        <li>Recommendation 3 with implementation details</li>
-                    </ol>
-
-                    <h2>Conclusion</h2>
-                    <p>[Summary of the project and its significance. Reiterate the most important points and future implications.]</p>
-                `,
-      },
-      {
-        id: "sales-invoice",
-        name: "Sales Invoice",
-        description: "Professional sales invoice template",
-        icon: "fas fa-file-invoice",
-        content: `
-                <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
-                    <header style="margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <div>
-                                <h1 style="margin: 0; font-size: 28px; color: #333;">INVOICE</h1>
-                                <p style="margin: 5px 0; font-size: 14px; color: #666;">Invoice #: [Invoice Number]</p>
-                                <p style="margin: 5px 0; font-size: 14px; color: #666;">Date: ${new Date().toLocaleDateString()}</p>
-                                <p style="margin: 5px 0; font-size: 14px; color: #666;">Due Date: [Due Date]</p>
-                            </div>
-                            <div style="text-align: right;">
-                                <p style="margin: 0; font-weight: bold; font-size: 16px;">[Your Company Name]</p>
-                                <p style="margin: 5px 0; font-size: 14px;">[Your Company Address]</p>
-                                <p style="margin: 5px 0; font-size: 14px;">[City, State ZIP]</p>
-                                <p style="margin: 5px 0; font-size: 14px;">Phone: [Your Phone]</p>
-                                <p style="margin: 5px 0; font-size: 14px;">Email: [Your Email]</p>
-                            </div>
-                        </div>
-                    </header>
-
-                    <div style="margin-bottom: 30px;">
-                        <div style="display: flex; justify-content: space-between;">
-                            <div style="width: 48%;">
-                                <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">Bill To:</h3>
-                                <p style="margin: 5px 0; font-weight: bold;">[Client Name]</p>
-                                <p style="margin: 5px 0;">[Client Company]</p>
-                                <p style="margin: 5px 0;">[Client Address]</p>
-                                <p style="margin: 5px 0;">[City, State ZIP]</p>
-                                <p style="margin: 5px 0;">Phone: [Client Phone]</p>
-                                <p style="margin: 5px 0;">Email: [Client Email]</p>
-                            </div>
-                            <div style="width: 48%;">
-                                <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">Ship To:</h3>
-                                <p style="margin: 5px 0; font-weight: bold;">[Ship To Name]</p>
-                                <p style="margin: 5px 0;">[Ship To Company]</p>
-                                <p style="margin: 5px 0;">[Ship To Address]</p>
-                                <p style="margin: 5px 0;">[City, State ZIP]</p>
-                                <p style="margin: 5px 0;">Phone: [Ship To Phone]</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
-                        <thead>
-                            <tr style="background: #f5f5f5;">
-                                <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Description</th>
-                                <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Quantity</th>
-                                <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">Unit Price</th>
-                                <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td style="padding: 12px; border: 1px solid #ddd;">[Item 1 Description]</td>
-                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">[Qty]</td>
-                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">$[Price]</td>
-                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">$[Amount]</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 12px; border: 1px solid #ddd;">[Item 2 Description]</td>
-                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">[Qty]</td>
-                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">$[Price]</td>
-                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">$[Amount]</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 12px; border: 1px solid #ddd;">[Item 3 Description]</td>
-                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">[Qty]</td>
-                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">$[Price]</td>
-                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">$[Amount]</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <div style="display: flex; justify-content: flex-end;">
-                        <div style="width: 300px;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                                <span>Subtotal:</span>
-                                <span>$[Subtotal]</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                                <span>Tax (0%):</span>
-                                <span>$[Tax]</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                                <span>Shipping:</span>
-                                <span>$[Shipping]</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; font-size: 18px; border-top: 2px solid #333; padding-top: 10px;">
-                                <span>Total:</span>
-                                <span>$[Total]</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="margin-top: 40px; padding: 20px; background: #f9f9f9; border-radius: 5px;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 16px;">Payment Instructions:</h3>
-                        <p style="margin: 5px 0; font-size: 14px;">Please make payment to: [Your Company Name]</p>
-                        <p style="margin: 5px 0; font-size: 14px;">Bank: [Bank Name] | Account: [Account Number] | Routing: [Routing Number]</p>
-                        <p style="margin: 5px 0; font-size: 14px;">PayPal: [PayPal Email] | Venmo: [Venmo Handle]</p>
-                        <p style="margin: 10px 0 0 0; font-size: 14px; font-weight: bold;">Thank you for your business!</p>
-                    </div>
-                </div>
-            `,
-      },
-      {
-        id: "sales-receipt",
-        name: "Sales Receipt",
-        description: "Sales receipt template for completed transactions",
-        icon: "fas fa-receipt",
-        content: `
-                <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
-                    <header style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px;">
-                        <h1 style="margin: 0; font-size: 28px; color: #333;">SALES RECEIPT</h1>
-                        <p style="margin: 5px 0; font-size: 14px; color: #666;">Receipt #: [Receipt Number]</p>
-                        <p style="margin: 5px 0; font-size: 14px; color: #666;">Date: ${new Date().toLocaleDateString()}</p>
-                        <p style="margin: 5px 0; font-size: 14px; color: #666;">Time: ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
-                    </header>
-
-                    <div style="margin-bottom: 30px;">
-                        <div style="display: flex; justify-content: space-between;">
-                            <div style="width: 48%;">
-                                <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">From:</h3>
-                                <p style="margin: 5px 0; font-weight: bold;">[Business Name]</p>
-                                <p style="margin: 5px 0;">[Business Address]</p>
-                                <p style="margin: 5px 0;">[City, State ZIP]</p>
-                                <p style="margin: 5px 0;">Phone: [Business Phone]</p>
-                                <p style="margin: 5px 0;">Email: [Business Email]</p>
-                            </div>
-                            <div style="width: 48%;">
-                                <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">To:</h3>
-                                <p style="margin: 5px 0; font-weight: bold;">[Customer Name]</p>
-                                <p style="margin: 5px 0;">[Customer Address]</p>
-                                <p style="margin: 5px 0;">[City, State ZIP]</p>
-                                <p style="margin: 5px 0;">Phone: [Customer Phone]</p>
-                                <p style="margin: 5px 0;">Email: [Customer Email]</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
-                        <thead>
-                            <tr style="background: #f5f5f5;">
-                                <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Item</th>
-                                <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Qty</th>
-                                <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">Price</th>
-                                <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td style="padding: 12px; border: 1px solid #ddd;">[Item 1 Description]</td>
-                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">[Qty]</td>
-                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">$[Price]</td>
-                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">$[Total]</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 12px; border: 1px solid #ddd;">[Item 2 Description]</td>
-                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">[Qty]</td>
-                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">$[Price]</td>
-                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">$[Total]</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 12px; border: 1px solid #ddd;">[Item 3 Description]</td>
-                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">[Qty]</td>
-                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">$[Price]</td>
-                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">$[Total]</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <div style="display: flex; justify-content: flex-end;">
-                        <div style="width: 300px;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                                <span>Subtotal:</span>
-                                <span>$[Subtotal]</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                                <span>Tax:</span>
-                                <span>$[Tax]</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                                <span>Discount:</span>
-                                <span>-$[Discount]</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; font-size: 18px; border-top: 2px solid #333; padding-top: 10px;">
-                                <span>Total Paid:</span>
-                                <span>$[Total Paid]</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="margin-top: 30px;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">Payment Details:</h3>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <span>Payment Method:</span>
-                            <span style="font-weight: bold;">[Cash/Credit Card/Check/Digital]</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <span>Reference/Check #:</span>
-                            <span>[Reference Number]</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <span>Amount Received:</span>
-                            <span>$[Amount Received]</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <span>Change Given:</span>
-                            <span>$[Change]</span>
-                        </div>
-                    </div>
-
-                    <div style="margin-top: 40px; text-align: center; padding: 20px; background: #e8f5e8; border: 1px solid #c8e6c9; border-radius: 5px;">
-                        <p style="margin: 0; font-weight: bold; color: #2e7d32;">PAYMENT RECEIVED - THANK YOU!</p>
-                        <p style="margin: 10px 0 0 0; font-size: 12px;">This serves as your official receipt for this transaction.</p>
-                        <p style="margin: 5px 0; font-size: 12px;">Please keep for your records.</p>
-                    </div>
-                </div>
-            `,
-      },
-      {
-        id: "memo-reminder",
-        name: "Memo Reminder",
-        description: "Internal memo and reminder template",
-        icon: "fas fa-sticky-note",
-        content: `
-                <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
-                    <header style="margin-bottom: 30px; border-bottom: 3px solid #333; padding-bottom: 15px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <h1 style="margin: 0; font-size: 32px; color: #333; text-transform: uppercase;">MEMORANDUM</h1>
-                            <div style="text-align: right;">
-                                <p style="margin: 0; font-weight: bold; font-size: 14px;">Date: ${new Date().toLocaleDateString()}</p>
-                                <p style="margin: 5px 0 0 0; font-size: 14px;">Memo #: [Memo Number]</p>
-                            </div>
-                        </div>
-                    </header>
-
-                    <div style="margin-bottom: 30px;">
-                        <div style="display: flex; justify-content: space-between;">
-                            <div style="width: 48%;">
-                                <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">TO:</h3>
-                                <p style="margin: 5px 0; font-weight: bold;">[Recipient Name(s)]</p>
-                                <p style="margin: 5px 0;">[Department/Team]</p>
-                                <p style="margin: 5px 0;">[Company/Organization]</p>
-                            </div>
-                            <div style="width: 48%;">
-                                <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">FROM:</h3>
-                                <p style="margin: 5px 0; font-weight: bold;">[Your Name]</p>
-                                <p style="margin: 5px 0;">[Your Department/Title]</p>
-                                <p style="margin: 5px 0;">[Your Contact Information]</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom: 20px;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">SUBJECT:</h3>
-                        <p style="margin: 0; font-weight: bold; font-size: 18px; color: #333;">[Memo Subject/Title]</p>
-                    </div>
-
-                    <div style="margin-bottom: 30px; line-height: 1.6;">
-                        <p>[Begin your memo with a clear statement of purpose. Explain why this memo is being written and what it aims to communicate.]</p>
-                        <br>
-                        <p>[Provide background information or context that recipients need to understand the memo's content.]</p>
-                        <br>
-                        <p>[Present the main information, announcements, updates, or instructions. Use clear, concise language.]</p>
-                        <br>
-                        <p>[Include any specific details, deadlines, or requirements that recipients need to know.]</p>
-                    </div>
-
-                    <div style="margin-bottom: 30px;">
-                        <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #333;">ACTION REQUIRED:</h3>
-                        <ul style="margin: 0; padding-left: 20px;">
-                            <li style="margin-bottom: 10px;">[Action item 1 with deadline: [Date/Time]]</li>
-                            <li style="margin-bottom: 10px;">[Action item 2 with deadline: [Date/Time]]</li>
-                            <li style="margin-bottom: 10px;">[Action item 3 with deadline: [Date/Time]]</li>
-                        </ul>
-                    </div>
-
-                    <div style="margin-bottom: 30px;">
-                        <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #333;">IMPORTANT REMINDERS:</h3>
-                        <ul style="margin: 0; padding-left: 20px;">
-                            <li style="margin-bottom: 10px;">[Reminder 1 - Important information to remember]</li>
-                            <li style="margin-bottom: 10px;">[Reminder 2 - Critical dates or deadlines]</li>
-                            <li style="margin-bottom: 10px;">[Reminder 3 - Key contacts or resources]</li>
-                        </ul>
-                    </div>
-
-                    <div style="margin-bottom: 20px;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">ATTACHMENTS:</h3>
-                        <p style="margin: 0;">[List any attached documents or files, if applicable]</p>
-                    </div>
-
-                    <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #333;">
-                        <p style="margin: 0; font-weight: bold;">Sincerely,</p>
-                        <p style="margin: 20px 0 0 0; font-weight: bold;">[Your Signature]</p>
-                        <p style="margin: 5px 0;">[Your Typed Name]</p>
-                        <p style="margin: 5px 0;">[Your Title]</p>
-                        <p style="margin: 5px 0;">[Your Department]</p>
-                    </div>
-
-                    <div style="margin-top: 30px; background: #e8f5e8; border: 1px solid #c8e6c9; padding: 15px;">
-                        <p style="margin: 0; font-weight: bold; color: #2e7d32;">Please confirm receipt of this reminder and acknowledge the required actions.</p>
-                    </div>
-                </div>
-            `,
-      },
-      {
-        id: "meeting-minutes",
-        name: "Meeting Minutes",
-        description: "Formal meeting minutes template",
-        icon: "fas fa-clipboard",
-        content: `
-                <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
-                    <header style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px;">
-                        <h1 style="margin: 0; font-size: 28px; color: #333;">MEETING MINUTES</h1>
-                        <p style="margin: 5px 0; font-size: 14px; color: #666;">Meeting of: [Committee/Team Name]</p>
-                        <p style="margin: 5px 0; font-size: 14px; color: #666;">Date: ${new Date().toLocaleDateString()}</p>
-                        <p style="margin: 5px 0; font-size: 14px; color: #666;">Time: [Start Time] - [End Time]</p>
-                        <p style="margin: 5px 0; font-size: 14px; color: #666;">Location: [Meeting Location/Virtual Platform]</p>
-                    </header>
-
-                    <div style="margin-bottom: 30px;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">ATTENDEES:</h3>
-                        <div style="display: flex; justify-content: space-between;">
-                            <div style="width: 48%;">
-                                <p style="margin: 5px 0; font-weight: bold;">Present:</p>
-                                <ul style="margin: 0; padding-left: 20px;">
-                                    <li>[Attendee 1 Name] - [Role]</li>
-                                    <li>[Attendee 2 Name] - [Role]</li>
-                                    <li>[Attendee 3 Name] - [Role]</li>
-                                    <li>[Attendee 4 Name] - [Role]</li>
-                                </ul>
-                            </div>
-                            <div style="width: 48%;">
-                                <p style="margin: 5px 0; font-weight: bold;">Absent:</p>
-                                <ul style="margin: 0; padding-left: 20px;">
-                                    <li>[Absentee 1 Name] - [Role]</li>
-                                    <li>[Absentee 2 Name] - [Role]</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom: 30px;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">AGENDA ITEMS:</h3>
-                        <ol style="margin: 0; padding-left: 20px;">
-                            <li style="margin-bottom: 10px;">
-                                <strong>[Agenda Item 1]</strong><br>
-                                Discussion: [Summary of discussion]<br>
-                                Decision/Action: [Decision made or action required]
-                            </li>
-                            <li style="margin-bottom: 10px;">
-                                <strong>[Agenda Item 2]</strong><br>
-                                Discussion: [Summary of discussion]<br>
-                                Decision/Action: [Decision made or action required]
-                            </li>
-                            <li style="margin-bottom: 10px;">
-                                <strong>[Agenda Item 3]</strong><br>
-                                Discussion: [Summary of discussion]<br>
-                                Decision/Action: [Decision made or action required]
-                            </li>
-                        </ol>
-                    </div>
-
-                    <div style="margin-bottom: 30px;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">ACTION ITEMS:</h3>
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <thead>
-                                <tr style="background: #f5f5f5;">
-                                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Task</th>
-                                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Responsible</th>
-                                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Deadline</th>
-                                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Task 1 Description]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Person Responsible]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Due Date]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Pending/In Progress/Completed]</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Task 2 Description]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Person Responsible]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Due Date]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Pending/In Progress/Completed]</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Task 3 Description]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Person Responsible]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Due Date]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Pending/In Progress/Completed]</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div style="margin-bottom: 30px;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">NEXT MEETING:</h3>
-                        <p style="margin: 5px 0;">Date: [Next Meeting Date]</p>
-                        <p style="margin: 5px 0;">Time: [Next Meeting Time]</p>
-                        <p style="margin: 5px 0;">Location: [Next Meeting Location]</p>
-                        <p style="margin: 5px 0;">Agenda Items: [Brief description of topics for next meeting]</p>
-                    </div>
-
-                    <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #333;">
-                        <p style="margin: 0; font-weight: bold;">Prepared by:</p>
-                        <p style="margin: 10px 0; font-weight: bold;">[Your Name]</p>
-                        <p style="margin: 5px 0;">[Your Title/Role]</p>
-                        <p style="margin: 5px 0;">Date Prepared: ${new Date().toLocaleDateString()}</p>
-                    </div>
-
-                    <div style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px;">
-                        <p style="margin: 0; font-size: 12px; color: #666;">These minutes were approved at the meeting on [Approval Date].</p>
-                        <p style="margin: 5px 0 0 0; font-size: 12px; color: #666;">Distributed to: [List of distribution recipients]</p>
-                    </div>
-                </div>
-            `,
-      },
-      {
-        id: "essay",
-        name: "Essay",
-        description: "Five-paragraph essay structure",
-        icon: "fas fa-graduation-cap",
-        content: `
-                <div style="font-family: Times New Roman, serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6;">
-                    <header style="text-align: center; margin-bottom: 40px;">
-                        <h1 style="margin: 0; font-size: 24px;">[Essay Title]</h1>
-                        <p style="margin: 20px 0 0 0;">[Your Name]</p>
-                        <p style="margin: 5px 0;">[Course Name]</p>
-                        <p style="margin: 5px 0;">[Instructor Name]</p>
-                        <p style="margin: 5px 0;">[Date]</p>
-                    </header>
-
-                    <section style="margin-bottom: 30px;">
-                        <h2 style="font-size: 20px; margin-bottom: 15px;">Introduction</h2>
-                        <p>[Start with a hook to grab the reader's attention. This could be a surprising fact, a question, or a brief story.]</p>
-                        <p>[Provide background information on your topic to help the reader understand the context.]</p>
-                        <p>[End with your thesis statement - the main argument or point of your essay.]</p>
-                    </section>
-
-                    <section style="margin-bottom: 30px;">
-                        <h2 style="font-size: 20px; margin-bottom: 15px;">Body Paragraph 1</h2>
-                        <p>[Start with a topic sentence that introduces your first main point supporting the thesis.]</p>
-                        <p>[Provide evidence, examples, or explanations to support your point.]</p>
-                        <p>[Include analysis of how your evidence supports your thesis.]</p>
-                        <p>[End with a transition sentence to the next paragraph.]</p>
-                    </section>
-
-                    <section style="margin-bottom: 30px;">
-                        <h2 style="font-size: 20px; margin-bottom: 15px;">Body Paragraph 2</h2>
-                        <p>[Start with a topic sentence that introduces your second main point supporting the thesis.]</p>
-                        <p>[Provide evidence, examples, or explanations to support your point.]</p>
-                        <p>[Include analysis of how your evidence supports your thesis.]</p>
-                        <p>[End with a transition sentence to the next paragraph.]</p>
-                    </section>
-
-                    <section style="margin-bottom: 30px;">
-                        <h2 style="font-size: 20px; margin-bottom: 15px;">Body Paragraph 3</h2>
-                        <p>[Start with a topic sentence that introduces your third main point supporting the thesis.]</p>
-                        <p>[Provide evidence, examples, or explanations to support your point.]</p>
-                        <p>[Include analysis of how your evidence supports your thesis.]</p>
-                        <p>[End with a transition sentence to the conclusion.]</p>
-                    </section>
-
-                    <section style="margin-bottom: 30px;">
-                        <h2 style="font-size: 20px; margin-bottom: 15px;">Conclusion</h2>
-                        <p>[Restate your thesis in a new way, reminding the reader of your main argument.]</p>
-                        <p>[Summarize your main points from the body paragraphs.]</p>
-                        <p>[End with a final thought, call to action, or implication of your argument.]</p>
-                    </section>
-                </div>
-            `,
-      },
-      {
-        id: "project-proposal",
-        name: "Project Proposal",
-        description: "Comprehensive project proposal template",
-        icon: "fas fa-clipboard-list",
-        content: `
-                <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
-                    <header style="text-align: center; margin-bottom: 40px;">
-                        <h1 style="margin: 0; font-size: 28px; color: #333;">Project Proposal</h1>
-                        <h2 style="margin: 10px 0; font-size: 22px; color: #666;">[Project Name]</h2>
-                        <p style="margin: 5px 0;">Prepared by: [Your Name/Team]</p>
-                        <p style="margin: 5px 0;">Date: ${new Date().toLocaleDateString()}</p>
-                        <p style="margin: 5px 0;">Version: [Proposal Version]</p>
-                    </header>
-
-                    <div style="margin-bottom: 30px;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">EXECUTIVE SUMMARY</h3>
-                        <p style="line-height: 1.6;">[Provide a concise overview of the project, including its purpose, key objectives, expected outcomes, and why it should be approved. This section should be 1-2 paragraphs and give readers a complete understanding of the proposal.]</p>
-                    </div>
-
-                    <div style="margin-bottom: 30px;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">BACKGROUND & PROBLEM STATEMENT</h3>
-                        <p style="line-height: 1.6;">[Describe the current situation, the problem or opportunity being addressed, and why this project is necessary. Include relevant background information and context.]</p>
-                    </div>
-
-                    <div style="margin-bottom: 30px;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">PROJECT OBJECTIVES</h3>
-                        <ul style="margin: 0; padding-left: 20px;">
-                            <li style="margin-bottom: 10px;">[Objective 1: Specific, measurable, achievable, relevant, and time-bound]</li>
-                            <li style="margin-bottom: 10px;">[Objective 2: Specific, measurable, achievable, relevant, and time-bound]</li>
-                            <li style="margin-bottom: 10px;">[Objective 3: Specific, measurable, achievable, relevant, and time-bound]</li>
-                        </ul>
-                    </div>
-
-                    <div style="margin-bottom: 30px;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">METHODOLOGY & APPROACH</h3>
-                        <p style="line-height: 1.6;">[Describe how the project will be executed. Include the approach, methods, tools, and techniques that will be used. Explain why this approach is appropriate for achieving the project objectives.]</p>
-                    </div>
-
-                    <div style="margin-bottom: 30px;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">DELIVERABLES</h3>
-                        <ul style="margin: 0; padding-left: 20px;">
-                            <li style="margin-bottom: 10px;">[Deliverable 1: Description and expected completion date]</li>
-                            <li style="margin-bottom: 10px;">[Deliverable 2: Description and expected completion date]</li>
-                            <li style="margin-bottom: 10px;">[Deliverable 3: Description and expected completion date]</li>
-                        </ul>
-                    </div>
-
-                    <div style="margin-bottom: 30px;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">TIMELINE</h3>
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <thead>
-                                <tr style="background: #f5f5f5;">
-                                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Phase/Task</th>
-                                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Start Date</th>
-                                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">End Date</th>
-                                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Duration</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Phase 1: Planning]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Start Date]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[End Date]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Duration]</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Phase 2: Execution]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Start Date]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[End Date]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Duration]</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Phase 3: Review]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Start Date]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[End Date]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Duration]</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div style="margin-bottom: 30px;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">BUDGET & RESOURCES</h3>
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <thead>
-                                <tr style="background: #f5f5f5;">
-                                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Item</th>
-                                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Description</th>
-                                    <th style="padding: 10px; text-align: right; border: 1px solid #ddd;">Cost</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Resource 1]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Description]</td>
-                                    <td style="padding: 10px; text-align: right; border: 1px solid #ddd;">$[Cost]</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Resource 2]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Description]</td>
-                                    <td style="padding: 10px; text-align: right; border: 1px solid #ddd;">$[Cost]</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Resource 3]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Description]</td>
-                                    <td style="padding: 10px; text-align: right; border: 1px solid #ddd;">$[Cost]</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <p style="margin-top: 10px; font-weight: bold;">Total Estimated Budget: $[Total Budget]</p>
-                    </div>
-
-                    <div style="margin-bottom: 30px;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">RISK ASSESSMENT</h3>
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <thead>
-                                <tr style="background: #f5f5f5;">
-                                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Risk</th>
-                                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Likelihood</th>
-                                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Impact</th>
-                                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Mitigation Strategy</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Risk 1]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Low/Medium/High]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Low/Medium/High]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Mitigation strategy]</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Risk 2]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Low/Medium/High]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Low/Medium/High]</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">[Mitigation strategy]</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #333;">
-                        <p style="margin: 0; font-weight: bold;">APPROVAL</p>
-                        <p style="margin: 20px 0 0 0;">Approved by: _________________________</p>
-                        <p style="margin: 5px 0;">Name: [Approver Name]</p>
-                        <p style="margin: 5px 0;">Title: [Approver Title]</p>
-                        <p style="margin: 5px 0;">Date: _________________________</p>
-                    </div>
-                </div>
-            `,
-      },
-    ];
+    this.commands = new WebEditorCommands(this);
+    this.storage = new WebEditorStorage(this);
+    this.layout = new EditorLayout(this);
+    this.exports = new EditorExports(this);
+    this.workspace = new EditorWorkspace(this);
 
     // Initialize
     this.loadFromLocalStorage();
@@ -806,26 +77,20 @@ class CharlesWebEditor {
         this.autoSave();
       }
     }, 30000);
-    
+
     // Warn before leaving if there are unsaved changes
-    window.addEventListener('beforeunload', (e) => {
+    window.addEventListener("beforeunload", (e) => {
       if (this.hasUnsavedChanges) {
+        this.saveDocumentState();
         e.preventDefault();
-        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        e.returnValue =
+          "You have unsaved changes. Are you sure you want to leave?";
         return e.returnValue;
       }
     });
-    
+
     // Setup drag and drop for file opening
     this.setupDragAndDrop();
-
-    // Auto-start editor after 5 seconds for better UX
-    setTimeout(() => {
-      const welcomeScreen = document.getElementById("welcomeScreen");
-      if (welcomeScreen && welcomeScreen.classList.contains("active")) {
-        this.startEditor();
-      }
-    }, 5000);
 
     // Log version info
     console.info(
@@ -869,7 +134,7 @@ class CharlesWebEditor {
     // Sidebar tabs
     document.querySelectorAll(".sidebar-tab").forEach((tab) => {
       tab.addEventListener("click", (e) => {
-        this.switchSidebarTab(e.target.dataset.tab);
+        this.switchSidebarTab(e.currentTarget.dataset.tab);
       });
     });
 
@@ -1017,11 +282,6 @@ class CharlesWebEditor {
       exportDocxBtn.addEventListener("click", () => this.exportToDOCX());
     }
 
-    const saveCloudBtn = document.getElementById("saveCloud");
-    if (saveCloudBtn) {
-      saveCloudBtn.addEventListener("click", () => this.saveToCloud());
-    }
-
     const printBtn = document.getElementById("printBtn");
     if (printBtn) {
       printBtn.addEventListener("click", () => window.print());
@@ -1045,7 +305,9 @@ class CharlesWebEditor {
 
     const templateManagerBtn = document.getElementById("templateManagerBtn");
     if (templateManagerBtn) {
-      templateManagerBtn.addEventListener("click", () => this.showTemplateManagerModal());
+      templateManagerBtn.addEventListener("click", () =>
+        this.showTemplateManagerModal(),
+      );
     }
 
     // Page Layout button
@@ -1257,9 +519,18 @@ class CharlesWebEditor {
       });
     }
 
-    const sendEmailBtn = document.getElementById("sendEmailBtn");
-    if (sendEmailBtn) {
-      sendEmailBtn.addEventListener("click", () => {
+    // emailModal send button → sendEmailFromHeader()
+    const sendEmailBtnModal = document.getElementById("sendEmailBtn");
+    if (sendEmailBtnModal) {
+      sendEmailBtnModal.addEventListener("click", () => {
+        this.sendEmailFromHeader();
+      });
+    }
+
+    // emailShareModal send button → sendEmail()
+    const sendEmailShareBtn = document.getElementById("sendEmailShareBtn");
+    if (sendEmailShareBtn) {
+      sendEmailShareBtn.addEventListener("click", () => {
         this.sendEmail();
       });
     }
@@ -1271,6 +542,21 @@ class CharlesWebEditor {
         this.hideExportModal();
       });
     }
+
+    // Save Modal event listeners
+    const closeSaveModal = document.getElementById("closeSaveModal");
+    if (closeSaveModal) {
+      closeSaveModal.addEventListener("click", () => this.hideSaveModal());
+    }
+    const cancelSaveModal = document.getElementById("cancelSaveModal");
+    if (cancelSaveModal) {
+      cancelSaveModal.addEventListener("click", () => this.hideSaveModal());
+    }
+    document.querySelectorAll(".save-fmt-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        this.saveWithFormat(btn.dataset.format);
+      });
+    });
 
     // Email Modal event listeners (Header button)
     const closeEmailModal = document.getElementById("closeEmailModal");
@@ -1284,17 +570,6 @@ class CharlesWebEditor {
     if (cancelEmailBtn) {
       cancelEmailBtn.addEventListener("click", () => {
         this.hideEmailModal();
-      });
-    }
-
-    const sendEmailBtnHeader = document.getElementById("sendEmailBtn");
-    if (sendEmailBtnHeader) {
-      // Clone to replace existing listener
-      const newBtn = sendEmailBtnHeader.cloneNode(true);
-      sendEmailBtnHeader.parentNode.replaceChild(newBtn, sendEmailBtnHeader);
-
-      newBtn.addEventListener("click", () => {
-        this.sendEmailFromHeader();
       });
     }
 
@@ -1321,7 +596,9 @@ class CharlesWebEditor {
     }
 
     // Template Manager Modal event listeners (Header button)
-    const closeTemplateManagerModal = document.getElementById("closeTemplateManagerModal");
+    const closeTemplateManagerModal = document.getElementById(
+      "closeTemplateManagerModal",
+    );
     if (closeTemplateManagerModal) {
       closeTemplateManagerModal.addEventListener("click", () => {
         this.hideTemplateManagerModal();
@@ -1445,6 +722,14 @@ class CharlesWebEditor {
         }
       }
 
+      // Save modal
+      const saveModal = document.getElementById("saveModal");
+      if (saveModal && saveModal.classList.contains("active")) {
+        if (e.target === saveModal) {
+          this.hideSaveModal();
+        }
+      }
+
       // Email modal (Header)
       const emailModal = document.getElementById("emailModal");
       if (emailModal && emailModal.classList.contains("active")) {
@@ -1462,8 +747,13 @@ class CharlesWebEditor {
       }
 
       // Template Manager modal (Header)
-      const templateManagerModal = document.getElementById("templateManagerModal");
-      if (templateManagerModal && templateManagerModal.classList.contains("active")) {
+      const templateManagerModal = document.getElementById(
+        "templateManagerModal",
+      );
+      if (
+        templateManagerModal &&
+        templateManagerModal.classList.contains("active")
+      ) {
         if (e.target === templateManagerModal) {
           this.hideTemplateManagerModal();
         }
@@ -1512,6 +802,21 @@ class CharlesWebEditor {
 
     // Keyboard shortcuts
     document.addEventListener("keydown", (e) => {
+      // Focus mode toggle: Ctrl+Shift+F
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "f") {
+        e.preventDefault();
+        this.toggleFocusMode();
+        return;
+      }
+      // Exit focus mode with Escape
+      if (e.key === "Escape") {
+        const container = document.getElementById("editorContainer");
+        if (container && container.classList.contains("focus-mode")) {
+          this.toggleFocusMode();
+          return;
+        }
+      }
+      if ((e.ctrlKey || e.metaKey) && ["z","y"].includes(e.key.toLowerCase()) && e.target.closest("input,textarea,select")) return;
       if (e.ctrlKey || e.metaKey) {
         switch (e.key.toLowerCase()) {
           case "n":
@@ -1528,7 +833,11 @@ class CharlesWebEditor {
             break;
           case "z":
             e.preventDefault();
-            this.undo();
+            if (e.shiftKey) this.redo(); else this.undo();
+            break;
+          case "y":
+            e.preventDefault();
+            this.redo();
             break;
           case "f":
             e.preventDefault();
@@ -1540,7 +849,7 @@ class CharlesWebEditor {
             break;
           case "p":
             e.preventDefault();
-            this.window.print();
+            window.print();
             break;
           case "\\":
             e.preventDefault();
@@ -1558,6 +867,101 @@ class CharlesWebEditor {
     if (helpFab) {
       helpFab.addEventListener("click", () => this.showHelpModal());
     }
+
+    // Focus mode buttons
+    const focusModeBtn = document.getElementById("focusModeBtn");
+    if (focusModeBtn) {
+      focusModeBtn.addEventListener("click", () => this.toggleFocusMode());
+    }
+    const focusModeExitBtn = document.getElementById("focusModeExitBtn");
+    if (focusModeExitBtn) {
+      focusModeExitBtn.addEventListener("click", () => this.toggleFocusMode());
+    }
+
+    // Insert TOC button
+    const insertTOCBtn = document.getElementById("insertTOCBtn");
+    if (insertTOCBtn) {
+      insertTOCBtn.addEventListener("click", () => this.insertTOC());
+    }
+
+    // Text-to-Speech buttons
+    const ttsBtn = document.getElementById("ttsBtn");
+    if (ttsBtn) {
+      ttsBtn.addEventListener("click", () => {
+        if (this.ttsActive) {
+          this.stopTextToSpeech();
+        } else {
+          this.startTextToSpeech();
+        }
+      });
+    }
+    const ttsPauseBtn = document.getElementById("ttsPauseBtn");
+    if (ttsPauseBtn) {
+      ttsPauseBtn.addEventListener("click", () => this.pauseTextToSpeech());
+    }
+    const ttsStopBtn = document.getElementById("ttsStopBtn");
+    if (ttsStopBtn) {
+      ttsStopBtn.addEventListener("click", () => this.stopTextToSpeech());
+    }
+    const ttsSpeed = document.getElementById("ttsSpeed");
+    if (ttsSpeed) {
+      ttsSpeed.addEventListener("change", () => {
+        if (this.ttsActive) {
+          // Restart with new speed seamlessly
+          const selection = window.getSelection();
+          const hadSelection = selection && selection.toString().trim();
+          this.stopTextToSpeech();
+          if (!hadSelection) this.startTextToSpeech();
+        }
+      });
+    }
+
+    // Voice Dictation buttons
+    const dictateBtn = document.getElementById("dictateBtn");
+    if (dictateBtn) {
+      dictateBtn.addEventListener("click", () => this.toggleDictation());
+    }
+    const dictationStopBtn = document.getElementById("dictationStopBtn");
+    if (dictationStopBtn) {
+      dictationStopBtn.addEventListener("click", () => this.stopDictation());
+    }
+
+    // Header & Footer buttons
+    const headerFooterBtn = document.getElementById("headerFooterBtn");
+    if (headerFooterBtn) {
+      headerFooterBtn.addEventListener("click", () =>
+        this.openHeaderFooterMode("header"),
+      );
+    }
+    const hfPageNumBtn = document.getElementById("hfPageNumBtn");
+    if (hfPageNumBtn) {
+      hfPageNumBtn.addEventListener("click", () => this.insertHFPageNumber());
+    }
+    const hfDateBtn = document.getElementById("hfDateBtn");
+    if (hfDateBtn) {
+      hfDateBtn.addEventListener("click", () => this.insertHFDate());
+    }
+    const hfSwitchBtn = document.getElementById("hfSwitchBtn");
+    if (hfSwitchBtn) {
+      hfSwitchBtn.addEventListener("click", () => this.switchHFZone());
+    }
+    const hfCloseBtn = document.getElementById("hfCloseBtn");
+    if (hfCloseBtn) {
+      hfCloseBtn.addEventListener("click", () => this.closeHeaderFooterMode());
+    }
+
+    // Double-click to enter header/footer editing
+    document.getElementById("pageHeaderZone")?.addEventListener("dblclick", () => {
+      this.openHeaderFooterMode("header");
+    });
+    document.getElementById("pageFooterZone")?.addEventListener("dblclick", () => {
+      this.openHeaderFooterMode("footer");
+    });
+
+    // Click on editor body while in HF mode → close HF mode
+    this.editor.addEventListener("mousedown", () => {
+      if (this.hfEditMode) this.closeHeaderFooterMode();
+    });
 
     // Zoom controls
     const zoomInBtn = document.getElementById("zoomInBtn");
@@ -1677,302 +1081,9 @@ class CharlesWebEditor {
   }
 
   // All existing methods from the original implementation are preserved exactly
-  startEditor() {
-    const welcomeScreen = document.getElementById("welcomeScreen");
-    const editorContainer = document.getElementById("editorContainer");
+  startEditor() { document.getElementById("welcomeScreen").classList.remove("active"); document.getElementById("editorContainer").style.display = "flex"; this.layout.render(); this.updateWordCount(); window.statsDashboard?.updateStats?.(); }
 
-    if (!welcomeScreen || !editorContainer) {
-      console.error("❌ Missing critical DOM elements for editor transition!");
-      return;
-    }
-
-    // Add fade-out animation
-    welcomeScreen.style.transition = "opacity 0.3s ease-out";
-    welcomeScreen.style.opacity = "0";
-
-    setTimeout(() => {
-      welcomeScreen.classList.remove("active");
-      welcomeScreen.style.opacity = "1"; // Reset for next time
-      editorContainer.style.display = "flex";
-      editorContainer.style.opacity = "0";
-      editorContainer.style.transition = "opacity 0.3s ease-in";
-
-      setTimeout(() => {
-        editorContainer.style.opacity = "1";
-        if (this.editor) {
-          this.editor.focus();
-        }
-        this.showToast("Welcome to CharlesWebEditor!", "success");
-      }, 50);
-    }, 300);
-  }
-
-  showTour() {
-    this.showToast("Starting interactive tour...", "success");
-  }
-
-  toggleTheme() {
-    this.currentTheme = this.currentTheme === "light" ? "dark" : "light";
-    this.setTheme(this.currentTheme);
-  }
-
-  setTheme(theme) {
-    document.documentElement.setAttribute("data-theme", theme);
-
-    const themeIcon = document.getElementById("themeIcon");
-    if (themeIcon) {
-      themeIcon.className = theme === "dark" ? "fas fa-sun" : "fas fa-moon";
-    }
-
-    // Update editor page background
-    if (this.page) {
-      if (theme === "dark") {
-        this.page.style.background = "#1e293b";
-        this.page.style.color = "#f8fafc";
-      } else {
-        this.page.style.background = "white";
-        this.page.style.color = "black";
-      }
-    }
-
-    localStorage.setItem("editor_theme", theme);
-    this.showToast(`Switched to ${theme} mode`, "success");
-  }
-
-  saveToCloud() {
-    this.showToast("🔄 Saving to Google Drive...", "success");
-
-    // Check if user is already authenticated
-    const accessToken = localStorage.getItem("gdrive_access_token");
-    const refreshToken = localStorage.getItem("gdrive_refresh_token");
-    const tokenExpiry = localStorage.getItem("gdrive_token_expiry");
-
-    if (accessToken) {
-      // Check if token is expired
-      const now = Date.now();
-      if (tokenExpiry && now > parseInt(tokenExpiry)) {
-        // Token expired, try to refresh
-        if (refreshToken) {
-          this.refreshGoogleDriveToken(refreshToken);
-        } else {
-          // Need to re-authenticate
-          this.authenticateWithGoogleDrive();
-        }
-      } else {
-        // Token is still valid, upload directly
-        this.uploadToGoogleDrive(accessToken);
-      }
-    } else {
-      // No authentication yet, initiate setup
-      this.authenticateWithGoogleDrive();
-    }
-  }
-
-  authenticateWithGoogleDrive() {
-    const storedClientId = localStorage.getItem("gdrive_client_id");
-
-    if (storedClientId) {
-      // Already configured, use stored Client ID
-      this.initiateGoogleOAuthFlow(storedClientId);
-    } else {
-      // First time setup - show setup dialog
-      this.showGoogleDriveSetupDialog();
-    }
-  }
-
-  showGoogleDriveSetupDialog() {
-    // Create a more user-friendly setup experience
-    const setupText = `Google Drive Cloud Storage Setup
-
-To enable automatic saving to Google Drive, please follow these steps:
-
-STEP 1: Create Google Cloud Project
-1. Go to: https://console.cloud.google.com/
-2. Create a new project or select existing one
-3. Click "APIs & Services" → "Library"
-4. Search and enable "Google Drive API"
-
-STEP 2: Create OAuth Credentials
-1. Go to "APIs & Services" → "Credentials"
-2. Click "Create Credentials" → "OAuth 2.0 Client ID"
-3. Select "Web application"
-4. Add authorized redirect URI: ${window.location.origin}
-5. Click "Create"
-
-STEP 3: Copy Your Client ID
-1. From the credentials page, copy the "Client ID"
-2. Paste it below
-
-Enter your Google Client ID:`;
-
-    const clientId = prompt(setupText);
-
-    if (clientId && clientId.trim()) {
-      localStorage.setItem("gdrive_client_id", clientId.trim());
-      this.showToast(
-        "✅ Client ID saved! Initiating authentication...",
-        "success",
-      );
-      setTimeout(() => this.initiateGoogleOAuthFlow(clientId.trim()), 1000);
-    } else if (clientId === null) {
-      // User clicked cancel
-      this.showToast("Google Drive setup cancelled", "warning");
-    } else {
-      this.showToast("Please enter a valid Client ID", "error");
-    }
-  }
-
-  initiateGoogleOAuthFlow(clientId) {
-    const redirectUri = window.location.origin;
-    const scope = "https://www.googleapis.com/auth/drive.file";
-    const state = Math.random().toString(36).substring(7);
-
-    localStorage.setItem("gdrive_oauth_state", state);
-
-    const authUrl =
-      `https://accounts.google.com/o/oauth2/v2/auth?` +
-      `client_id=${encodeURIComponent(clientId)}` +
-      `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-      `&response_type=code` +
-      `&scope=${encodeURIComponent(scope)}` +
-      `&state=${state}` +
-      `&access_type=offline` +
-      `&prompt=consent`;
-
-    // Store client ID for future reference
-    localStorage.setItem("gdrive_client_id", clientId);
-
-    // Open Google OAuth in new window
-    const authWindow = window.open(
-      authUrl,
-      "google_auth",
-      "width=500,height=600",
-    );
-
-    // Listen for the OAuth callback
-    const checkClosed = setInterval(() => {
-      if (authWindow.closed) {
-        clearInterval(checkClosed);
-        this.showToast("Authentication window closed", "warning");
-      }
-    }, 1000);
-
-    this.showToast("📲 Opening Google authentication...", "info");
-  }
-
-  refreshGoogleDriveToken(refreshToken) {
-    const clientId = localStorage.getItem("gdrive_client_id");
-    const clientSecret = localStorage.getItem("gdrive_client_secret");
-
-    if (!clientId) {
-      this.authenticateWithGoogleDrive();
-      return;
-    }
-
-    const tokenData = {
-      grant_type: "refresh_token",
-      refresh_token: refreshToken,
-      client_id: clientId,
-      scope: "https://www.googleapis.com/auth/drive.file",
-    };
-
-    if (clientSecret) {
-      tokenData.client_secret = clientSecret;
-    }
-
-    fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams(tokenData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.access_token) {
-          localStorage.setItem("gdrive_access_token", data.access_token);
-          if (data.refresh_token) {
-            localStorage.setItem("gdrive_refresh_token", data.refresh_token);
-          }
-          const expiryTime = Date.now() + data.expires_in * 1000;
-          localStorage.setItem("gdrive_token_expiry", expiryTime.toString());
-
-          this.uploadToGoogleDrive(data.access_token);
-        } else {
-          // Refresh failed, re-authenticate
-          this.authenticateWithGoogleDrive();
-        }
-      })
-      .catch((error) => {
-        console.error("Google Drive token refresh error:", error);
-        this.authenticateWithGoogleDrive();
-      });
-  }
-
-  uploadToGoogleDrive(accessToken) {
-    const fileName =
-      (this.currentDoc.name || "document").replace(/[^\w\s-]/g, "") + ".html";
-    const fileContent = this.currentDoc.content || this.editor.innerHTML;
-
-    // First, create file metadata
-    const metadata = {
-      name: fileName,
-      mimeType: "text/html",
-    };
-
-    // Create multipart form data
-    const boundary = "-------314159265358979323846";
-    const delimiter = "\r\n--" + boundary + "\r\n";
-    const close_delim = "\r\n--" + boundary + "--";
-
-    const multipartRequestBody =
-      delimiter +
-      "Content-Type: application/json\r\n\r\n" +
-      JSON.stringify(metadata) +
-      delimiter +
-      "Content-Type: text/html\r\n\r\n" +
-      fileContent +
-      close_delim;
-
-    // Upload to Google Drive using Google Drive API
-    fetch(
-      "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": 'multipart/related; boundary="' + boundary + '"',
-        },
-        body: multipartRequestBody,
-      },
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.id) {
-          this.showToast(
-            "✅ Document saved to Google Drive successfully!",
-            "success",
-          );
-          this.currentDoc.lastSave = new Date();
-
-          // Update status bar
-          const timestamp = new Date().toLocaleTimeString();
-          this.updateSaveStatus(`✓ Google Drive (${timestamp})`);
-
-          // Store file ID for future reference
-          localStorage.setItem(`gdrive_file_${this.currentDocId}`, data.id);
-        } else {
-          throw new Error("Upload failed: " + JSON.stringify(data));
-        }
-      })
-      .catch((error) => {
-        console.error("Google Drive upload error:", error);
-        this.showToast(
-          "⚠️ Failed to save to Google Drive. Check console for details.",
-          "error",
-        );
-      });
-  }
+  showTour() { this.showHelpModal(); }
 
   showHelpModal() {
     const modal = document.getElementById("helpModal");
@@ -2036,455 +1147,37 @@ Enter your Google Client ID:`;
 
   // Missing methods that are referenced in event listeners
   addNewDocument() {
-    const docId = "doc" + Date.now();
-    const docName = `Document ${Object.keys(this.documents).length + 1}`;
+  clearTimeout(this.autoSaveTimer); this.saveDocumentState();
+  const id = "doc-" + crypto.randomUUID();
+  const doc = this.storage.normalize({id,name:"Untitled document",content:"<p><br></p>"});
+  this.documents[id] = doc; this.storage.rebuildTabs(); this.switchDocument(id); this.saveDocumentState();
+}
 
-    this.documents[docId] = {
-      id: docId,
-      name: docName,
-      content: "",
-      history: [],
-      historyIndex: -1,
-      lastSave: null,
-    };
+  insertImage() { const input=document.createElement("input");input.type="file";input.accept="image/png,image/jpeg,image/gif,image/webp";const id=this.currentDocId;this.commands.remember();input.onchange=()=>{const file=input.files[0];if(!file)return;if(!/^image\/(png|jpeg|gif|webp)$/.test(file.type)||file.size>10*1024*1024)return this.showToast("Choose a PNG, JPEG, GIF, or WebP image under 10 MB.","warning");const reader=new FileReader();reader.onload=()=>{if(this.currentDocId!==id)return this.showToast("The document changed. Insert the image again.","info");const img=document.createElement("img");img.src=reader.result;img.alt=file.name.replace(/\.[^.]+$/,"");this.executeCommand("insertHTML",img.outerHTML);};reader.readAsDataURL(file);};input.click(); }
 
-    const tab = document.createElement("div");
-    tab.className = "tab";
-    tab.dataset.docId = docId;
-    tab.innerHTML = `
-            <i class="fas fa-file-alt"></i>
-            <span>${docName}</span>
-            <span class="tab-close"><i class="fas fa-times"></i></span>
-        `;
+  insertTable() { this.workspace.insertTable(); }
 
-    document.getElementById("documentTabs").appendChild(tab);
-    this.switchDocument(docId);
-  }
+  insertLink() { this.workspace.insertLink(); }
 
-  insertImage() {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
+  toggleSidebar() { const collapsed=document.getElementById("sidebar").classList.toggle("collapsed");document.getElementById("toggleSidebarBtn").setAttribute("aria-expanded",!collapsed);this.layout.render(); }
 
-    input.onchange = (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const img = document.createElement("img");
-          img.src = event.target.result;
-          img.className = "editor-image";
-          img.style.maxWidth = "300px";
-          img.style.height = "auto";
-          img.style.margin = "10px 0";
+  findNext() { this.commands.find(document.getElementById("findInput").value); }
 
-          this.executeCommand("insertHTML", img.outerHTML);
-          this.saveDocumentState();
-        };
-        reader.readAsDataURL(file);
-      }
-    };
-
-    input.click();
-  }
-
-  insertTable() {
-    const rows = prompt("Enter number of rows:", "3");
-    const cols = prompt("Enter number of columns:", "3");
-
-    if (rows && cols) {
-      const table = document.createElement("table");
-      table.style.width = "100%";
-      table.style.borderCollapse = "collapse";
-      table.style.margin = "10px 0";
-
-      for (let i = 0; i < parseInt(rows); i++) {
-        const row = document.createElement("tr");
-
-        for (let j = 0; j < parseInt(cols); j++) {
-          const cell = document.createElement("td");
-          cell.innerHTML = "&nbsp;";
-          cell.style.border = "1px solid #ccc";
-          cell.style.padding = "8px";
-          row.appendChild(cell);
-        }
-
-        table.appendChild(row);
-      }
-
-      this.executeCommand("insertHTML", table.outerHTML);
-      this.saveDocumentState();
-    }
-  }
-
-  insertLink() {
-    const url = prompt("Enter the URL:", "https://");
-    const text = prompt("Enter link text:", "Click here");
-
-    if (url && text) {
-      const link = document.createElement("a");
-      link.href = url;
-      link.textContent = text;
-      link.style.color = "#2563eb";
-      link.style.textDecoration = "underline";
-
-      this.executeCommand("insertHTML", link.outerHTML);
-      this.saveDocumentState();
-      this.showToast("Link inserted successfully", "success");
-    }
-  }
-
-  toggleSidebar() {
-    document.getElementById("sidebar").classList.toggle("collapsed");
-    const btn = document.getElementById("toggleSidebarBtn");
-    btn.classList.toggle("active");
-  }
-
-  findNext() {
-    const findText = document.getElementById("findInput").value;
-    if (!findText) {
-      this.showToast("Please enter text to find", "warning");
-      return;
-    }
-
-    // Get the current selection or start from beginning
-    const selection = window.getSelection();
-    let startNode = selection.anchorNode;
-    let startOffset = selection.anchorOffset;
-
-    // If no selection, start from the beginning of the editor
-    if (!startNode || !this.editor.contains(startNode)) {
-      startNode = this.editor;
-      startOffset = 0;
-    }
-
-    // Get all text content
-    const editorText = this.editor.textContent || this.editor.innerText;
-
-    // Find the current position in the text
-    let currentPosition = 0;
-    const walker = document.createTreeWalker(
-      this.editor,
-      NodeFilter.SHOW_TEXT,
-      null,
-      false,
-    );
-
-    let node;
-    while ((node = walker.nextNode())) {
-      if (node === startNode) {
-        currentPosition += startOffset;
-        break;
-      }
-      currentPosition += node.textContent.length;
-    }
-
-    // Search for the text (case-insensitive)
-    const searchText = findText.toLowerCase();
-    const lowerText = editorText.toLowerCase();
-    const foundIndex = lowerText.indexOf(searchText, currentPosition + 1);
-
-    if (foundIndex === -1) {
-      // Try from the beginning
-      const foundFromStart = lowerText.indexOf(searchText, 0);
-      if (foundFromStart === -1) {
-        this.showToast(`"${findText}" not found`, "warning");
-        return;
-      }
-      // Found from start, select it
-      this.selectTextAtPosition(
-        foundFromStart,
-        foundFromStart + findText.length,
-      );
-      this.showToast(`Found "${findText}" (wrapped to beginning)`, "success");
-    } else {
-      // Found, select it
-      this.selectTextAtPosition(foundIndex, foundIndex + findText.length);
-      this.showToast(`Found "${findText}"`, "success");
-    }
-  }
-
-  findPrevious() {
-    const findText = document.getElementById("findInput").value;
-    if (!findText) {
-      this.showToast("Please enter text to find", "warning");
-      return;
-    }
-
-    // Get the current selection
-    const selection = window.getSelection();
-    let startNode = selection.anchorNode;
-    let startOffset = selection.anchorOffset;
-
-    // Get all text content
-    const editorText = this.editor.textContent || this.editor.innerText;
-
-    // Find the current position in the text
-    let currentPosition = 0;
-    const walker = document.createTreeWalker(
-      this.editor,
-      NodeFilter.SHOW_TEXT,
-      null,
-      false,
-    );
-
-    let node;
-    while ((node = walker.nextNode())) {
-      if (node === startNode) {
-        currentPosition += startOffset;
-        break;
-      }
-      currentPosition += node.textContent.length;
-    }
-
-    // If at the beginning, start from the end
-    if (currentPosition === 0) {
-      currentPosition = editorText.length;
-    }
-
-    // Search backwards for the text (case-insensitive)
-    const searchText = findText.toLowerCase();
-    const lowerText = editorText.toLowerCase();
-    const foundIndex = lowerText.lastIndexOf(searchText, currentPosition - 2);
-
-    if (foundIndex === -1) {
-      // Try from the end
-      const foundFromEnd = lowerText.lastIndexOf(searchText);
-      if (foundFromEnd === -1) {
-        this.showToast(`"${findText}" not found`, "warning");
-        return;
-      }
-      // Found from end, select it
-      this.selectTextAtPosition(foundFromEnd, foundFromEnd + findText.length);
-      this.showToast(`Found "${findText}" (wrapped to end)`, "success");
-    } else {
-      // Found, select it
-      this.selectTextAtPosition(foundIndex, foundIndex + findText.length);
-      this.showToast(`Found "${findText}"`, "success");
-    }
-  }
+  findPrevious() { this.commands.find(document.getElementById("findInput").value,true); }
 
   // Helper function to select text at a specific position
-  selectTextAtPosition(start, end) {
-    const range = document.createRange();
-    const selection = window.getSelection();
+  selectTextAtPosition(start,end) { const range=this.commands.textRange(start,end);if(!range)return;getSelection().removeAllRanges();getSelection().addRange(range);this.commands.remember(); }
 
-    // Walk through text nodes to find the right position
-    const walker = document.createTreeWalker(
-      this.editor,
-      NodeFilter.SHOW_TEXT,
-      null,
-      false,
-    );
-
-    let currentPos = 0;
-    let startNode = null,
-      startOffset = 0;
-    let endNode = null,
-      endOffset = 0;
-    let node;
-
-    while ((node = walker.nextNode())) {
-      const nodeLength = node.textContent.length;
-
-      if (!startNode && currentPos + nodeLength >= start) {
-        startNode = node;
-        startOffset = start - currentPos;
-      }
-
-      if (!endNode && currentPos + nodeLength >= end) {
-        endNode = node;
-        endOffset = end - currentPos;
-        break;
-      }
-
-      currentPos += nodeLength;
-    }
-
-    if (startNode && endNode) {
-      range.setStart(startNode, startOffset);
-      range.setEnd(endNode, endOffset);
-      selection.removeAllRanges();
-      selection.addRange(range);
-
-      // Scroll the selection into view
-      const rect = range.getBoundingClientRect();
-      if (rect.top < 0 || rect.bottom > window.innerHeight) {
-        startNode.parentElement.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-      }
-    }
-  }
-
-  replaceCurrent() {
-    const findText = document.getElementById("replaceFindInput").value;
-    const replaceText = document.getElementById("replaceInput").value;
-
-    if (!findText) {
-      this.showToast("Please enter text to find", "warning");
-      return;
-    }
-
-    const selection = window.getSelection();
-    const selectedText = selection.toString();
-
-    if (selectedText && selectedText.toLowerCase() === findText.toLowerCase()) {
-      // Replace the selected text
-      this.executeCommand("insertText", replaceText);
-      this.saveDocumentState();
-      this.showToast("Text replaced", "success");
-
-      // Find next occurrence
-      setTimeout(() => {
-        this.findNextInReplace();
-      }, 100);
-    } else {
-      // Find first occurrence
-      this.findNextInReplace();
-    }
-  }
+  replaceCurrent() { this.commands.replaceCurrent(); }
 
   // Helper function for find in replace modal
-  findNextInReplace() {
-    const findText = document.getElementById("replaceFindInput").value;
-    if (!findText) {
-      this.showToast("Please enter text to find", "warning");
-      return;
-    }
+  findNextInReplace() { this.commands.find(document.getElementById("replaceFindInput").value); }
 
-    // Get the current selection or start from beginning
-    const selection = window.getSelection();
-    let startNode = selection.anchorNode;
-    let startOffset = selection.anchorOffset;
+  replaceAll() { this.commands.replaceAll(); }
 
-    if (!startNode || !this.editor.contains(startNode)) {
-      startNode = this.editor;
-      startOffset = 0;
-    }
+  clearRecentDocuments() { this.storage.clearRecent(); }
 
-    const editorText = this.editor.textContent || this.editor.innerText;
-
-    let currentPosition = 0;
-    const walker = document.createTreeWalker(
-      this.editor,
-      NodeFilter.SHOW_TEXT,
-      null,
-      false,
-    );
-
-    let node;
-    while ((node = walker.nextNode())) {
-      if (node === startNode) {
-        currentPosition += startOffset;
-        break;
-      }
-      currentPosition += node.textContent.length;
-    }
-
-    const searchText = findText.toLowerCase();
-    const lowerText = editorText.toLowerCase();
-    const foundIndex = lowerText.indexOf(searchText, currentPosition + 1);
-
-    if (foundIndex === -1) {
-      const foundFromStart = lowerText.indexOf(searchText, 0);
-      if (foundFromStart === -1) {
-        this.showToast(`"${findText}" not found`, "warning");
-        return;
-      }
-      this.selectTextAtPosition(
-        foundFromStart,
-        foundFromStart + findText.length,
-      );
-      this.showToast(`Found "${findText}" (wrapped to beginning)`, "success");
-    } else {
-      this.selectTextAtPosition(foundIndex, foundIndex + findText.length);
-      this.showToast(`Found "${findText}"`, "success");
-    }
-  }
-
-  replaceAll() {
-    const findText = document.getElementById("replaceFindInput").value;
-    const replaceText = document.getElementById("replaceInput").value;
-
-    if (!findText) {
-      this.showToast("Please enter text to find", "warning");
-      return;
-    }
-
-    // Get the text content
-    let content = this.editor.textContent || this.editor.innerText;
-
-    // Count occurrences
-    const searchText = findText.toLowerCase();
-    const lowerContent = content.toLowerCase();
-    let count = 0;
-    let pos = 0;
-
-    while ((pos = lowerContent.indexOf(searchText, pos)) !== -1) {
-      count++;
-      pos += searchText.length;
-    }
-
-    if (count === 0) {
-      this.showToast(`"${findText}" not found`, "warning");
-      return;
-    }
-
-    // Replace all occurrences (case-insensitive)
-    const regex = new RegExp(
-      findText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-      "gi",
-    );
-    content = content.replace(regex, replaceText);
-
-    // Update the editor content
-    this.editor.textContent = content;
-    this.saveDocumentState();
-    this.showToast(
-      `Replaced ${count} occurrence${count > 1 ? "s" : ""} of "${findText}"`,
-      "success",
-    );
-  }
-
-  clearRecentDocuments() {
-    if (confirm("Are you sure you want to clear all recent documents?")) {
-      this.recentDocuments = [];
-      localStorage.removeItem("charles_editor_recent_docs");
-      this.updateRecentDocumentsList();
-      this.showToast("Recent documents cleared", "success");
-    }
-  }
-
-  confirmRename() {
-    const newName = document.getElementById("renameInput").value.trim();
-
-    if (!newName) {
-      this.showToast("Please enter a document name", "error");
-      return;
-    }
-
-    // Update document name
-    this.currentDoc.name = newName;
-
-    // Update tab display
-    const tab = document.querySelector(
-      `.tab[data-doc-id="${this.currentDocId}"]`,
-    );
-    if (tab) {
-      tab.querySelector("span").textContent = newName;
-    }
-
-    // Save to localStorage
-    localStorage.setItem(
-      `charles_editor_doc_${this.currentDocId}_name`,
-      newName,
-    );
-
-    this.hideRenameModal();
-    this.showToast(`Document renamed to "${newName}"`, "success");
-  }
+  confirmRename() { const name=document.getElementById("renameInput").value.trim();if(!name)return;this.currentDoc.name=name;this.storage.rebuildTabs();this.saveDocumentState();this.hideRenameModal(); }
 
   hideRenameModal() {
     const modal = document.getElementById("renameModal");
@@ -2493,147 +1186,30 @@ Enter your Google Client ID:`;
     }
   }
 
-  switchDocument(docId) {
-    if (!this.documents[docId]) return;
+  switchDocument(id) {
+  if (!this.documents[id]) return;
+  clearTimeout(this.autoSaveTimer); this.saveDocumentState();
+  if (this.hfEditMode) this.closeHeaderFooterMode();
+  this.contextMenuDocId = null; this.currentDocId = id; this.currentDoc = this.documents[id];
+  this.storage.apply(this.storage.stateFromRecord(this.currentDoc));
+  this.storage.rebuildTabs(); this.storage.persistSession(); this.workspace.renderHistory();
+  this.updateSaveStatus(this.currentDoc.dirty ? "Unsaved changes" : this.currentDoc.lastSave ? "Saved in this browser" : "Not saved yet");
+}
 
-    this.currentDoc.content = this.editor.innerHTML;
+  closeDocument(id) {
+  if (!this.documents[id]) return;
+  if (Object.keys(this.documents).length === 1) return this.showToast("Keep at least one document open.", "info");
+  if (this.currentDocId === id) this.switchDocument(Object.keys(this.documents).find(key=>key!==id));
+  delete this.documents[id]; this.storage.rebuildTabs(); this.storage.persistSession();
+}
 
-    document.querySelectorAll(".tab").forEach((tab) => {
-      tab.classList.remove("active");
-      if (tab.dataset.docId === docId) {
-        tab.classList.add("active");
-      }
-    });
+  saveDocumentState(recordHistory = true) { return this.storage.save(recordHistory); }
 
-    this.currentDocId = docId;
-    this.currentDoc = this.documents[docId];
+  loadFromLocalStorage() { this.storage.loadLegacyCurrent(); }
 
-    this.editor.innerHTML = this.currentDoc.content || "<p>New document</p>";
+  loadRecentDocuments() { this.recentDocuments = []; }
 
-    this.updateWordCount();
-    this.updateStatusBar();
-
-    this.showToast(`Switched to ${this.currentDoc.name}`, "success");
-  }
-
-  closeDocument(docId) {
-    if (Object.keys(this.documents).length <= 1) {
-      this.showToast("Cannot close the last document", "error");
-      return;
-    }
-
-    this.documents[docId].content = this.editor.innerHTML;
-
-    const tab = document.querySelector(`.tab[data-doc-id="${docId}"]`);
-    if (tab) tab.remove();
-
-    delete this.documents[docId];
-
-    const remainingDocId = Object.keys(this.documents)[0];
-    this.switchDocument(remainingDocId);
-  }
-
-  saveDocumentState() {
-    const sanitizeHTML = (html) => {
-      const temp = document.createElement("div");
-      temp.innerHTML = html;
-      temp.querySelectorAll("script, style").forEach((el) => el.remove());
-      temp.querySelectorAll("*").forEach((el) => {
-        [...el.attributes].forEach((attr) => {
-          if (/^on/i.test(attr.name)) el.removeAttribute(attr.name);
-        });
-      });
-      return temp.innerHTML;
-    };
-    const content = sanitizeHTML(this.editor.innerHTML);
-    this.currentDoc.content = content;
-    if (!this.currentDoc.history) {
-      this.currentDoc.history = [];
-      this.currentDoc.historyIndex = -1;
-    }
-    if (this.currentDoc.historyIndex < this.currentDoc.history.length - 1) {
-      this.currentDoc.history = this.currentDoc.history.slice(
-        0,
-        this.currentDoc.historyIndex + 1,
-      );
-    }
-    if (
-      this.currentDoc.history.length === 0 ||
-      this.currentDoc.history[this.currentDoc.history.length - 1] !== content
-    ) {
-      this.currentDoc.history.push(content);
-      this.currentDoc.historyIndex = this.currentDoc.history.length - 1;
-    }
-    localStorage.setItem(`charles_editor_doc_${this.currentDocId}`, content);
-    localStorage.setItem(
-      `charles_editor_doc_${this.currentDocId}_name`,
-      this.currentDoc.name,
-    );
-    this.currentDoc.lastSave = new Date();
-    this.hasUnsavedChanges = false;
-    this.updateSaveStatus("Auto-saved");
-
-    // Save to recent documents
-    this.saveToRecent(this.currentDoc);
-  }
-
-  loadFromLocalStorage() {
-    const savedContent = localStorage.getItem(
-      `charles_editor_doc_${this.currentDocId}`,
-    );
-    if (savedContent) {
-      this.currentDoc.content = savedContent;
-      this.editor.innerHTML = savedContent;
-
-      const savedName = localStorage.getItem(
-        `charles_editor_doc_${this.currentDocId}_name`,
-      );
-      if (savedName) {
-        this.currentDoc.name = savedName;
-        const tab = document.querySelector(
-          `.tab[data-doc-id="${this.currentDocId}"]`,
-        );
-        if (tab) {
-          tab.querySelector("span").textContent = savedName;
-        }
-      }
-    }
-  }
-
-  loadRecentDocuments() {
-    const recent = localStorage.getItem("charles_editor_recent_docs");
-    this.recentDocuments = recent ? JSON.parse(recent) : [];
-  }
-
-  saveToRecent(document) {
-    const recentDoc = {
-      id: document.id,
-      name: document.name,
-      lastModified: document.lastSave || new Date().toISOString(),
-      contentPreview: (document.content || "")
-        .replace(/<[^>]*>/g, "")
-        .substring(0, 100),
-    };
-
-    // Remove if already exists
-    this.recentDocuments = this.recentDocuments.filter(
-      (doc) => doc.id !== document.id,
-    );
-
-    // Add to beginning
-    this.recentDocuments.unshift(recentDoc);
-
-    // Keep only last 10
-    this.recentDocuments = this.recentDocuments.slice(0, 10);
-
-    // Save to localStorage
-    localStorage.setItem(
-      "charles_editor_recent_docs",
-      JSON.stringify(this.recentDocuments),
-    );
-
-    this.updateRecentDocumentsList();
-  }
+  saveToRecent() { this.storage.refreshRecent(); }
 
   updateRecentDocumentsList() {
     const recentList = document.getElementById("recentList");
@@ -2651,12 +1227,12 @@ Enter your Google Client ID:`;
         const timeAgo = this.getTimeAgo(date);
 
         return `
-                <div class="recent-item" data-doc-id="${doc.id}">
+                <div class="recent-item" data-doc-id="${this.escapeHtml(doc.id)}">
                     <div class="recent-item-info">
-                        <div class="recent-item-name">${doc.name}</div>
-                        <div class="recent-item-meta">${timeAgo} • ${doc.contentPreview}...</div>
+                        <div class="recent-item-name">${this.escapeHtml(doc.name)}</div>
+                        <div class="recent-item-meta">${this.escapeHtml(timeAgo)} • ${this.escapeHtml(doc.contentPreview)}...</div>
                     </div>
-                    <button class="recent-item-action" onclick="window.charlesEditor.openRecentDocument('${doc.id}')">
+                    <button class="recent-item-action" onclick="window.charlesEditor.openRecentDocument('${this.escapeHtml(doc.id)}')">
                         Open
                     </button>
                 </div>
@@ -2676,41 +1252,10 @@ Enter your Google Client ID:`;
     return date.toLocaleDateString();
   }
 
-  openRecentDocument(docId) {
-    const recentDoc = this.recentDocuments.find((doc) => doc.id === docId);
-    if (!recentDoc) return;
-
-    // Check if document exists in current session
-    if (this.documents[docId]) {
-      this.switchDocument(docId);
-      return;
-    }
-
-    // Create new document from recent
-    this.documents[docId] = {
-      id: docId,
-      name: recentDoc.name,
-      content: recentDoc.content || "",
-      history: [],
-      historyIndex: -1,
-      lastSave: recentDoc.lastModified,
-    };
-
-    // Create tab
-    const tab = document.createElement("div");
-    tab.className = "tab";
-    tab.dataset.docId = docId;
-    tab.innerHTML = `
-            <span>${recentDoc.name}</span>
-            <button class="tab-close">×</button>
-        `;
-    document.getElementById("documentTabs").appendChild(tab);
-
-    this.switchDocument(docId);
-    this.showToast(`Opened: ${recentDoc.name}`, "success");
-  }
+  openRecentDocument(id) { this.storage.open(id); }
 
   switchSidebarTab(tabName) {
+    if (tabName === "stats") window.statsDashboard?.updateStats?.();
     document.querySelectorAll(".sidebar-tab").forEach((tab) => {
       tab.classList.remove("active");
       if (tab.dataset.tab === tabName) {
@@ -2726,82 +1271,12 @@ Enter your Google Client ID:`;
     });
   }
 
-  applyStyle(style) {
-    switch (style) {
-      case "heading1":
-        this.executeCommand("formatBlock", "<h1>");
-        break;
-      case "heading2":
-        this.executeCommand("formatBlock", "<h2>");
-        break;
-      case "heading3":
-        this.executeCommand("formatBlock", "<h3>");
-        break;
-      case "normal":
-        this.executeCommand("formatBlock", "<p>");
-        break;
-    }
-    this.saveDocumentState();
-  }
+  updateTemplatesList() { this.workspace.templateCards(document.getElementById('templatesList')); }
 
-  updateTemplatesList() {
-    const templatesList = document.getElementById("templatesList");
-
-    // Guard against missing element - templatesList may not exist in all views
-    if (!templatesList) {
-      return;
-    }
-
-    templatesList.innerHTML = `
-            <div class="template-grid">
-                ${this.templates
-                  .map(
-                    (template) => `
-                    <div class="template-item" onclick="window.charlesEditor.applyTemplate('${template.id}')">
-                        <div class="template-icon">
-                            <i class="${template.icon}"></i>
-                        </div>
-                        <div class="template-name">${template.name}</div>
-                        <div class="template-description">${template.description}</div>
-                    </div>
-                `,
-                  )
-                  .join("")}
-            </div>
-        `;
-  }
-
-  applyTemplate(templateId) {
-    const template = this.templates.find((t) => t.id === templateId);
-    if (!template) return;
-
-    this.editor.innerHTML = template.content;
-    this.saveDocumentState();
-    this.showToast(`Applied ${template.name} template`, "success");
-  }
+  applyTemplate(id) { const template=this.templates.find(t=>t.id===id);if(!template)return;this.commands.change(()=>{this.editor.innerHTML=WebEditorCommands.sanitize(template.content);});this.commands.clearSelection(); }
 
   // Page Layout Modal Functions
-  showPageLayoutModal() {
-    const modal = document.getElementById("pageLayoutModal");
-    if (modal) {
-      modal.classList.add("active");
-      // Set current values
-      const pageSizeSelect = document.getElementById("pageSizeSelectModal");
-      const pageOrientation = document.getElementById("pageOrientationModal");
-      const marginTop = document.getElementById("marginTopModal");
-      const marginBottom = document.getElementById("marginBottomModal");
-      const marginLeft = document.getElementById("marginLeftModal");
-      const marginRight = document.getElementById("marginRightModal");
-
-      if (pageSizeSelect) pageSizeSelect.value = this.currentPageSize || "a4";
-      if (pageOrientation)
-        pageOrientation.value = this.currentPageOrientation || "portrait";
-      if (marginTop) marginTop.value = this.currentMarginTop || 25;
-      if (marginBottom) marginBottom.value = this.currentMarginBottom || 25;
-      if (marginLeft) marginLeft.value = this.currentMarginLeft || 25;
-      if (marginRight) marginRight.value = this.currentMarginRight || 25;
-    }
-  }
+  showPageLayoutModal() { this.layout.showSettings(); }
 
   hidePageLayoutModal() {
     const modal = document.getElementById("pageLayoutModal");
@@ -2810,46 +1285,7 @@ Enter your Google Client ID:`;
     }
   }
 
-  applyPageLayout() {
-    const pageSizeSelect = document.getElementById("pageSizeSelectModal");
-    const pageOrientation = document.getElementById("pageOrientationModal");
-    const marginTop = document.getElementById("marginTopModal");
-    const marginBottom = document.getElementById("marginBottomModal");
-    const marginLeft = document.getElementById("marginLeftModal");
-    const marginRight = document.getElementById("marginRightModal");
-
-    if (pageSizeSelect) this.currentPageSize = pageSizeSelect.value;
-    if (pageOrientation) this.currentPageOrientation = pageOrientation.value;
-    if (marginTop) this.currentMarginTop = parseInt(marginTop.value);
-    if (marginBottom) this.currentMarginBottom = parseInt(marginBottom.value);
-    if (marginLeft) this.currentMarginLeft = parseInt(marginLeft.value);
-    if (marginRight) this.currentMarginRight = parseInt(marginRight.value);
-
-    // Apply page size
-    const page = document.getElementById("page");
-    if (page) {
-      page.className = "page";
-      if (this.currentPageSize === "a4") {
-        page.classList.add("a4");
-      } else if (this.currentPageSize === "letter") {
-        page.classList.add("letter");
-      } else if (this.currentPageSize === "legal") {
-        page.classList.add("legal");
-      }
-    }
-
-    // Apply margins to editor
-    const editor = document.getElementById("editor");
-    if (editor) {
-      editor.style.paddingTop = `${this.currentMarginTop}px`;
-      editor.style.paddingBottom = `${this.currentMarginBottom}px`;
-      editor.style.paddingLeft = `${this.currentMarginLeft}px`;
-      editor.style.paddingRight = `${this.currentMarginRight}px`;
-    }
-
-    this.hidePageLayoutModal();
-    this.showToast("✅ Page layout applied successfully!", "success");
-  }
+  applyPageLayout() { this.layout.applySettings(); }
 
   // Quick Styles Modal Functions
   showQuickStylesModal() {
@@ -2867,37 +1303,7 @@ Enter your Google Client ID:`;
   }
 
   // Templates Modal Functions
-  showTemplatesModal() {
-    const modal = document.getElementById("templatesModal");
-    const templatesList = document.getElementById("templatesModalList");
-
-    if (modal && templatesList) {
-      // Populate templates list
-      templatesList.innerHTML = `
-        ${this.templates
-          .map(
-            (template) => `
-            <div class="template-item" style="border: 1px solid var(--border-primary); border-radius: 8px; padding: 15px; cursor: pointer; transition: all 0.2s; background: var(--bg-primary);"
-                 onclick="window.charlesEditor.applyTemplateFromModal('${template.id}')"
-                 onmouseover="this.style.background='var(--bg-secondary)'"
-                 onmouseout="this.style.background='var(--bg-primary)'">
-                <div style="font-size: 32px; color: var(--primary-color); margin-bottom: 10px; text-align: center;">
-                    <i class="${template.icon}"></i>
-                </div>
-                <div style="font-weight: 600; margin-bottom: 5px; text-align: center; color: var(--text-primary);">
-                    ${template.name}
-                </div>
-                <div style="font-size: 12px; color: var(--text-secondary); text-align: center;">
-                    ${template.description}
-                </div>
-            </div>
-        `,
-          )
-          .join("")}
-      `;
-      modal.classList.add("active");
-    }
-  }
+  showTemplatesModal() { this.workspace.templateCards(document.getElementById('templatesModalList'));document.getElementById('templatesModal').classList.add('active'); }
 
   hideTemplatesModal() {
     const modal = document.getElementById("templatesModal");
@@ -2938,108 +1344,32 @@ Enter your Google Client ID:`;
     }
   }
 
-  applyLineSpacing(value) {
-    const selection = window.getSelection();
-    if (selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      const selectedText = range.extractContents();
-      const span = document.createElement("span");
-      span.style.lineHeight = value;
-      span.appendChild(selectedText);
-      range.insertNode(span);
-      this.saveDocumentState();
-      this.showToast(`Line spacing set to ${value}`, "success");
-    } else {
-      // Apply to entire editor
-      this.editor.style.lineHeight = value;
-      this.saveDocumentState();
-      this.showToast(`Line spacing set to ${value}`, "success");
-    }
-  }
+  applyLineSpacing(value) { this.commands.paragraphFormat({lineHeight:String(value)}); }
 
   transformText(transform) {
-    const selection = window.getSelection();
-    if (selection.rangeCount > 0 && selection.toString().length > 0) {
-      const range = selection.getRangeAt(0);
-      const selectedText = selection.toString();
-      let transformedText;
-
-      switch (transform) {
-        case "uppercase":
-          transformedText = selectedText.toUpperCase();
-          break;
-        case "lowercase":
-          transformedText = selectedText.toLowerCase();
-          break;
-        case "capitalize":
-          transformedText = selectedText.replace(/\b\w/g, (char) =>
-            char.toUpperCase(),
-          );
-          break;
-        default:
-          return;
-      }
-
-      range.deleteContents();
-      range.insertNode(document.createTextNode(transformedText));
-      this.saveDocumentState();
-      this.showToast(`Text transformed to ${transform}`, "success");
-    } else {
-      this.showToast("Please select text to transform", "warning");
-    }
+    const selection = this.commands.restore();
+    const text = selection.toString();
+    if (!text) return this.showToast("Select text to transform.", "warning");
+    const value = transform === 'uppercase' ? text.toUpperCase() : transform === 'lowercase' ? text.toLowerCase() : text.replace(/\b\w/g, char => char.toUpperCase());
+    this.commands.execute('insertText', value);
   }
 
-  applyAdvancedFormatting() {
-    const paragraphSpacingBefore = document.getElementById(
-      "paragraphSpacingBefore",
-    );
-    const paragraphSpacingAfter = document.getElementById(
-      "paragraphSpacingAfter",
-    );
-
-    if (paragraphSpacingBefore && paragraphSpacingAfter) {
-      const before = paragraphSpacingBefore.value;
-      const after = paragraphSpacingAfter.value;
-
-      // Apply to selected paragraphs or all paragraphs
-      const selection = window.getSelection();
-      if (selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const paragraphs =
-          range.commonAncestorContainer.parentElement.querySelectorAll("p");
-        paragraphs.forEach((p) => {
-          p.style.marginTop = before + "pt";
-          p.style.marginBottom = after + "pt";
-        });
-      } else {
-        // Apply to all paragraphs
-        const paragraphs = this.editor.querySelectorAll("p");
-        paragraphs.forEach((p) => {
-          p.style.marginTop = before + "pt";
-          p.style.marginBottom = after + "pt";
-        });
-      }
-
-      this.saveDocumentState();
-      this.showToast("Advanced formatting applied", "success");
-      this.hideAdvancedFormattingModal();
-    }
-  }
+  applyAdvancedFormatting() { this.commands.paragraphFormat({lineHeight:document.getElementById("lineSpacing").value,marginTop:Number(document.getElementById("paragraphSpacingBefore").value)+"pt",marginBottom:Number(document.getElementById("paragraphSpacingAfter").value)+"pt"}); this.hideAdvancedFormattingModal(); }
 
   // Email Share Modal Functions
   showEmailShareModal() {
     const modal = document.getElementById("emailShareModal");
     if (modal) {
-      // Set default subject
-      const emailSubject = document.getElementById("emailSubject");
+      // Set default subject (uses renamed IDs unique to emailShareModal)
+      const emailSubject = document.getElementById("shareEmailSubject");
       if (emailSubject) {
         emailSubject.value = `Document from CharlesWebEditor - ${this.currentDoc.name}`;
       }
 
       // Clear other fields
-      const emailTo = document.getElementById("emailTo");
+      const emailTo = document.getElementById("shareEmailTo");
       if (emailTo) emailTo.value = "";
-      const emailMessage = document.getElementById("emailMessage");
+      const emailMessage = document.getElementById("shareEmailMessage");
       if (emailMessage) emailMessage.value = "";
 
       // Reset selected email service
@@ -3114,7 +1444,8 @@ Enter your Google Client ID:`;
 
   copyDocumentToClipboard() {
     const documentText = this.editor.innerText;
-    const emailMessage = document.getElementById("emailMessage");
+    // Read the message from the emailShareModal field (renamed to avoid duplicate ID)
+    const emailMessage = document.getElementById("shareEmailMessage");
     const message = emailMessage ? emailMessage.value : "";
 
     const textToCopy = message
@@ -3166,43 +1497,7 @@ Enter your Google Client ID:`;
     document.body.removeChild(textarea);
   }
 
-  downloadDocumentForEmail() {
-    const documentContent = this.editor.innerHTML;
-    const docName = this.currentDoc.name || "Document";
-
-    // Create HTML file with proper formatting
-    const htmlContent = `<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>${docName}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 20px;
-            line-height: 1.6;
-        }
-    </style>
-</head>
-<body>
-${documentContent}
-</body>
-</html>`;
-
-    const blob = new Blob([htmlContent], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${docName}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    this.showToast("Document downloaded! Attach it to your email.", "success");
-  }
+  downloadDocumentForEmail() { return this.exports.export("html").catch(()=>{}); }
 
   hideEmailShareModal() {
     const modal = document.getElementById("emailShareModal");
@@ -3212,9 +1507,9 @@ ${documentContent}
   }
 
   sendEmail() {
-    const emailTo = document.getElementById("emailTo");
-    const emailSubject = document.getElementById("emailSubject");
-    const emailMessage = document.getElementById("emailMessage");
+    const emailTo = document.getElementById("shareEmailTo");
+    const emailSubject = document.getElementById("shareEmailSubject");
+    const emailMessage = document.getElementById("shareEmailMessage");
     const emailIncludeDocument = document.getElementById(
       "emailIncludeDocument",
     );
@@ -3287,14 +1582,18 @@ ${documentContent}
         break;
     }
 
-    // Open the email URL
-    if (service === "default") {
-      // For mailto, use location.href
-      window.location.href = emailUrl;
-    } else {
-      // For web services, open in new tab
-      window.open(emailUrl, "_blank");
+    // Open the email URL without navigating the app away.
+    // Using a hidden <a> click works for both mailto: and https: URLs.
+    const tempLink = document.createElement("a");
+    tempLink.href = emailUrl;
+    if (service !== "default") {
+      // Web clients (Gmail, Outlook, Yahoo) open in a new tab
+      tempLink.target = "_blank";
+      tempLink.rel = "noopener noreferrer";
     }
+    document.body.appendChild(tempLink);
+    tempLink.click();
+    document.body.removeChild(tempLink);
 
     // Show appropriate message
     const serviceNames = {
@@ -3372,96 +1671,11 @@ ${documentContent}
     }
   }
 
-  exportToMarkdown() {
-    const html = this.editor.innerHTML;
-    let markdown = "";
+  exportToMarkdown() { return this.exports.export("md").catch(()=>{}); }
 
-    // Create a temporary div to parse HTML
-    const temp = document.createElement("div");
-    temp.innerHTML = html;
+  exportToHTML() { return this.exports.export("html").catch(()=>{}); }
 
-    // Convert HTML to Markdown
-    temp.querySelectorAll("*").forEach((element) => {
-      const text = element.textContent || "";
-
-      if (element.tagName === "H1") {
-        markdown += `# ${text}\n\n`;
-      } else if (element.tagName === "H2") {
-        markdown += `## ${text}\n\n`;
-      } else if (element.tagName === "H3") {
-        markdown += `### ${text}\n\n`;
-      } else if (element.tagName === "P") {
-        markdown += `${text}\n\n`;
-      } else if (element.tagName === "STRONG" || element.tagName === "B") {
-        markdown += `**${text}**`;
-      } else if (element.tagName === "EM" || element.tagName === "I") {
-        markdown += `*${text}*`;
-      } else if (element.tagName === "LI") {
-        markdown += `- ${text}\n`;
-      }
-    });
-
-    const blob = new Blob([markdown], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${this.currentDoc.name || "document"}.md`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    this.showToast("Exported as Markdown", "success");
-  }
-
-  exportToHTML() {
-    const html = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>${this.currentDoc.name || "Document"}</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 20px;
-      line-height: 1.6;
-    }
-  </style>
-</head>
-<body>
-  ${this.editor.innerHTML}
-</body>
-</html>`;
-
-    const blob = new Blob([html], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${this.currentDoc.name || "document"}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    this.showToast("Exported as HTML", "success");
-  }
-
-  exportToPlainText() {
-    const text = this.editor.innerText;
-    const blob = new Blob([text], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${this.currentDoc.name || "document"}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    this.showToast("Exported as Plain Text", "success");
-  }
+  exportToPlainText() { return this.exports.export("txt").catch(()=>{}); }
 
   // Email Modal Functions (Header Button)
   showEmailModal() {
@@ -3491,113 +1705,7 @@ ${documentContent}
   }
 
   // Share Modal Functions (Header Button)
-  showShareModal() {
-    const modal = document.getElementById("shareLinkModal");
-    if (modal) {
-      // Generate a shareable link (in a real app, this would create a server-side link)
-      const shareId = Math.random().toString(36).substring(2, 15);
-      const shareLink = `https://charleswed.app/shared/${shareId}`;
-
-      const shareLinkInput = document.getElementById("shareLinkInput");
-      if (shareLinkInput) {
-        shareLinkInput.value = shareLink;
-      }
-
-      // Set up share platform button handlers
-      this.setupSharePlatformHandlers(shareLink);
-
-      modal.classList.add("active");
-    }
-  }
-
-  setupSharePlatformHandlers(shareLink) {
-    const platformBtns = document.querySelectorAll('.share-platform-btn');
-    let docTitle = 'Document';
-    try {
-      const activeDoc = this.getActiveDocument();
-      if (activeDoc && activeDoc.name) {
-        docTitle = activeDoc.name;
-      }
-    } catch (e) {
-      console.log('Could not get active document name');
-    }
-    const shareText = `Check out this document: ${docTitle}`;
-
-    platformBtns.forEach(btn => {
-      // Remove existing listeners by cloning
-      const newBtn = btn.cloneNode(true);
-      btn.parentNode.replaceChild(newBtn, btn);
-
-      newBtn.addEventListener('click', () => {
-        const platform = newBtn.dataset.platform;
-        this.shareToSocialPlatform(platform, shareLink, shareText, docTitle);
-      });
-    });
-  }
-
-  shareToSocialPlatform(platform, shareLink, shareText, docTitle) {
-    const encodedLink = encodeURIComponent(shareLink);
-    const encodedText = encodeURIComponent(shareText);
-    const encodedTitle = encodeURIComponent(docTitle);
-
-    let shareUrl = '';
-
-    switch (platform) {
-      case 'facebook':
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedLink}&quote=${encodedText}`;
-        window.open(shareUrl, '_blank', 'width=600,height=400');
-        this.showToast('Opening Facebook...', 'info');
-        break;
-
-      case 'twitter':
-        shareUrl = `https://twitter.com/intent/tweet?url=${encodedLink}&text=${encodedText}`;
-        window.open(shareUrl, '_blank', 'width=600,height=400');
-        this.showToast('Opening X (Twitter)...', 'info');
-        break;
-
-      case 'whatsapp':
-        shareUrl = `https://api.whatsapp.com/send?text=${encodedText}%20${encodedLink}`;
-        window.open(shareUrl, '_blank', 'width=600,height=400');
-        this.showToast('Opening WhatsApp...', 'info');
-        break;
-
-      case 'linkedin':
-        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedLink}`;
-        window.open(shareUrl, '_blank', 'width=600,height=400');
-        this.showToast('Opening LinkedIn...', 'info');
-        break;
-
-      case 'telegram':
-        shareUrl = `https://t.me/share/url?url=${encodedLink}&text=${encodedText}`;
-        window.open(shareUrl, '_blank', 'width=600,height=400');
-        this.showToast('Opening Telegram...', 'info');
-        break;
-
-      case 'copy':
-        this.copyShareLink(shareLink);
-        break;
-
-      default:
-        console.warn('Unknown platform:', platform);
-    }
-  }
-
-  copyShareLink(shareLink) {
-    const linkToCopy = shareLink || document.getElementById("shareLinkInput")?.value;
-    if (linkToCopy) {
-      navigator.clipboard.writeText(linkToCopy).then(() => {
-        this.showToast("Link copied to clipboard!", "success");
-      }).catch(err => {
-        // Fallback for older browsers
-        const input = document.getElementById("shareLinkInput");
-        if (input) {
-          input.select();
-          document.execCommand('copy');
-          this.showToast("Link copied to clipboard!", "success");
-        }
-      });
-    }
-  }
+  showShareModal() { this.workspace.share(); }
 
   hideShareModal() {
     const modal = document.getElementById("shareLinkModal");
@@ -3607,13 +1715,7 @@ ${documentContent}
   }
 
   // Template Manager Modal Functions (Header Button)
-  showTemplateManagerModal() {
-    const modal = document.getElementById("templateManagerModal");
-    if (modal) {
-      this.updateTemplateManagerList();
-      modal.classList.add("active");
-    }
-  }
+  showTemplateManagerModal() { this.workspace.templateManager(); }
 
   hideTemplateManagerModal() {
     const modal = document.getElementById("templateManagerModal");
@@ -3622,125 +1724,52 @@ ${documentContent}
     }
   }
 
-  updateTemplateManagerList() {
-    const list = document.getElementById("templateManagerList");
-    if (!list) return;
+  updateTemplateManagerList() { this.workspace.templateManager(); }
 
-    if (this.templates.length === 0) {
-      list.innerHTML = `
-        <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
-          <i class="fas fa-folder-open" style="font-size: 48px; margin-bottom: 16px; opacity: 0.3;"></i>
-          <p>No templates saved yet</p>
-          <p style="font-size: 14px;">Save your current document as a template to get started</p>
-        </div>
-      `;
-      return;
-    }
+  applyTemplateById(index) { const template=this.templates[index];if(template)this.applyTemplate(template.id);this.hideTemplateManagerModal(); }
 
-    list.innerHTML = this.templates
-      .map(
-        (template, index) => `
-      <div class="template-item" data-template-id="${index}">
-        <div class="template-item-header">
-          <div class="template-item-title">${template.name}</div>
-          <div class="template-item-actions">
-            <button class="template-action-btn" onclick="window.charlesEditor.applyTemplateById(${index})" title="Apply Template">
-              <i class="fas fa-check"></i>
-            </button>
-            <button class="template-action-btn" onclick="window.charlesEditor.deleteTemplate(${index})" title="Delete Template">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </div>
-        <div class="template-item-preview">${template.content.substring(0, 100)}...</div>
-      </div>
-    `,
-      )
-      .join("");
-  }
-
-  applyTemplateById(templateId) {
-    if (this.templates[templateId]) {
-      this.editor.innerHTML = this.templates[templateId].content;
-      this.saveDocumentState();
-      this.showToast(`Template "${this.templates[templateId].name}" applied`, "success");
-      this.hideTemplateManagerModal();
-    }
-  }
-
-  saveCurrentAsTemplate() {
-    const templateName = prompt("Enter a name for this template:");
-    if (templateName && templateName.trim()) {
-      const template = {
-        name: templateName.trim(),
-        content: this.editor.innerHTML,
-        created: new Date().toISOString()
-      };
-
-      this.templates.push(template);
-      this.saveTemplates();
-      this.updateTemplateManagerList();
-      this.showToast(`Template "${templateName}" saved successfully`, "success");
-    }
-  }
+  saveCurrentAsTemplate() { this.workspace.saveTemplate(); }
 
   sendEmailFromHeader() {
     const emailTo = document.getElementById("emailTo");
     const emailSubject = document.getElementById("emailSubject");
     const emailMessage = document.getElementById("emailMessage");
 
-    if (!emailTo || !emailTo.value) {
+    if (!emailTo || !emailTo.value.trim()) {
       this.showToast("Please enter a recipient email address", "error");
       return;
     }
 
     // Get document content
     const documentText = this.editor.innerText;
-    const subject = emailSubject ? emailSubject.value : `Document from CharlesWebEditor - ${this.currentDoc.name}`;
+    const subject = emailSubject
+      ? emailSubject.value
+      : `Document from CharlesWebEditor - ${this.currentDoc.name}`;
     const message = emailMessage ? emailMessage.value : "";
 
-    // Build email body
-    const body = message
+    // Build email body and truncate to stay within mailto URL limits
+    let body = message
       ? `${message}\n\n--- Document Content ---\n\n${documentText}`
       : documentText;
 
-    // Create mailto link
-    const mailtoLink = `mailto:${emailTo.value}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const maxBodyLength = 1800;
+    if (body.length > maxBodyLength) {
+      body =
+        body.substring(0, maxBodyLength) +
+        "\n\n[Content truncated. Export the document as PDF or DOCX for the full version.]";
+    }
 
-    // Open default email client
-    window.location.href = mailtoLink;
+    const mailtoLink = `mailto:${encodeURIComponent(emailTo.value)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    // Open the mail client without navigating the app away
+    const tempLink = document.createElement("a");
+    tempLink.href = mailtoLink;
+    document.body.appendChild(tempLink);
+    tempLink.click();
+    document.body.removeChild(tempLink);
 
     this.showToast("Opening email client...", "success");
     this.hideEmailModal();
-  }
-
-  copyShareLink() {
-    const shareLinkInput = document.getElementById("shareLinkInput");
-    if (shareLinkInput) {
-      shareLinkInput.select();
-
-      // Use modern clipboard API if available
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard
-          .writeText(shareLinkInput.value)
-          .then(() => {
-            this.showToast("Share link copied to clipboard!", "success");
-          })
-          .catch((err) => {
-            console.error("Clipboard write failed:", err);
-            this.showToast("Failed to copy link. Please copy manually.", "error");
-          });
-      } else {
-        // Fallback for older browsers
-        try {
-          document.execCommand("copy");
-          this.showToast("Share link copied to clipboard!", "success");
-        } catch (err) {
-          console.error("Copy failed:", err);
-          this.showToast("Failed to copy link. Please copy manually.", "error");
-        }
-      }
-    }
   }
 
   // AI Assistant Panel Functions
@@ -3785,189 +1814,42 @@ ${documentContent}
     }
   }
 
-  updateAIStats() {
-    const text = this.editor.innerText || "";
-    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-    const chars = text.length;
-    const paragraphs = this.editor.querySelectorAll("p").length || 1;
-    const readingTime = Math.ceil(words / 200); // Average reading speed: 200 words/min
+  updateAIStats() { window.statsDashboard?.updateStats?.();for(const [to,from] of [["aiWordCount","statsWords"],["aiCharCount","statsChars"],["aiParagraphCount","statsParagraphs"],["aiReadingTime","statsReadingTime"]]){const el=document.getElementById(to);if(el)el.textContent=document.getElementById(from)?.textContent||"0";} }
 
-    const aiWordCount = document.getElementById("aiWordCount");
-    const aiCharCount = document.getElementById("aiCharCount");
-    const aiParagraphCount = document.getElementById("aiParagraphCount");
-    const aiReadingTime = document.getElementById("aiReadingTime");
+  checkGrammarAndStyle() { this.workspace.checkWriting(); }
 
-    if (aiWordCount) aiWordCount.textContent = words;
-    if (aiCharCount) aiCharCount.textContent = chars;
-    if (aiParagraphCount) aiParagraphCount.textContent = paragraphs;
-    if (aiReadingTime) aiReadingTime.textContent = readingTime + " min";
-  }
-
-  checkGrammarAndStyle() {
-    const checkBtn = document.getElementById("checkGrammarBtn");
-    const statusIndicator = document.getElementById("grammarStatusIndicator");
-    const statusText = document.getElementById("grammarStatusText");
-    const suggestionsDiv = document.getElementById("grammarSuggestions");
-
-    if (!checkBtn || !statusIndicator || !statusText || !suggestionsDiv) return;
-
-    // Show checking status
-    checkBtn.disabled = true;
-    statusIndicator.className = "status-indicator checking";
-    statusText.textContent = "Analyzing text...";
-    suggestionsDiv.style.display = "none";
-    suggestionsDiv.innerHTML = "";
-
-    // Simulate analysis (in a real app, this would call an AI API)
-    setTimeout(() => {
-      const text = this.editor.innerText || "";
-      const suggestions = this.analyzeText(text);
-
-      if (suggestions.length === 0) {
-        statusIndicator.className = "status-indicator success";
-        statusText.textContent = "No issues found!";
-        suggestionsDiv.style.display = "block";
-        suggestionsDiv.innerHTML =
-          '<div class="no-suggestions">✨ Your text looks great! No suggestions at this time.</div>';
-      } else {
-        statusIndicator.className = "status-indicator warning";
-        statusText.textContent = `Found ${suggestions.length} suggestion${suggestions.length > 1 ? "s" : ""}`;
-        suggestionsDiv.style.display = "block";
-        suggestionsDiv.innerHTML = suggestions
-          .map(
-            (suggestion, index) => `
-          <div class="grammar-suggestion">
-            <div class="suggestion-type">
-              <i class="fas fa-${suggestion.icon}"></i>
-              ${suggestion.type}
-            </div>
-            <div class="suggestion-message">${suggestion.message}</div>
-            ${suggestion.suggestion ? `<div style="color: var(--text-secondary); font-size: 12px; margin-top: 4px;">Suggestion: "${suggestion.suggestion}"</div>` : ""}
-            ${suggestion.action ? `<button class="apply-suggestion-btn" onclick="window.charlesEditor.applySuggestion(${index})">Apply</button>` : ""}
-          </div>
-        `,
-          )
-          .join("");
-      }
-
-      checkBtn.disabled = false;
-    }, 1500);
-  }
-
-  analyzeText(text) {
-    const suggestions = [];
-
-    // Check for common issues
-    // 1. Check for repeated words
-    const words = text.split(/\s+/);
-    for (let i = 0; i < words.length - 1; i++) {
-      if (
-        words[i].toLowerCase() === words[i + 1].toLowerCase() &&
-        words[i].length > 2
-      ) {
-        suggestions.push({
-          type: "Repetition",
-          icon: "redo",
-          message: `Repeated word: "${words[i]}"`,
-          suggestion: `Consider removing the duplicate "${words[i]}"`,
-          action: "remove",
-        });
-        break; // Only show one repetition suggestion
-      }
-    }
-
-    // 2. Check for very long sentences (over 50 words)
-    const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0);
-    sentences.forEach((sentence, index) => {
-      const wordCount = sentence.trim().split(/\s+/).length;
-      if (wordCount > 50) {
-        suggestions.push({
-          type: "Style",
-          icon: "edit",
-          message: `Long sentence (${wordCount} words) - consider breaking it into shorter sentences`,
-          suggestion: "Break into 2-3 shorter sentences for better readability",
-        });
-      }
-    });
-
-    // 3. Check for passive voice indicators
-    const passiveIndicators = /\b(was|were|is|are|been|being)\s+\w+ed\b/gi;
-    if (passiveIndicators.test(text)) {
-      suggestions.push({
-        type: "Style",
-        icon: "magic",
-        message: "Consider using active voice for more engaging writing",
-        suggestion: "Rewrite sentences to use active voice where possible",
-      });
-    }
-
-    // 4. Check for common typos/patterns
-    if (/\bteh\b/i.test(text)) {
-      suggestions.push({
-        type: "Spelling",
-        icon: "spell-check",
-        message: 'Possible typo: "teh" should be "the"',
-        suggestion: "the",
-        action: "replace",
-      });
-    }
-
-    return suggestions.slice(0, 5); // Limit to 5 suggestions
-  }
-
-  applySuggestion(index) {
-    // This would apply the suggestion based on the index
-    // For now, just show a message
-    this.showToast("Suggestion applied (simulated)", "success");
-  }
-
-  improveSelectedText() {
-    const selection = window.getSelection();
-    if (selection.rangeCount > 0 && selection.toString().trim().length > 0) {
-      const selectedText = selection.toString();
-      this.showAIResponse("Improving text...", () => {
-        // Simulate text improvement
-        const improved = this.improveText(selectedText);
-        return `Improved version:\n\n"${improved}"\n\nWould you like to replace the selected text with this improved version?`;
-      });
-    } else {
-      this.showToast("Please select text to improve", "warning");
-    }
-  }
+  improveSelectedText() { this.workspace.previewEdit("clean"); }
 
   improveText(text) {
-    // Basic text improvements (in a real app, this would use AI)
-    let improved = text;
+    let improved = text.trim();
 
-    // Remove extra spaces
-    improved = improved.replace(/\s+/g, " ");
-
-    // Capitalize first letter
-    improved = improved.trim();
+    // Capitalize first letter of the selection
     if (improved.length > 0) {
       improved = improved.charAt(0).toUpperCase() + improved.slice(1);
     }
 
-    // Ensure proper punctuation
-    if (!/[.!?]$/.test(improved.trim())) {
-      improved = improved.trim() + ".";
+    // Remove extra whitespace
+    improved = improved.replace(/\s+/g, " ");
+
+    // Remove common redundant filler phrases
+    improved = improved.replace(
+      /\b(very very|really really|quite quite)\b/gi,
+      (m) => m.split(" ")[0],
+    );
+    improved = improved.replace(/\b(in order to)\b/gi, "to");
+    improved = improved.replace(/\b(due to the fact that)\b/gi, "because");
+    improved = improved.replace(/\b(at this point in time)\b/gi, "currently");
+    improved = improved.replace(/\b(for the purpose of)\b/gi, "for");
+
+    // Ensure sentence ends with punctuation
+    if (improved.length > 0 && !/[.!?]$/.test(improved)) {
+      improved += ".";
     }
 
     return improved;
   }
 
-  makeTextShorter() {
-    const selection = window.getSelection();
-    if (selection.rangeCount > 0 && selection.toString().trim().length > 0) {
-      const selectedText = selection.toString();
-      this.showAIResponse("Making text shorter...", () => {
-        const shortened = this.shortenText(selectedText);
-        return `Shorter version:\n\n"${shortened}"\n\nThis version is ${Math.round((1 - shortened.length / selectedText.length) * 100)}% shorter.`;
-      });
-    } else {
-      this.showToast("Please select text to shorten", "warning");
-    }
-  }
+  makeTextShorter() { this.workspace.previewEdit("shorten"); }
 
   shortenText(text) {
     // Remove filler words and simplify (basic implementation)
@@ -3989,189 +1871,17 @@ ${documentContent}
     return shortened || text; // Return original if too short
   }
 
-  makeTextLonger() {
-    const selection = window.getSelection();
-    if (selection.rangeCount > 0 && selection.toString().trim().length > 0) {
-      const selectedText = selection.toString();
-      this.showAIResponse("Expanding text...", () => {
-        const expanded = this.expandText(selectedText);
-        return `Expanded version:\n\n"${expanded}"\n\nThis version is ${Math.round((expanded.length / selectedText.length - 1) * 100)}% longer.`;
-      });
-    } else {
-      this.showToast("Please select text to expand", "warning");
-    }
-  }
-
-  expandText(text) {
-    // Add descriptive words and expand phrases (basic implementation)
-    let expanded = text;
-
-    // Expand common abbreviations
-    expanded = expanded.replace(/\b(etc\.)\b/gi, "and so on");
-    expanded = expanded.replace(/\b(i\.e\.)\b/gi, "that is");
-    expanded = expanded.replace(/\b(e\.g\.)\b/gi, "for example");
-
-    // Add descriptive adjectives where appropriate
-    expanded = expanded.replace(/\b(important)\b/gi, "significantly important");
-    expanded = expanded.replace(/\b(good)\b/gi, "quite good");
-
-    return expanded;
-  }
-
-  changeTextTone() {
-    const selection = window.getSelection();
-    if (selection.rangeCount > 0 && selection.toString().trim().length > 0) {
-      const selectedText = selection.toString();
-      this.showAIResponse("Changing tone...", () => {
-        return `Tone options for your text:\n\n1. Professional: More formal and business-appropriate\n2. Casual: Friendly and conversational\n3. Academic: Scholarly and precise\n4. Creative: Engaging and expressive\n\nSelect a tone to apply the transformation.`;
-      });
-    } else {
-      this.showToast("Please select text to change tone", "warning");
-    }
-  }
-
-  summarizeDocument() {
-    const text = this.editor.innerText || "";
-    if (text.trim().length < 50) {
-      this.showToast("Document is too short to summarize", "warning");
-      return;
-    }
-
-    this.showAIResponse("Summarizing document...", () => {
-      const summary = this.createSummary(text);
-      return `Document Summary:\n\n${summary}\n\nThis summary captures the key points of your ${text.split(/\s+/).length}-word document.`;
-    });
-  }
-
-  createSummary(text) {
-    // Basic summarization (first and last sentences + key points)
-    const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 10);
-    if (sentences.length <= 3) {
-      return text; // Too short to summarize
-    }
-
-    const firstSentence = sentences[0].trim();
-    const lastSentence = sentences[sentences.length - 1].trim();
-    const middleSentence = sentences[Math.floor(sentences.length / 2)].trim();
-
-    return `${firstSentence}. ${middleSentence}. ${lastSentence}.`;
-  }
-
-  generateTitle() {
-    const text = this.editor.innerText || "";
-    if (text.trim().length < 20) {
-      this.showToast("Document is too short to generate a title", "warning");
-      return;
-    }
-
-    this.showAIResponse("Generating title...", () => {
-      const title = this.generateTitleFromText(text);
-      return `Suggested Title:\n\n"${title}"\n\nThis title is based on the main topic and key words in your document.`;
-    });
-  }
-
-  generateTitleFromText(text) {
-    // Extract first sentence or create from key words
-    const firstSentence = text.split(/[.!?]+/)[0].trim();
-    if (firstSentence.length <= 60) {
-      return firstSentence;
-    }
-
-    // Create title from first few words
-    const words = firstSentence.split(/\s+/).slice(0, 8);
-    return words.join(" ") + "...";
-  }
-
-  expandIdeas() {
-    const selection = window.getSelection();
-    if (selection.rangeCount > 0 && selection.toString().trim().length > 0) {
-      const selectedText = selection.toString();
-      this.showAIResponse("Expanding ideas...", () => {
-        return `Ideas to expand "${selectedText}":\n\n1. Provide examples and case studies\n2. Add supporting evidence or data\n3. Include related concepts or perspectives\n4. Explain the implications or consequences\n5. Compare with similar ideas or alternatives\n\nUse these suggestions to develop your ideas further.`;
-      });
-    } else {
-      this.showToast("Please select text to expand ideas", "warning");
-    }
-  }
-
-  showAIResponse(loadingMessage, callback) {
-    const responseSection = document.getElementById("aiResponseSection");
-    const responseDiv = document.getElementById("aiResponse");
-
-    if (!responseSection || !responseDiv) return;
-
-    responseSection.style.display = "block";
-    responseDiv.textContent = loadingMessage;
-    responseDiv.style.fontStyle = "italic";
-    responseDiv.style.color = "var(--text-secondary)";
-
-    // Simulate AI processing
-    setTimeout(() => {
-      const response = callback();
-      responseDiv.textContent = response;
-      responseDiv.style.fontStyle = "normal";
-      responseDiv.style.color = "var(--text-primary)";
-
-      // Scroll to response
-      responseSection.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }, 1500);
-  }
-
-  applyStyle(styleName) {
-    const editor = document.getElementById("editor");
-    if (!editor) return;
-
-    // Remove existing style classes
-    editor.classList.remove(
-      "style-heading1",
-      "style-heading2",
-      "style-heading3",
-      "style-normal",
-      "style-quote",
-      "style-code",
-    );
-
-    // Apply new style
-    switch (styleName) {
-      case "heading1":
-        document.execCommand("formatBlock", false, "h1");
-        editor.classList.add("style-heading1");
-        break;
-      case "heading2":
-        document.execCommand("formatBlock", false, "h2");
-        editor.classList.add("style-heading2");
-        break;
-      case "heading3":
-        document.execCommand("formatBlock", false, "h3");
-        editor.classList.add("style-heading3");
-        break;
-      case "normal":
-        document.execCommand("formatBlock", false, "p");
-        editor.classList.add("style-normal");
-        break;
-      case "quote":
-        document.execCommand("formatBlock", false, "blockquote");
-        editor.classList.add("style-quote");
-        break;
-      case "code":
-        document.execCommand("formatBlock", false, "pre");
-        editor.classList.add("style-code");
-        break;
-    }
-
-    this.saveDocumentState();
-    this.showToast(`✅ Applied ${styleName} style`, "success");
-  }
+  applyStyle(name) { this.commands.style(name); }
 
   updateWordCount() {
     const text = this.editor.innerText || this.editor.textContent;
-    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-    const characters = text.length;
-    const readingTime = Math.max(1, Math.ceil(words / 200));
+    const words = typeof Intl.Segmenter === 'function' ? [...new Intl.Segmenter(this.editor.lang || 'en', {granularity:'word'}).segment(text)].filter(part=>part.isWordLike).length : (text.match(/[\p{L}\p{N}]+/gu)||[]).length;
+    const characters = text.trim() ? [...text].length : 0;
+    const readingTime = Math.ceil(words / 200);
 
     document.getElementById("wordCount").textContent = words;
     document.getElementById("charCount").textContent = characters;
-    document.getElementById("readingTime").textContent = readingTime;
+    document.getElementById("readingTime").textContent = words > 0 && words < 200 ? "<1 min" : readingTime + " min";
   }
 
   updateStatusBar() {
@@ -4181,129 +1891,507 @@ ${documentContent}
       `${fontFamily}, ${fontSize}`;
   }
 
-  updateSaveStatus(status) {
-    const statusElement = document.getElementById("saveStatus");
-    const spinnerElement = document.getElementById("autosaveSpinner");
+  updateSaveStatus(status) { document.getElementById("saveStatus").textContent=status;document.getElementById("autosaveSpinner").style.display=status.startsWith("Saving")?"inline-block":"none"; }
 
-    statusElement.textContent = status;
-
-    if (status === "Auto-saved") {
-      spinnerElement.style.display = "none";
-    } else if (status === "Saving...") {
-      spinnerElement.style.display = "inline-block";
-    }
-  }
-
-  autoSave() {
-    this.updateSaveStatus("Saving...");
-    setTimeout(() => {
-      this.saveDocumentState();
-    }, 500);
-  }
+  autoSave() { return this.saveDocumentState(); }
 
   setupDragAndDrop() {
     // Prevent default drag behaviors on the page
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-      document.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      }, false);
+    ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+      document.addEventListener(
+        eventName,
+        (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        },
+        false,
+      );
     });
 
     // Highlight drop zone when dragging over
-    ['dragenter', 'dragover'].forEach(eventName => {
-      document.addEventListener(eventName, () => {
-        if (this.editor) {
-          this.editor.classList.add('drag-over');
-        }
-      }, false);
+    ["dragenter", "dragover"].forEach((eventName) => {
+      document.addEventListener(
+        eventName,
+        () => {
+          if (this.editor) {
+            this.editor.classList.add("drag-over");
+          }
+        },
+        false,
+      );
     });
 
-    ['dragleave', 'drop'].forEach(eventName => {
-      document.addEventListener(eventName, () => {
-        if (this.editor) {
-          this.editor.classList.remove('drag-over');
-        }
-      }, false);
+    ["dragleave", "drop"].forEach((eventName) => {
+      document.addEventListener(
+        eventName,
+        () => {
+          if (this.editor) {
+            this.editor.classList.remove("drag-over");
+          }
+        },
+        false,
+      );
     });
 
     // Handle dropped files
-    document.addEventListener('drop', (e) => {
-      const files = e.dataTransfer.files;
-      if (files.length > 0) {
-        const file = files[0];
-        this.handleDroppedFile(file);
-      }
-    }, false);
+    document.addEventListener(
+      "drop",
+      (e) => {
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          const file = files[0];
+          this.handleDroppedFile(file);
+        }
+      },
+      false,
+    );
   }
 
-  handleDroppedFile(file) {
-    const fileName = file.name.toLowerCase();
-    
-    if (fileName.endsWith('.txt') || fileName.endsWith('.html') || fileName.endsWith('.docx')) {
-      this.showToast(`Opening ${file.name}...`, 'info');
-      const reader = new FileReader();
-      
-      if (fileName.endsWith('.docx')) {
-        reader.onload = (e) => {
-          const arrayBuffer = e.target.result;
-          if (typeof mammoth !== 'undefined') {
-            mammoth.convertToHtml({ arrayBuffer: arrayBuffer })
-              .then((result) => {
-                this.editor.innerHTML = result.value;
-                this.saveDocumentState();
-                this.showToast(`${file.name} opened successfully!`, 'success');
-              })
-              .catch((error) => {
-                this.showToast(`Failed to open ${file.name}. Please try again.`, 'error');
-                console.error("Error reading DOCX file:", error);
-              });
-          } else {
-            this.showToast('DOCX parser not loaded. Please refresh the page.', 'error');
-          }
-        };
-        reader.readAsArrayBuffer(file);
-      } else {
-        reader.onload = (e) => {
-          this.editor.innerHTML = e.target.result;
-          this.saveDocumentState();
-          this.showToast(`${file.name} opened successfully!`, 'success');
-        };
-        reader.readAsText(file);
+  handleDroppedFile(file) { this.workspace.openFile(file); }
+
+  handleEditorInput() { this.currentDoc.dirty=true;this.hasUnsavedChanges=true;this.updateWordCount();this.updateOutline();this.updateSaveStatus("Unsaved changes");clearTimeout(this.autoSaveTimer);this.autoSaveTimer=setTimeout(()=>this.saveDocumentState(),this.debounceDelay); }
+
+  // ── Text-to-Speech ───────────────────────────────────────────────────────
+
+  startTextToSpeech() {
+    if (!("speechSynthesis" in window)) {
+      this.showToast(
+        "Text-to-Speech is not supported in this browser.",
+        "error",
+      );
+      return;
+    }
+
+    const selection = window.getSelection();
+    const text =
+      selection && selection.toString().trim()
+        ? selection.toString().trim()
+        : this.editor.innerText;
+
+    if (!text.trim()) {
+      this.showToast("Nothing to read. Add some text first.", "warning");
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = parseFloat(
+      document.getElementById("ttsSpeed")?.value || "1",
+    );
+
+    utterance.onstart = () => {
+      this.ttsActive = true;
+      document.getElementById("ttsPanel")?.classList.add("active");
+      const btn = document.getElementById("ttsBtn");
+      if (btn) {
+        btn.classList.add("active");
+        btn.innerHTML =
+          '<i class="fas fa-volume-up"></i><span>Stop</span>';
       }
+    };
+
+    utterance.onend = () => this.stopTextToSpeech();
+    utterance.onerror = (e) => {
+      if (e.error !== "interrupted") this.stopTextToSpeech();
+    };
+
+    this.currentUtterance = utterance;
+    window.speechSynthesis.speak(utterance);
+    this.showToast(
+      selection && selection.toString().trim()
+        ? "Reading selected text..."
+        : "Reading full document...",
+      "info",
+    );
+  }
+
+  pauseTextToSpeech() {
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+      const icon = document.getElementById("ttsPauseIcon");
+      if (icon) icon.className = "fas fa-pause";
+      const status = document.getElementById("ttsStatus");
+      if (status)
+        status.innerHTML = '<i class="fas fa-volume-up"></i> Reading...';
+    } else if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.pause();
+      const icon = document.getElementById("ttsPauseIcon");
+      if (icon) icon.className = "fas fa-play";
+      const status = document.getElementById("ttsStatus");
+      if (status) status.innerHTML = '<i class="fas fa-pause"></i> Paused';
+    }
+  }
+
+  stopTextToSpeech() {
+    window.speechSynthesis.cancel();
+    this.ttsActive = false;
+    this.currentUtterance = null;
+    document.getElementById("ttsPanel")?.classList.remove("active");
+    const btn = document.getElementById("ttsBtn");
+    if (btn) {
+      btn.classList.remove("active");
+      btn.innerHTML = '<i class="fas fa-volume-up"></i><span>Read</span>';
+    }
+    const icon = document.getElementById("ttsPauseIcon");
+    if (icon) icon.className = "fas fa-pause";
+    const status = document.getElementById("ttsStatus");
+    if (status)
+      status.innerHTML = '<i class="fas fa-volume-up"></i> Reading...';
+  }
+
+  // ── Voice Dictation ───────────────────────────────────────────────────────
+
+  toggleDictation() {
+    if (this.dictationActive) {
+      this.stopDictation();
     } else {
-      this.showToast('Please drop a .txt, .html, or .docx file', 'warning');
+      this.startDictation();
     }
   }
 
-  handleEditorInput() {
-    this.updateWordCount();
-    this.hasUnsavedChanges = true;
-    this.updateSaveStatus("Unsaved changes");
-    
-    // Debounced auto-save - only saves after user stops typing for 2 seconds
-    if (this.autoSaveTimer) {
-      clearTimeout(this.autoSaveTimer);
+  startDictation() {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      this.showToast(
+        "Voice dictation is not supported in this browser. Try Chrome or Edge.",
+        "error",
+      );
+      return;
     }
-    this.autoSaveTimer = setTimeout(() => {
-      this.saveDocumentState();
-      this.hasUnsavedChanges = false;
-    }, this.debounceDelay);
+
+    const langMap = { en: "en-US", es: "es-ES", fr: "fr-FR", de: "de-DE" };
+    const langKey =
+      document.getElementById("languageSelect")?.value || "en";
+
+    this.recognition = new SpeechRecognition();
+    this.recognition.continuous = true;
+    this.recognition.interimResults = true;
+    this.recognition.lang = langMap[langKey] || "en-US";
+
+    // Save cursor position in editor
+    this.editor.focus();
+    const sel = window.getSelection();
+    if (sel.rangeCount) {
+      this.dictationRange = sel.getRangeAt(0).cloneRange();
+    }
+
+    this.recognition.onstart = () => {
+      this.dictationActive = true;
+      document.getElementById("dictationIndicator")?.classList.add("active");
+      const btn = document.getElementById("dictateBtn");
+      if (btn)
+        btn.innerHTML =
+          '<i class="fas fa-microphone-slash"></i><span>Stop</span>';
+      btn?.classList.add("active");
+    };
+
+    this.recognition.onresult = (event) => {
+      let interim = "";
+      let final = "";
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          final += event.results[i][0].transcript;
+        } else {
+          interim += event.results[i][0].transcript;
+        }
+      }
+
+      const interimEl = document.getElementById("dictationInterim");
+      if (interimEl) interimEl.textContent = interim || "Listening...";
+
+      if (final) {
+        this.editor.focus();
+        if (this.dictationRange) {
+          const s = window.getSelection();
+          s.removeAllRanges();
+          s.addRange(this.dictationRange);
+        }
+        document.execCommand("insertText", false, final + " ");
+        const s = window.getSelection();
+        if (s.rangeCount) {
+          this.dictationRange = s.getRangeAt(0).cloneRange();
+        }
+        this.handleEditorInput();
+      }
+    };
+
+    this.recognition.onerror = (event) => {
+      if (event.error !== "aborted") {
+        this.showToast(`Dictation error: ${event.error}`, "error");
+      }
+      this.stopDictation();
+    };
+
+    // Auto-restart to keep listening continuously
+    this.recognition.onend = () => {
+      if (this.dictationActive && this.recognition) {
+        try {
+          this.recognition.start();
+        } catch (_) {
+          this.stopDictation();
+        }
+      }
+    };
+
+    this.recognition.start();
+    this.showToast("Listening — speak now", "info");
   }
 
-  showToast(message, type = "success") {
-    const toast = document.getElementById("toast");
-    const toastMessage = document.getElementById("toastMessage");
+  stopDictation() {
+    this.dictationActive = false;
+    if (this.recognition) {
+      this.recognition.onend = null;
+      this.recognition.stop();
+      this.recognition = null;
+    }
+    document.getElementById("dictationIndicator")?.classList.remove("active");
+    const btn = document.getElementById("dictateBtn");
+    if (btn) {
+      btn.classList.remove("active");
+      btn.innerHTML = '<i class="fas fa-microphone"></i><span>Dictate</span>';
+    }
+    const interimEl = document.getElementById("dictationInterim");
+    if (interimEl) interimEl.textContent = "Listening...";
+    this.showToast("Dictation stopped", "info");
+  }
 
-    if (toast && toastMessage) {
-      toastMessage.textContent = message;
-      toast.className = `toast ${type} active`;
+  // ── Header & Footer ──────────────────────────────────────────────────────
 
-      setTimeout(() => {
-        toast.classList.remove("active");
-      }, 3000);
+  openHeaderFooterMode(zone = "header") {
+    this.hfEditMode = true;
+    this.hfActiveZone = zone;
+
+    const toolbar = document.getElementById("hfEditToolbar");
+    const headerContent = document.getElementById("pageHeaderContent");
+    const footerContent = document.getElementById("pageFooterContent");
+
+    if (toolbar) toolbar.classList.add("active");
+    if (headerContent) headerContent.contentEditable = "true";
+    if (footerContent) footerContent.contentEditable = "true";
+
+    document.getElementById("page")?.classList.add("hf-edit-mode");
+
+    headerContent?.classList.remove("hf-zone-active");
+    footerContent?.classList.remove("hf-zone-active");
+
+    const target =
+      zone === "header" ? headerContent : footerContent;
+    target?.classList.add("hf-zone-active");
+    target?.focus();
+
+    this._updateHFLabel(zone);
+  }
+
+  _updateHFLabel(zone) {
+    const label = document.getElementById("hfEditingLabel");
+    const switchBtn = document.getElementById("hfSwitchBtn");
+    if (label) {
+      label.innerHTML =
+        zone === "header"
+          ? '<i class="fas fa-heading"></i> Editing: Header'
+          : '<i class="fas fa-shoe-prints"></i> Editing: Footer';
+    }
+    if (switchBtn) {
+      switchBtn.innerHTML =
+        zone === "header"
+          ? '<i class="fas fa-arrow-down"></i> Switch to Footer'
+          : '<i class="fas fa-arrow-up"></i> Switch to Header';
     }
   }
+
+  switchHFZone() {
+    this.openHeaderFooterMode(
+      this.hfActiveZone === "header" ? "footer" : "header",
+    );
+  }
+
+  closeHeaderFooterMode() {
+    this.hfEditMode = false;
+
+    const toolbar = document.getElementById("hfEditToolbar");
+    const headerContent = document.getElementById("pageHeaderContent");
+    const footerContent = document.getElementById("pageFooterContent");
+
+    if (headerContent) {
+      this.currentDoc.headerHtml = headerContent.innerHTML;
+      headerContent.contentEditable = "false";
+      headerContent.classList.remove("hf-zone-active");
+      headerContent.dataset.empty = headerContent.innerHTML.trim()
+        ? "false"
+        : "true";
+    }
+    if (footerContent) {
+      this.currentDoc.footerHtml = footerContent.innerHTML;
+      footerContent.contentEditable = "false";
+      footerContent.classList.remove("hf-zone-active");
+      footerContent.dataset.empty = footerContent.innerHTML.trim()
+        ? "false"
+        : "true";
+    }
+
+    if (toolbar) toolbar.classList.remove("active");
+    document.getElementById("page")?.classList.remove("hf-edit-mode");
+    this.saveDocumentState();
+    this.editor.focus();
+  }
+
+  insertHFPageNumber() {
+    const el = document.getElementById(
+      this.hfActiveZone === "header"
+        ? "pageHeaderContent"
+        : "pageFooterContent",
+    );
+    if (!el) return;
+    el.focus();
+    document.execCommand(
+      "insertHTML",
+      false,
+      '<span class="hf-page-num" contenteditable="false" title="Page number">1</span>&nbsp;',
+    );
+  }
+
+  insertHFDate() {
+    const el = document.getElementById(
+      this.hfActiveZone === "header"
+        ? "pageHeaderContent"
+        : "pageFooterContent",
+    );
+    if (!el) return;
+    el.focus();
+    const today = new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    document.execCommand("insertText", false, today);
+  }
+
+  restoreHeaderFooter() {
+    const headerContent = document.getElementById("pageHeaderContent");
+    const footerContent = document.getElementById("pageFooterContent");
+    if (headerContent) {
+      headerContent.innerHTML = this.currentDoc.headerHtml || "";
+      headerContent.dataset.empty = (this.currentDoc.headerHtml || "").trim()
+        ? "false"
+        : "true";
+    }
+    if (footerContent) {
+      footerContent.innerHTML = this.currentDoc.footerHtml || "";
+      footerContent.dataset.empty = (this.currentDoc.footerHtml || "").trim()
+        ? "false"
+        : "true";
+    }
+  }
+
+  _hfToExportHtml(html) {
+    if (!html || !html.trim()) return "";
+    return html.replace(
+      /<span[^>]*class="hf-page-num"[^>]*>[^<]*<\/span>/g,
+      '<span class="pageNumber"></span>',
+    );
+  }
+
+  toggleFocusMode() {
+    const container = document.getElementById("editorContainer");
+    const isFocused = container.classList.toggle("focus-mode");
+    const btn = document.getElementById("focusModeBtn");
+    if (isFocused) {
+      if (btn) btn.innerHTML = '<i class="fas fa-eye-slash"></i><span>Focus</span>';
+      this.showToast("Focus mode on — press Esc or Ctrl+Shift+F to exit", "info");
+      this.editor.focus();
+    } else {
+      if (btn) btn.innerHTML = '<i class="fas fa-eye"></i><span>Focus</span>';
+    }
+  }
+
+  updateOutline() { const panel=document.getElementById("outlineList");if(!panel)return;panel.replaceChildren();const headings=[...this.editor.querySelectorAll("h1,h2,h3,h4")].filter(el=>!el.closest(".toc-container"));if(!headings.length){const empty=document.createElement("p");empty.className="empty-outline";empty.textContent="Use heading styles to build an outline.";panel.append(empty);return;}for(const heading of headings){const button=document.createElement("button");button.className="outline-item";button.textContent=heading.textContent||"Untitled heading";button.style.paddingLeft=(Number(heading.tagName[1])-1)*8+"px";button.addEventListener("click",()=>{heading.scrollIntoView({block:"center",inline:"nearest"});const range=document.createRange();range.selectNodeContents(heading);range.collapse(true);getSelection().removeAllRanges();getSelection().addRange(range);this.commands.remember();});panel.append(button);} }
+
+  insertTOC() { const headings=[...this.editor.querySelectorAll("h1,h2,h3")].filter(el=>!el.closest(".toc-container"));if(!headings.length)return this.showToast("Add heading styles first.","info");this.commands.change(()=>{this.editor.querySelector(".toc-container")?.remove();const box=document.createElement("div");box.className="toc-container";const label=document.createElement("p");label.textContent="Contents";const list=document.createElement("ol");for(const heading of headings){heading.id||="heading-"+crypto.randomUUID();const item=document.createElement("li"),link=document.createElement("a");link.href="#"+heading.id;link.textContent=heading.textContent;item.style.marginLeft=(Number(heading.tagName[1])-1)*12+"px";item.append(link);list.append(item);}box.append(label,list);this.editor.prepend(box);}); }
+
+  markdownToHtml(md) {
+    const lines = md.split("\n");
+    let html = "";
+    let inList = false;
+    let inOrderedList = false;
+    let inCodeBlock = false;
+
+    for (const line of lines) {
+      if (line.startsWith("```")) {
+        if (inCodeBlock) {
+          html += "</code></pre>";
+          inCodeBlock = false;
+        } else {
+          if (inList) { html += "</ul>"; inList = false; }
+          if (inOrderedList) { html += "</ol>"; inOrderedList = false; }
+          html += "<pre><code>";
+          inCodeBlock = true;
+        }
+        continue;
+      }
+
+      if (inCodeBlock) { html += this._escHtml(line) + "\n"; continue; }
+
+      if (inList && !line.match(/^[-*+]\s/)) { html += "</ul>"; inList = false; }
+      if (inOrderedList && !line.match(/^\d+\.\s/)) { html += "</ol>"; inOrderedList = false; }
+
+      if (line.startsWith("### ")) { html += `<h3>${this._inlineMd(line.slice(4))}</h3>`; continue; }
+      if (line.startsWith("## ")) { html += `<h2>${this._inlineMd(line.slice(3))}</h2>`; continue; }
+      if (line.startsWith("# ")) { html += `<h1>${this._inlineMd(line.slice(2))}</h1>`; continue; }
+      if (line.match(/^---+$/) || line.match(/^\*\*\*+$/)) { html += "<hr>"; continue; }
+      if (line.startsWith("> ")) { html += `<blockquote>${this._inlineMd(line.slice(2))}</blockquote>`; continue; }
+
+      if (line.match(/^[-*+]\s/)) {
+        if (!inList) { html += "<ul>"; inList = true; }
+        html += `<li>${this._inlineMd(line.slice(2))}</li>`;
+        continue;
+      }
+      if (line.match(/^\d+\.\s/)) {
+        if (!inOrderedList) { html += "<ol>"; inOrderedList = true; }
+        html += `<li>${this._inlineMd(line.replace(/^\d+\.\s/, ""))}</li>`;
+        continue;
+      }
+
+      html += line.trim() === "" ? "<br>" : `<p>${this._inlineMd(line)}</p>`;
+    }
+
+    if (inList) html += "</ul>";
+    if (inOrderedList) html += "</ol>";
+    if (inCodeBlock) html += "</code></pre>";
+    return html;
+  }
+
+  _inlineMd(text) {
+    return this._escHtml(text)
+      .replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>")
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.+?)\*/g, "<em>$1</em>")
+      .replace(/__(.+?)__/g, "<strong>$1</strong>")
+      .replace(/_(.+?)_/g, "<em>$1</em>")
+      .replace(/~~(.+?)~~/g, "<del>$1</del>")
+      .replace(/`(.+?)`/g, "<code>$1</code>")
+      .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>');
+  }
+
+  _escHtml(text) {
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#x27;");
+  }
+
+  showToast(message,type="success") { const toast=document.getElementById("toast");toast.className="toast "+type+" visible";toast.replaceChildren();const icon=document.createElement("i");icon.className="fas "+(type==="error"?"fa-exclamation-circle":type==="warning"?"fa-exclamation-triangle":"fa-info-circle");const text=document.createElement("span");text.textContent=message;toast.append(icon,text);clearTimeout(this.toastTimer);this.toastTimer=setTimeout(()=>toast.classList.remove("visible"),3500); }
 
   showExportProgress(format) {
     // Create or update export progress indicator
@@ -4320,7 +2408,8 @@ ${documentContent}
       `;
       document.body.appendChild(progressIndicator);
     } else {
-      progressIndicator.querySelector(".export-progress-text").textContent = `Exporting ${format}...`;
+      progressIndicator.querySelector(".export-progress-text").textContent =
+        `Exporting ${format}...`;
       progressIndicator.style.display = "flex";
     }
   }
@@ -4332,41 +2421,12 @@ ${documentContent}
     }
   }
 
-  executeCommand(command, value = null) {
-    document.execCommand(command, false, value);
-    this.editor.focus();
-  }
+  executeCommand(command,value=null) { this.commands.execute(command,value); }
 
   // Missing essential methods
-  undo() {
-    if (!this.currentDoc.history) return;
-    if (this.currentDoc.historyIndex > 0) {
-      this.currentDoc.historyIndex--;
-      const prevContent = this.currentDoc.history[this.currentDoc.historyIndex];
-      this.editor.innerHTML = prevContent;
-      this.currentDoc.content = prevContent;
-      this.updateWordCount();
-      this.updateStatusBar();
-      this.updateSaveStatus("Unsaved changes...");
-    } else {
-      this.showToast("No more undo steps", "warning");
-    }
-  }
+  undo() { this.commands.undo(); }
 
-  redo() {
-    if (!this.currentDoc.history) return;
-    if (this.currentDoc.historyIndex < this.currentDoc.history.length - 1) {
-      this.currentDoc.historyIndex++;
-      const nextContent = this.currentDoc.history[this.currentDoc.historyIndex];
-      this.editor.innerHTML = nextContent;
-      this.currentDoc.content = nextContent;
-      this.updateWordCount();
-      this.updateStatusBar();
-      this.updateSaveStatus("Unsaved changes...");
-    } else {
-      this.showToast("No more redo steps", "warning");
-    }
-  }
+  redo() { this.commands.redo(); }
 
   toggleTheme() {
     this.currentTheme = this.currentTheme === "light" ? "dark" : "light";
@@ -4392,640 +2452,19 @@ ${documentContent}
       }
     }
 
-    localStorage.setItem("editor_theme", theme);
+    WebEditorStorage.set("editor_theme", theme);
     this.showToast(`Switched to ${theme} mode`, "success");
   }
 
-  exportToPDF() {
-    this.showToast("Exporting to PDF...", "info");
-    this.showExportProgress("PDF");
+  async exportToPDF() { return this.exports.export("pdf").catch(()=>{}); }
 
-    try {
-      const { jsPDF } = window.jspdf;
-      
-      // Create a temporary container for rendering
-      const tempContainer = document.createElement('div');
-      tempContainer.style.cssText = `
-        position: fixed;
-        left: 0;
-        top: 0;
-        width: 8.5in;
-        min-height: 11in;
-        padding: 0.75in;
-        background: white;
-        font-family: 'Times New Roman', Times, serif;
-        font-size: 12pt;
-        line-height: 1.6;
-        color: black;
-        z-index: -9999;
-        box-sizing: border-box;
-      `;
-      tempContainer.innerHTML = this.editor.innerHTML;
-      document.body.appendChild(tempContainer);
-      
-      // Use html2canvas to capture the content as an image
-      if (typeof html2canvas !== 'undefined') {
-        html2canvas(tempContainer, {
-          scale: 2,
-          useCORS: true,
-          logging: false,
-          backgroundColor: '#ffffff',
-          width: tempContainer.offsetWidth,
-          height: Math.max(tempContainer.offsetHeight, 1056) // At least one page height
-        }).then((canvas) => {
-          document.body.removeChild(tempContainer);
-          
-          const imgData = canvas.toDataURL('image/png');
-          const imgWidth = 595.28; // A4 width in points
-          const pageHeight = 841.89; // A4 height in points
-          const imgHeight = (canvas.height * imgWidth) / canvas.width;
-          
-          const doc = new jsPDF('p', 'pt', 'a4');
-          let heightLeft = imgHeight;
-          let position = 0;
-          
-          // Add first page
-          doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-          heightLeft -= pageHeight;
-          
-          // Add additional pages if content is longer than one page
-          while (heightLeft > 0) {
-            position = heightLeft - imgHeight;
-            doc.addPage();
-            doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-          }
-          
-          doc.save((this.currentDoc.name || "document") + ".pdf");
-          this.hideExportProgress();
-          this.showToast("PDF exported successfully!", "success");
-        }).catch((error) => {
-          document.body.removeChild(tempContainer);
-          this.hideExportProgress();
-          this.showToast("PDF export failed. The document may be too large. Trying alternative method...", "warning");
-          console.error("html2canvas error:", error);
-          this.exportToPDFFallback();
-        });
-      } else {
-        document.body.removeChild(tempContainer);
-        this.hideExportProgress();
-        this.exportToPDFFallback();
-      }
-    } catch (error) {
-      this.hideExportProgress();
-      console.error("PDF export error:", error);
-      this.exportToPDFFallback();
-    }
-  }
+  async exportToDOCX() { return this.exports.export("docx").catch(()=>{}); }
 
-  exportToPDFFallback() {
-    this.showExportProgress("PDF");
-    try {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF("p", "pt", "a4");
-      
-      // Get computed styles from editor
-      const editorStyles = window.getComputedStyle(this.editor);
-      const fontFamily = editorStyles.fontFamily.includes('Times') ? 'times' : 'helvetica';
-      
-      doc.setFont(fontFamily, 'normal');
-      doc.setFontSize(12);
-      
-      // Process the HTML content to preserve some formatting
-      const content = this.editor.innerHTML;
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = content;
-      
-      let yPosition = 50;
-      const pageHeight = 792; // A4 height in points
-      const pageWidth = 515; // Usable width
-      const lineHeight = 16;
-      const margin = 40;
-      
-      // Process each element
-      const processNode = (node) => {
-        if (yPosition > pageHeight - 50) {
-          doc.addPage();
-          yPosition = 50;
-        }
-        
-        if (node.nodeType === Node.TEXT_NODE) {
-          const text = node.textContent.trim();
-          if (text) {
-            const lines = doc.splitTextToSize(text, pageWidth);
-            lines.forEach(line => {
-              if (yPosition > pageHeight - 50) {
-                doc.addPage();
-                yPosition = 50;
-              }
-              doc.text(line, margin, yPosition);
-              yPosition += lineHeight;
-            });
-          }
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          const tagName = node.tagName.toLowerCase();
-          
-          // Handle headings
-          if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tagName)) {
-            const sizes = { h1: 24, h2: 20, h3: 16, h4: 14, h5: 12, h6: 11 };
-            doc.setFontSize(sizes[tagName] || 12);
-            doc.setFont(fontFamily, 'bold');
-            yPosition += 10;
-          }
-          
-          // Handle bold
-          if (tagName === 'b' || tagName === 'strong') {
-            doc.setFont(fontFamily, 'bold');
-          }
-          
-          // Handle italic
-          if (tagName === 'i' || tagName === 'em') {
-            doc.setFont(fontFamily, 'italic');
-          }
-          
-          // Process children
-          node.childNodes.forEach(child => processNode(child));
-          
-          // Reset styles after headings
-          if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tagName)) {
-            doc.setFontSize(12);
-            doc.setFont(fontFamily, 'normal');
-            yPosition += 8;
-          }
-          
-          // Add line break after block elements
-          if (['p', 'div', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li'].includes(tagName)) {
-            yPosition += lineHeight * 0.5;
-          }
-          
-          // Reset font style
-          if (['b', 'strong', 'i', 'em'].includes(tagName)) {
-            doc.setFont(fontFamily, 'normal');
-          }
-        }
-      };
-      
-      tempDiv.childNodes.forEach(node => processNode(node));
-      
-      doc.save((this.currentDoc.name || "document") + ".pdf");
-      this.hideExportProgress();
-      this.showToast("PDF exported successfully!", "success");
-    } catch (error) {
-      this.hideExportProgress();
-      console.error("PDF fallback export error:", error);
-      this.showToast("PDF export failed. The document may be too complex. Please try exporting as DOCX instead.", "error");
-    }
-  }
+  changeLanguage(lang) { this.editor.lang=({en:"en-US",es:"es-ES",fr:"fr-FR",de:"de-DE"})[lang]||"en-US";WebEditorStorage.set("editor_language",lang); }
 
-  exportToDOCX() {
-    this.showToast("Exporting to DOCX...", "info");
-    this.showExportProgress("DOCX");
+  setPageSize(size) { this.layout.set({size}); }
 
-    try {
-      const content = this.editor.innerHTML;
-      const docName = this.currentDoc.name || "document";
-      
-      // Create a proper DOCX file using Office Open XML format
-      const JSZip = window.JSZip;
-      
-      if (typeof JSZip === 'undefined') {
-        // Fallback: Create an HTML file that Word can open
-        this.exportToDOCXFallback(content, docName);
-        return;
-      }
-      
-      const zip = new JSZip();
-      
-      // Convert HTML to WordML
-      const wordContent = this.htmlToWordML(content);
-      
-      // [Content_Types].xml - Complete with all required parts
-      zip.file("[Content_Types].xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
-  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
-  <Default Extension="xml" ContentType="application/xml"/>
-  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
-  <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
-  <Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/>
-</Types>`);
-      
-      // _rels/.rels
-      zip.folder("_rels").file(".rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
-</Relationships>`);
-      
-      // word/styles.xml - Required by MS Word
-      zip.folder("word").file("styles.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-  <w:style w:type="paragraph" w:styleId="Normal">
-    <w:name w:val="Normal"/>
-    <w:qFormat/>
-  </w:style>
-  <w:style w:type="paragraph" w:styleId="Heading1">
-    <w:name w:val="heading 1"/>
-    <w:basedOn w:val="Normal"/>
-    <w:next w:val="Normal"/>
-    <w:qFormat/>
-    <w:pPr>
-      <w:keepNext/>
-      <w:spacing w:before="480" w:after="0"/>
-      <w:outlineLvl w:val="0"/>
-    </w:pPr>
-    <w:rPr>
-      <w:b/>
-      <w:sz w:val="32"/>
-    </w:rPr>
-  </w:style>
-  <w:style w:type="paragraph" w:styleId="Heading2">
-    <w:name w:val="heading 2"/>
-    <w:basedOn w:val="Normal"/>
-    <w:next w:val="Normal"/>
-    <w:qFormat/>
-    <w:pPr>
-      <w:keepNext/>
-      <w:spacing w:before="240" w:after="0"/>
-      <w:outlineLvl w:val="1"/>
-    </w:pPr>
-    <w:rPr>
-      <w:b/>
-      <w:sz w:val="28"/>
-    </w:rPr>
-  </w:style>
-  <w:style w:type="paragraph" w:styleId="Heading3">
-    <w:name w:val="heading 3"/>
-    <w:basedOn w:val="Normal"/>
-    <w:next w:val="Normal"/>
-    <w:qFormat/>
-    <w:pPr>
-      <w:keepNext/>
-      <w:spacing w:before="240" w:after="0"/>
-      <w:outlineLvl w:val="2"/>
-    </w:pPr>
-    <w:rPr>
-      <w:b/>
-      <w:sz w:val="24"/>
-    </w:rPr>
-  </w:style>
-</w:styles>`);
-      
-      // word/document.xml
-      zip.folder("word").file("document.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
-  <w:body>
-    ${wordContent}
-    <w:sectPr>
-      <w:pgSz w:w="12240" w:h="15840"/>
-      <w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440"/>
-      <w:cols w:space="720"/>
-      <w:docGrid w:linePitch="360"/>
-    </w:sectPr>
-  </w:body>
-</w:document>`);
-      
-      // word/numbering.xml - Required for lists to work properly
-      zip.folder("word").file("numbering.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-  <w:abstractNum w:abstractNumId="0">
-    <w:multiLevelType w:val="hybridMultilevel"/>
-    <w:lvl w:ilvl="0">
-      <w:start w:val="1"/>
-      <w:numFmt w:val="decimal"/>
-      <w:lvlText w:val="%1."/>
-      <w:lvlJc w:val="left"/>
-    </w:lvl>
-  </w:abstractNum>
-  <w:abstractNum w:abstractNumId="1">
-    <w:multiLevelType w:val="hybridMultilevel"/>
-    <w:lvl w:ilvl="0">
-      <w:start w:val="1"/>
-      <w:numFmt w:val="bullet"/>
-      <w:lvlText w:val="•"/>
-      <w:lvlJc w:val="left"/>
-      <w:pPr>
-        <w:ind w:left="720" w:hanging="360"/>
-      </w:pPr>
-    </w:lvl>
-  </w:abstractNum>
-  <w:num w:numId="1">
-    <w:abstractNumId w:val="0"/>
-  </w:num>
-  <w:num w:numId="2">
-    <w:abstractNumId w:val="1"/>
-  </w:num>
-</w:numbering>`);
-      
-      // word/_rels/document.xml.rels
-      zip.folder("word").folder("_rels").file("document.xml.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
-  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>
-</Relationships>`);
-      
-      // Generate the DOCX file
-      zip.generateAsync({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" })
-        .then((blob) => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = docName + ".docx";
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-          this.hideExportProgress();
-          this.showToast("DOCX exported successfully!", "success");
-        })
-        .catch((error) => {
-          this.hideExportProgress();
-          this.showToast("DOCX export failed. Trying alternative format...", "warning");
-          console.error("DOCX generation error:", error);
-          this.exportToDOCXFallback(content, docName);
-        });
-        
-    } catch (error) {
-      console.error("DOCX export error:", error);
-      this.exportToDOCXFallback(this.editor.innerHTML, this.currentDoc.name || "document");
-    }
-  }
-
-  htmlToWordML(html) {
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = html;
-    
-    let wordML = '';
-    let listLevel = 0;
-    let listId = 1;
-    
-    // Helper function to build run properties from a text node
-    const buildRunProps = (textNode) => {
-      let props = [];
-      let current = textNode.parentNode;
-      let hasBold = false, hasItalic = false, hasUnderline = false;
-      
-      // Check parent nodes for formatting
-      while (current && current !== tempDiv) {
-        const tag = current.tagName ? current.tagName.toLowerCase() : '';
-        if ((tag === 'b' || tag === 'strong') && !hasBold) {
-          props.push('<w:b/>');
-          hasBold = true;
-        } else if ((tag === 'i' || tag === 'em') && !hasItalic) {
-          props.push('<w:i/>');
-          hasItalic = true;
-        } else if (tag === 'u' && !hasUnderline) {
-          props.push('<w:u w:val="single"/>');
-          hasUnderline = true;
-        }
-        current = current.parentNode;
-      }
-      
-      return props.length > 0 ? `<w:rPr>${props.join('')}</w:rPr>` : '';
-    };
-    
-    // Helper to get text color
-    const getColor = (node) => {
-      let current = node;
-      while (current && current !== tempDiv) {
-        if (current.style && current.style.color) {
-          const color = current.style.color;
-          // Convert rgb/rgba to hex
-          const rgbMatch = color.match(/\d+/g);
-          if (rgbMatch && rgbMatch.length >= 3) {
-            const hex = rgbMatch.slice(0, 3).map(n => {
-              const hex = parseInt(n).toString(16);
-              return hex.length === 1 ? '0' + hex : hex;
-            }).join('');
-            return `<w:color w:val="${hex.toUpperCase()}"/>`;
-          }
-        }
-        current = current.parentNode;
-      }
-      return '';
-    };
-    
-    // Helper to get font size
-    const getFontSize = (node) => {
-      let current = node;
-      while (current && current !== tempDiv) {
-        if (current.style && current.style.fontSize) {
-          const size = parseInt(current.style.fontSize);
-          if (size) {
-            // Convert px to half-points (Word uses half-points)
-            const halfPoints = Math.round(size * 0.75 * 2);
-            return `<w:sz w:val="${halfPoints}"/>`;
-          }
-        }
-        current = current.parentNode;
-      }
-      return '';
-    };
-    
-    const processNode = (node, inList = false) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        const text = node.textContent;
-        if (text.trim() || text === '\n') {
-          // Get formatting from parent elements
-          let runProps = '';
-          const parent = node.parentNode;
-          
-          if (parent) {
-            const rPr = buildRunProps(node);
-            const color = getColor(parent);
-            const size = getFontSize(parent);
-            
-            if (rPr || color || size) {
-              // Combine all properties
-              let allProps = '';
-              if (rPr) {
-                allProps = rPr.replace('</w:rPr>', '');
-              } else {
-                allProps = '<w:rPr>';
-              }
-              allProps += color + size;
-              if (allProps !== '<w:rPr>') {
-                runProps = allProps + '</w:rPr>';
-              }
-            }
-          }
-          
-          // Handle text - preserve spaces and newlines
-          const escapedText = this.escapeXml(text);
-          if (escapedText.trim()) {
-            return `<w:r>${runProps}<w:t xml:space="preserve">${escapedText}</w:t></w:r>`;
-          }
-        }
-        return '';
-      }
-      
-      if (node.nodeType === Node.ELEMENT_NODE) {
-        const tagName = node.tagName.toLowerCase();
-        let content = '';
-        
-        // Process children
-        Array.from(node.childNodes).forEach(child => {
-          if (tagName === 'ul' || tagName === 'ol') {
-            content += processNode(child, true);
-          } else {
-            content += processNode(child, inList);
-          }
-        });
-        
-        // Handle block elements
-        if (['p', 'div'].includes(tagName)) {
-          if (!content.trim()) {
-            return '<w:p><w:r><w:t></w:t></w:r></w:p>';
-          }
-          return `<w:p>${content}</w:p>`;
-        }
-        
-        // Handle headings
-        if (tagName.match(/^h[1-6]$/)) {
-          const level = tagName.charAt(1);
-          return `<w:p><w:pPr><w:pStyle w:val="Heading${level}"/></w:pPr>${content}</w:p>`;
-        }
-        
-        // Handle list items
-        if (tagName === 'li') {
-          const isOrdered = node.parentNode && node.parentNode.tagName.toLowerCase() === 'ol';
-          const numId = isOrdered ? 1 : 2;
-          return `<w:p><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="${numId}"/></w:numPr></w:pPr>${content}</w:p>`;
-        }
-        
-        // Handle lists - just return content, formatting handled in li
-        if (tagName === 'ul' || tagName === 'ol') {
-          return content;
-        }
-        
-        // Handle line breaks
-        if (tagName === 'br') {
-          return '<w:br/>';
-        }
-        
-        // Handle tables
-        if (tagName === 'table') {
-          let tableContent = '<w:tbl><w:tblPr><w:tblW w:w="0" w:type="auto"/></w:tblPr><w:tblGrid>';
-          // Add grid columns (simplified - assume 3 columns)
-          tableContent += '<w:gridCol w:w="2000"/><w:gridCol w:w="2000"/><w:gridCol w:w="2000"/>';
-          tableContent += '</w:tblGrid>';
-          
-          Array.from(node.querySelectorAll('tr')).forEach(row => {
-            tableContent += '<w:tr>';
-            Array.from(row.querySelectorAll('td, th')).forEach(cell => {
-              const cellContent = Array.from(cell.childNodes).map(child => processNode(child)).join('');
-              const isHeader = cell.tagName.toLowerCase() === 'th';
-              tableContent += `<w:tc><w:tcPr><w:tcW w:w="2000" w:type="dxa"/></w:tcPr><w:p>${cellContent || '<w:r><w:t></w:t></w:r>'}</w:p></w:tc>`;
-            });
-            tableContent += '</w:tr>';
-          });
-          
-          tableContent += '</w:tbl>';
-          return tableContent;
-        }
-        
-        // Inline formatting elements - just return content (formatting handled in text nodes)
-        if (['b', 'strong', 'i', 'em', 'u', 'span', 'a'].includes(tagName)) {
-          return content;
-        }
-        
-        // Default: return content
-        return content;
-      }
-      
-      return '';
-    };
-    
-    // Process all top-level nodes
-    Array.from(tempDiv.childNodes).forEach(node => {
-      const result = processNode(node);
-      if (result) {
-        wordML += result;
-      }
-    });
-    
-    // If no content, create empty paragraph
-    if (!wordML.trim()) {
-      wordML = '<w:p><w:r><w:t></w:t></w:r></w:p>';
-    }
-    
-    return wordML;
-  }
-
-  escapeXml(text) {
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&apos;');
-  }
-
-  exportToDOCXFallback(content, docName) {
-    this.hideExportProgress();
-    // Create an HTML file with proper Word-compatible structure
-    const wordHtml = `<!DOCTYPE html>
-<html xmlns:o="urn:schemas-microsoft-com:office:office" 
-      xmlns:w="urn:schemas-microsoft-com:office:word" 
-      xmlns="http://www.w3.org/TR/REC-html40">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <!--[if gte mso 9]>
-  <xml>
-    <w:WordDocument>
-      <w:View>Print</w:View>
-      <w:Zoom>100</w:Zoom>
-    </w:WordDocument>
-  </xml>
-  <![endif]-->
-  <style>
-    @page { size: 8.5in 11in; margin: 1in; }
-    body { font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.5; }
-    h1 { font-size: 24pt; font-weight: bold; }
-    h2 { font-size: 18pt; font-weight: bold; }
-    h3 { font-size: 14pt; font-weight: bold; }
-    p { margin: 0 0 10pt 0; }
-  </style>
-</head>
-<body>
-${content}
-</body>
-</html>`;
-    
-    const blob = new Blob([wordHtml], { 
-      type: "application/vnd.ms-word;charset=utf-8" 
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = docName + ".doc";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    this.showToast("Document exported as .doc format", "success");
-  }
-
-  changeLanguage(lang) {
-    localStorage.setItem("editor_language", lang);
-    this.showToast(`Language changed to ${lang.toUpperCase()}`, "success");
-  }
-
-  setPageSize(size) {
-    this.page.className = "page " + size;
-    this.showToast(`Page size changed to ${size.toUpperCase()}`, "success");
-  }
-
-  setPageOrientation(orientation) {
-    if (orientation === "landscape") {
-      this.page.style.transform = "rotate(90deg)";
-      this.page.style.margin = "50px auto";
-    } else {
-      this.page.style.transform = "none";
-      this.page.style.margin = "20px auto";
-    }
-    this.showToast(`Page orientation changed to ${orientation}`, "success");
-  }
+  setPageOrientation(orientation) { this.layout.set({orientation}); }
 
   toggleSpellCheck() {
     this.spellCheckEnabled = !this.spellCheckEnabled;
@@ -5041,100 +2480,45 @@ ${content}
     }
   }
 
-  openDocument() {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".txt,.html,.docx";
+  openDocument() { const input=document.createElement("input");input.type="file";input.accept=".txt,.html,.htm,.docx,.md";input.onchange=()=>{if(input.files[0])this.workspace.openFile(input.files[0]);};input.click(); }
 
-    input.onchange = (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const fileName = file.name.toLowerCase();
+  saveDocument() { this.saveDocumentState();if(this.fileHandles?.[this.currentDocId])return this.saveToExistingHandle(this.fileHandles[this.currentDocId]);return this.saveWithFilePicker(); }
 
-        // Check if it's a DOCX file
-        if (fileName.endsWith(".docx")) {
-          // Handle DOCX files with mammoth.js
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            const arrayBuffer = event.target.result;
+  async saveWithFilePicker() {
+ if(!window.showSaveFilePicker)return this.showSaveModal();
+ const snapshot=this.exports.snapshot();
+ try{const handle=await window.showSaveFilePicker({suggestedName:this.exports.filename("docx"),types:[{description:"Word document",accept:{"application/vnd.openxmlformats-officedocument.wordprocessingml.document":[".docx"]}},{description:"PDF",accept:{"application/pdf":[".pdf"]}},{description:"HTML",accept:{"text/html":[".html"]}},{description:"Markdown",accept:{"text/markdown":[".md"]}},{description:"Text",accept:{"text/plain":[".txt"]}}]});this.fileHandles||={};this.fileHandles[snapshot.id]=handle;return this.saveToExistingHandle(handle,snapshot);}catch(error){if(error.name!=="AbortError")this.showToast("File save failed. Try Export or another location.","error");}
+}
 
-            // Check if mammoth is available
-            if (typeof mammoth === "undefined") {
-              this.showToast(
-                "DOCX parser not loaded. Please refresh the page.",
-                "error",
-              );
-              return;
-            }
+  async saveToExistingHandle(handle,snapshot=this.exports.snapshot()) { try{const extension=handle.name.split(".").pop().toLowerCase();const blob=await this.exports.blob(extension,snapshot);const writable=await handle.createWritable();await writable.write(blob);await writable.close();this.showToast("Saved file: "+handle.name,"success");if(this.currentDocId===snapshot.id)this.updateSaveStatus(this.editor.innerHTML===snapshot.payload.html?"Saved to file":"File saved; newer edits remain");}catch(error){if(this.fileHandles)delete this.fileHandles[snapshot.id];this.showToast("File save failed: "+error.message,"error");} }
 
-            // Convert DOCX to HTML using mammoth.js
-            mammoth
-              .convertToHtml({ arrayBuffer: arrayBuffer })
-              .then((result) => {
-                const html = result.value; // The generated HTML
-                const messages = result.messages; // Any messages such as warnings
+  generateMarkdownBlob() { return new Blob([this.exports.markdown()],{type:"text/markdown"}); }
 
-                // Insert the converted HTML into the editor
-                this.editor.innerHTML = html;
-                this.saveDocumentState();
-
-                // Show success message
-                this.showToast(`Opened "${file.name}" successfully`, "success");
-
-                // Log any warnings from mammoth
-                if (messages.length > 0) {
-                  console.log("Mammoth conversion messages:", messages);
-                }
-              })
-              .catch((error) => {
-                console.error("Error reading DOCX file:", error);
-                this.showToast(
-                  "Failed to read DOCX file. Please try again.",
-                  "error",
-                );
-              });
-          };
-          reader.readAsArrayBuffer(file);
-        } else {
-          // Handle TXT and HTML files as plain text
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            const content = event.target.result;
-            this.editor.innerHTML = content;
-            this.saveDocumentState();
-            this.showToast(`Opened "${file.name}" successfully`, "success");
-          };
-          reader.readAsText(file);
-        }
-      }
-    };
-
-    input.click();
+  showSaveModal() {
+    const modal = document.getElementById("saveModal");
+    if (modal) modal.classList.add("active");
   }
 
-  saveDocument() {
-    this.saveDocumentState();
-    this.showToast("Document saved successfully", "success");
+  hideSaveModal() {
+    const modal = document.getElementById("saveModal");
+    if (modal) modal.classList.remove("active");
   }
 
-  zoomIn() {
-    if (this.zoomLevel < 200) {
-      this.zoomLevel += 10;
-      this.updateZoom();
-    }
-  }
+  // ── Generate blobs ────────────────────────────────────────────────────────
 
-  zoomOut() {
-    if (this.zoomLevel > 50) {
-      this.zoomLevel -= 10;
-      this.updateZoom();
-    }
-  }
+  async generateDOCXBlob() { return {blob:await this.exports.blob("docx"),ext:".docx"}; }
 
-  updateZoom() {
-    this.page.style.transform = `scale(${this.zoomLevel / 100})`;
-    document.getElementById("zoomPercent").textContent = `${this.zoomLevel}%`;
-  }
+  async generatePDFBlob() { return this.exports.blob("pdf"); }
+
+  // ── Save to local drive ───────────────────────────────────────────────────
+
+  async saveWithFormat(format) { this.hideSaveModal();return this.exports.export(format).catch(()=>{}); }
+
+  zoomIn() { this.layout.zoom(this.zoomLevel+10); }
+
+  zoomOut() { this.layout.zoom(this.zoomLevel-10); }
+
+  updateZoom() { this.layout.render(); }
 
   // Context menu methods for tabs
   showTabContextMenu(tab, x, y) {
@@ -5172,61 +2556,15 @@ ${content}
     }
   }
 
-  renameCurrentDocument() {
-    this.hideTabContextMenu();
-    const doc = this.documents[this.contextMenuDocId || this.currentDocId];
-    if (!doc) return;
-
-    const newName = prompt("Enter new document name:", doc.name);
-    if (newName && newName.trim()) {
-      doc.name = newName.trim();
-
-      const tab = document.querySelector(
-        `.tab[data-doc-id="${this.contextMenuDocId || this.currentDocId}"]`,
-      );
-      if (tab) {
-        tab.querySelector("span").textContent = doc.name;
-      }
-
-      localStorage.setItem(
-        `charles_editor_doc_${this.contextMenuDocId || this.currentDocId}_name`,
-        doc.name,
-      );
-      this.showToast(`Document renamed to "${doc.name}"`, "success");
-    }
-  }
+  renameCurrentDocument() { this.workspace.rename(); }
 
   duplicateCurrentDocument() {
-    const originalDoc =
-      this.documents[this.contextMenuDocId || this.currentDocId];
-    if (!originalDoc) return;
-
-    const newDocId = "doc" + Date.now();
-    const newDocName = originalDoc.name + " (Copy)";
-
-    this.documents[newDocId] = {
-      id: newDocId,
-      name: newDocName,
-      content: originalDoc.content,
-      history: [...(originalDoc.history || [])],
-      historyIndex: originalDoc.historyIndex || 0,
-      lastSave: new Date(),
-    };
-
-    const tab = document.createElement("div");
-    tab.className = "tab";
-    tab.dataset.docId = newDocId;
-    tab.innerHTML = `
-            <i class="fas fa-file-alt"></i>
-            <span>${newDocName}</span>
-            <span class="tab-close"><i class="fas fa-times"></i></span>
-        `;
-
-    document.getElementById("documentTabs").appendChild(tab);
-    this.hideTabContextMenu();
-    this.switchDocument(newDocId);
-    this.showToast(`Document duplicated as "${newDocName}"`, "success");
-  }
+  const originalId=this.contextMenuDocId||this.currentDocId;
+  if(originalId===this.currentDocId)this.storage.record();
+  const original=this.documents[originalId];if(!original)return;
+  const id="doc-"+crypto.randomUUID();this.documents[id]=this.storage.normalize({...this.storage.stateFromRecord(original),id,name:original.name+" (Copy)"});
+  this.hideTabContextMenu();this.storage.rebuildTabs();this.switchDocument(id);this.saveDocumentState();
+}
 
   closeCurrentDocument() {
     const docId = this.contextMenuDocId || this.currentDocId;
@@ -5235,101 +2573,22 @@ ${content}
   }
 }
 
-// Handle OAuth callback from Google Drive
-function handleOAuthCallback() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const code = urlParams.get("code");
-  const state = urlParams.get("state");
-  const storedState = localStorage.getItem("gdrive_oauth_state");
-
-  if (code && state && state === storedState) {
-    // Clear the state
-    localStorage.removeItem("gdrive_oauth_state");
-
-    // Exchange code for tokens
-    const clientId = localStorage.getItem("gdrive_client_id");
-    if (!clientId) {
-      console.error("No client ID found");
-      return;
-    }
-
-    // Note: In production, this should be done server-side
-    // For client-side only, we'll use the code directly
-    // This is a simplified version - proper implementation needs a backend
-
-    const tokenData = {
-      code: code,
-      client_id: clientId,
-      redirect_uri: window.location.origin,
-      grant_type: "authorization_code",
-    };
-
-    fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams(tokenData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.access_token) {
-          localStorage.setItem("gdrive_access_token", data.access_token);
-          if (data.refresh_token) {
-            localStorage.setItem("gdrive_refresh_token", data.refresh_token);
-          }
-          const expiryTime = Date.now() + data.expires_in * 1000;
-          localStorage.setItem("gdrive_token_expiry", expiryTime.toString());
-
-          // Clean up URL
-          window.history.replaceState(
-            {},
-            document.title,
-            window.location.pathname,
-          );
-
-          // Show success message
-          if (window.charlesEditor) {
-            window.charlesEditor.showToast(
-              "✅ Google Drive authentication successful!",
-              "success",
-            );
-            // Attempt to upload the current document
-            setTimeout(() => {
-              window.charlesEditor.uploadToGoogleDrive(data.access_token);
-            }, 1000);
-          }
-        } else {
-          console.error("Failed to get access token:", data);
-          if (window.charlesEditor) {
-            window.charlesEditor.showToast(
-              "❌ Authentication failed. Please try again.",
-              "error",
-            );
-          }
-        }
-      })
-      .catch((error) => {
-        console.error("Token exchange error:", error);
-        if (window.charlesEditor) {
-          window.charlesEditor.showToast(
-            "❌ Authentication error. Note: Client-side OAuth has limitations.",
-            "error",
-          );
-        }
-      });
-  }
-}
-
 // Initialize when DOM is ready
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   try {
     window.charlesEditor = new CharlesWebEditor();
     // Alias for backward compatibility with inline handlers
     window.charliesEditor = window.charlesEditor;
+    const app = window.charlesEditor;
+    await app.storage.initialize();
+    window.statsDashboard = new StatsDashboard(app.editor);
+    app.workspace.init();
+    window.formatPainter = new FormatPainter();
+    window.contextMenu = new ContextMenu();
+    window.autocomplete = new Autocomplete(app.editor);
+    app.startEditor();
 
-    // Check for OAuth callback
-    handleOAuthCallback();
+
   } catch (error) {
     console.error("❌ Failed to initialize CharlesWebEditor:", error);
 
@@ -5343,7 +2602,7 @@ document.addEventListener("DOMContentLoaded", () => {
           CharlesWebEditor failed to load properly.
         </p>
         <p style="font-size:0.9em;color:#666;margin-bottom:25px;">
-          Error: ${error.message}
+          Error: ${String(error.message).replace(/[<>&]/g, "")}
         </p>
         <button onclick="location.reload()"
                 style="padding:12px 24px;background:#dc2626;color:white;
@@ -5358,7 +2617,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Handle errors gracefully
 window.addEventListener("error", (event) => {
-  console.error("CharlesWebEditor error:", event.error);
+  console.error("WebEditor error:", event.message, event.filename, event.lineno, event.colno, event.error);
 });
 
 // Handle unhandled promise rejections
@@ -5370,475 +2629,25 @@ window.addEventListener("unhandledrejection", (event) => {
 // ENHANCED FEATURES IMPLEMENTATION
 // ========================================
 
-// Format Painter Functionality
-class FormatPainter {
-  constructor() {
-    this.copiedFormat = null;
-    this.isActive = false;
-    this.formatPainterBtn = document.getElementById('formatPainterBtn');
-    this.init();
-  }
+// Keep the compact header title in sync with existing document management.
+document.addEventListener("DOMContentLoaded", () => {
+  const title = document.getElementById("headerDocumentTitle");
+  const tabs = document.getElementById("documentTabs");
+  if (!title || !tabs || !window.charlesEditor) return;
+  const refreshTitle = () => {
+    title.replaceChildren(...Array.from(tabs.querySelectorAll(".tab"), tab => {
+      const option = new Option(tab.querySelector("span")?.textContent || "Untitled", tab.dataset.docId);
+      option.selected = tab.dataset.docId === window.charlesEditor.currentDocId;
+      return option;
+    }));
+  };
+  title.addEventListener("change", () => window.charlesEditor.switchDocument(title.value));
+  new MutationObserver(refreshTitle).observe(tabs, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ["class"] });
+  refreshTitle();
+});
 
-  init() {
-    if (this.formatPainterBtn) {
-      this.formatPainterBtn.addEventListener('click', () => {
-        this.toggleFormatPainter();
-      });
-    }
-
-    // Keyboard shortcut Ctrl+Shift+C
-    document.addEventListener('keydown', (e) => {
-      if (e.ctrlKey && e.shiftKey && e.key === 'C') {
-        e.preventDefault();
-        this.copyFormat();
-      }
-      if (e.ctrlKey && e.shiftKey && e.key === 'V') {
-        e.preventDefault();
-        this.applyFormat();
-      }
-    });
-  }
-
-  toggleFormatPainter() {
-    if (!this.isActive) {
-      this.copyFormat();
-    } else {
-      this.deactivate();
-    }
-  }
-
-  copyFormat() {
-    const selection = window.getSelection();
-    if (selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      const container = range.commonAncestorContainer;
-      const element = container.nodeType === 3 ? container.parentNode : container;
-
-      // Copy computed styles
-      const computedStyle = window.getComputedStyle(element);
-      this.copiedFormat = {
-        fontFamily: computedStyle.fontFamily,
-        fontSize: computedStyle.fontSize,
-        fontWeight: computedStyle.fontWeight,
-        fontStyle: computedStyle.fontStyle,
-        textDecoration: computedStyle.textDecoration,
-        color: computedStyle.color,
-        backgroundColor: computedStyle.backgroundColor,
-      };
-
-      this.activate();
-      this.showToast('Format copied! Click text to apply.');
-    }
-  }
-
-  activate() {
-    this.isActive = true;
-    if (this.formatPainterBtn) {
-      this.formatPainterBtn.classList.add('format-painter-active');
-    }
-    document.getElementById('editor').style.cursor = 'crosshair';
-
-    // Add click listener to apply format
-    this.applyHandler = () => this.applyFormat();
-    document.getElementById('editor').addEventListener('click', this.applyHandler);
-  }
-
-  deactivate() {
-    this.isActive = false;
-    if (this.formatPainterBtn) {
-      this.formatPainterBtn.classList.remove('format-painter-active');
-    }
-    document.getElementById('editor').style.cursor = 'text';
-    if (this.applyHandler) {
-      document.getElementById('editor').removeEventListener('click', this.applyHandler);
-    }
-  }
-
-  applyFormat() {
-    if (!this.copiedFormat) return;
-
-    const selection = window.getSelection();
-    if (selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      const span = document.createElement('span');
-      
-      span.style.fontFamily = this.copiedFormat.fontFamily;
-      span.style.fontSize = this.copiedFormat.fontSize;
-      span.style.fontWeight = this.copiedFormat.fontWeight;
-      span.style.fontStyle = this.copiedFormat.fontStyle;
-      span.style.textDecoration = this.copiedFormat.textDecoration;
-      span.style.color = this.copiedFormat.color;
-      span.style.backgroundColor = this.copiedFormat.backgroundColor;
-
-      try {
-        range.surroundContents(span);
-        this.showToast('Format applied successfully!');
-      } catch (e) {
-        console.warn('Could not apply format:', e);
-      }
-    }
-
-    this.deactivate();
-  }
-
-  showToast(message) {
-    if (window.charlesEditor) {
-      window.charlesEditor.showToast(message, 'success');
-    }
-  }
-}
-
-// Enhanced Statistics Dashboard
-class StatsDashboard {
-  constructor(editor) {
-    this.editor = editor;
-    this.init();
-  }
-
-  init() {
-    // Update stats whenever editor content changes
-    if (this.editor) {
-      this.editor.addEventListener('input', () => {
-        this.updateStats();
-      });
-    }
-  }
-
-  updateStats() {
-    const text = this.editor.innerText || '';
-    const words = text.trim() ? text.trim().split(/\s+/) : [];
-    const wordCount = words.length;
-    const charCount = text.length;
-    const paragraphs = this.editor.querySelectorAll('p').length || (text ? 1 : 0);
-    const sentences = text.split(/[.!?]+/).filter(s => s.trim()).length;
-    const readingTime = Math.ceil(wordCount / 200);
-    const avgWordLength = wordCount > 0 ? Math.round(text.replace(/\s/g, '').length / wordCount) : 0;
-
-    // Update stat cards
-    this.updateElement('statsWords', wordCount);
-    this.updateElement('statsChars', charCount);
-    this.updateElement('statsParagraphs', paragraphs);
-    this.updateElement('statsReadingTime', readingTime + ' min');
-    this.updateElement('statsSentences', sentences);
-    this.updateElement('statsAvgWordLen', avgWordLength);
-
-    // Update progress bars
-    const wordsTarget = 500;
-    const charsTarget = 3000;
-    const wordsProgress = Math.min((wordCount / wordsTarget) * 100, 100);
-    const charsProgress = Math.min((charCount / charsTarget) * 100, 100);
-
-    this.updateBar('statsWordsBar', wordsProgress);
-    this.updateBar('statsCharsBar', charsProgress);
-  }
-
-  updateElement(id, value) {
-    const element = document.getElementById(id);
-    if (element) {
-      element.textContent = value;
-    }
-  }
-
-  updateBar(id, percentage) {
-    const bar = document.getElementById(id);
-    if (bar) {
-      bar.style.width = percentage + '%';
-    }
-  }
-}
-
-// Context Menu
-class ContextMenu {
-  constructor() {
-    this.contextMenu = document.getElementById('contextMenu');
-    this.init();
-  }
-
-  init() {
-    // Show context menu on right-click in editor
-    const editor = document.getElementById('editor');
-    if (editor) {
-      editor.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        this.show(e.pageX, e.pageY);
-      });
-    }
-
-    // Hide context menu on click elsewhere
-    document.addEventListener('click', () => {
-      this.hide();
-    });
-
-    // Handle context menu item clicks
-    if (this.contextMenu) {
-      this.contextMenu.querySelectorAll('.context-menu-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const action = item.getAttribute('data-action');
-          this.handleAction(action);
-          this.hide();
-        });
-      });
-    }
-  }
-
-  show(x, y) {
-    if (!this.contextMenu) return;
-
-    this.contextMenu.style.left = x + 'px';
-    this.contextMenu.style.top = y + 'px';
-    this.contextMenu.classList.add('active');
-
-    // Adjust position if menu goes off screen
-    const rect = this.contextMenu.getBoundingClientRect();
-    if (rect.right > window.innerWidth) {
-      this.contextMenu.style.left = (x - rect.width) + 'px';
-    }
-    if (rect.bottom > window.innerHeight) {
-      this.contextMenu.style.top = (y - rect.height) + 'px';
-    }
-  }
-
-  hide() {
-    if (this.contextMenu) {
-      this.contextMenu.classList.remove('active');
-    }
-  }
-
-  handleAction(action) {
-    switch (action) {
-      case 'cut':
-        document.execCommand('cut');
-        break;
-      case 'copy':
-        document.execCommand('copy');
-        break;
-      case 'paste':
-        document.execCommand('paste');
-        break;
-      case 'selectAll':
-        document.execCommand('selectAll');
-        break;
-      case 'bold':
-        document.execCommand('bold');
-        break;
-      case 'italic':
-        document.execCommand('italic');
-        break;
-      case 'underline':
-        document.execCommand('underline');
-        break;
-      case 'formatPainter':
-        if (window.formatPainter) {
-          window.formatPainter.toggleFormatPainter();
-        }
-        break;
-    }
-  }
-}
-
-// Autocomplete Feature
-class Autocomplete {
-  constructor(editor) {
-    this.editor = editor;
-    this.dropdown = document.getElementById('autocompleteDropdown');
-    this.suggestions = [
-      'However',
-      'Therefore',
-      'Furthermore',
-      'Nevertheless',
-      'Moreover',
-      'Consequently',
-      'In addition',
-      'On the other hand',
-      'For example',
-      'In conclusion',
-      'Specifically',
-      'Generally speaking',
-      'According to',
-      'As a result',
-      'In other words'
-    ];
-    this.isVisible = false;
-    this.selectedIndex = -1;
-    this.init();
-  }
-
-  init() {
-    if (!this.editor || !this.dropdown) return;
-
-    // Listen for input in the editor
-    this.editor.addEventListener('input', (e) => {
-      this.handleInput(e);
-    });
-
-    // Listen for keyboard navigation
-    this.editor.addEventListener('keydown', (e) => {
-      if (this.isVisible) {
-        this.handleKeydown(e);
-      }
-    });
-
-    // Hide dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!this.dropdown.contains(e.target) && e.target !== this.editor) {
-        this.hide();
-      }
-    });
-  }
-
-  handleInput(e) {
-    const selection = window.getSelection();
-    if (!selection.rangeCount) return;
-
-    const range = selection.getRangeAt(0);
-    const textNode = range.startContainer;
-
-    if (textNode.nodeType !== Node.TEXT_NODE) return;
-
-    const text = textNode.textContent;
-    const cursorPos = range.startOffset;
-
-    // Get the word being typed
-    const beforeCursor = text.substring(0, cursorPos);
-    const words = beforeCursor.split(/\s+/);
-    const currentWord = words[words.length - 1];
-
-    // Show suggestions if word is at least 2 characters
-    if (currentWord.length >= 2) {
-      const matches = this.suggestions.filter(suggestion =>
-        suggestion.toLowerCase().startsWith(currentWord.toLowerCase())
-      );
-
-      if (matches.length > 0) {
-        this.show(matches, currentWord);
-      } else {
-        this.hide();
-      }
-    } else {
-      this.hide();
-    }
-  }
-
-  show(suggestions, partialWord) {
-    if (!this.dropdown) return;
-
-    this.dropdown.innerHTML = suggestions.map((suggestion, index) => `
-      <div class="autocomplete-item ${index === this.selectedIndex ? 'selected' : ''}"
-           data-index="${index}"
-           data-suggestion="${suggestion}">
-        <strong>${suggestion.substring(0, partialWord.length)}</strong>${suggestion.substring(partialWord.length)}
-      </div>
-    `).join('');
-
-    // Position dropdown near cursor
-    const selection = window.getSelection();
-    if (selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      const rect = range.getBoundingClientRect();
-
-      this.dropdown.style.left = rect.left + 'px';
-      this.dropdown.style.top = (rect.bottom + 5) + 'px';
-    }
-
-    this.dropdown.classList.add('active');
-    this.isVisible = true;
-    this.selectedIndex = -1;
-
-    // Add click listeners to suggestions
-    this.dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
-      item.addEventListener('click', () => {
-        this.applySuggestion(item.dataset.suggestion);
-      });
-    });
-  }
-
-  hide() {
-    if (this.dropdown) {
-      this.dropdown.classList.remove('active');
-      this.isVisible = false;
-      this.selectedIndex = -1;
-    }
-  }
-
-  handleKeydown(e) {
-    const items = this.dropdown.querySelectorAll('.autocomplete-item');
-
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      this.selectedIndex = Math.min(this.selectedIndex + 1, items.length - 1);
-      this.updateSelection(items);
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      this.selectedIndex = Math.max(this.selectedIndex - 1, -1);
-      this.updateSelection(items);
-    } else if (e.key === 'Enter' || e.key === 'Tab') {
-      if (this.selectedIndex >= 0 && items[this.selectedIndex]) {
-        e.preventDefault();
-        const suggestion = items[this.selectedIndex].dataset.suggestion;
-        this.applySuggestion(suggestion);
-      }
-    } else if (e.key === 'Escape') {
-      e.preventDefault();
-      this.hide();
-    }
-  }
-
-  updateSelection(items) {
-    items.forEach((item, index) => {
-      if (index === this.selectedIndex) {
-        item.classList.add('selected');
-      } else {
-        item.classList.remove('selected');
-      }
-    });
-  }
-
-  applySuggestion(suggestion) {
-    const selection = window.getSelection();
-    if (!selection.rangeCount) return;
-
-    const range = selection.getRangeAt(0);
-    const textNode = range.startContainer;
-
-    if (textNode.nodeType !== Node.TEXT_NODE) return;
-
-    const text = textNode.textContent;
-    const cursorPos = range.startOffset;
-
-    // Get the word being typed
-    const beforeCursor = text.substring(0, cursorPos);
-    const afterCursor = text.substring(cursorPos);
-    const words = beforeCursor.split(/\s+/);
-    const currentWord = words[words.length - 1];
-
-    // Replace the partial word with the suggestion
-    const newBefore = beforeCursor.substring(0, beforeCursor.length - currentWord.length);
-    textNode.textContent = newBefore + suggestion + ' ' + afterCursor;
-
-    // Move cursor after the inserted suggestion
-    const newPos = newBefore.length + suggestion.length + 1;
-    range.setStart(textNode, newPos);
-    range.setEnd(textNode, newPos);
-    selection.removeAllRanges();
-    selection.addRange(range);
-
-    this.hide();
-  }
-}
-
-// Initialize all enhanced features
-document.addEventListener('DOMContentLoaded', () => {
-  // Wait a bit for the main editor to initialize
-  setTimeout(() => {
-    const editor = document.getElementById('editor');
-    if (editor) {
-      window.formatPainter = new FormatPainter();
-      window.statsDashboard = new StatsDashboard(editor);
-      window.contextMenu = new ContextMenu();
-      window.autocomplete = new Autocomplete(editor);
-
-      console.log('✨ Enhanced features initialized successfully!');
-    }
-  }, 500);
+// Show only the selected sidebar section, including on the first load.
+document.addEventListener("DOMContentLoaded", () => {
+  const active = document.querySelector(".sidebar-tab.active");
+  window.charlesEditor?.switchSidebarTab(active?.dataset.tab || "templates");
 });
