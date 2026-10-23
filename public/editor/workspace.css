@@ -344,3 +344,5 @@ button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-
 .document-close-btn:disabled { opacity: .3; cursor: default; }
 @media (pointer: coarse) { .document-close-btn { flex-basis: 36px; width: 36px; min-height: 36px; } }
 .ready-file-name { overflow-wrap: anywhere; padding: 10px; background: var(--bg-secondary); border-radius: 4px; }
+
+.page-container { scrollbar-gutter: stable; }

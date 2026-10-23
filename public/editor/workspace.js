@@ -38,7 +38,7 @@ class EditorWorkspace {
     document.addEventListener('selectionchange',()=>{app.commands.remember();this.syncFormatting();});
     document.addEventListener('mousedown',event=>{if(event.target.closest('.toolbar,.header-controls,.modal,.sidebar')){app.commands.remember();if(event.target.closest('.toolbar button,.style-btn'))event.preventDefault();}},true);
     document.addEventListener('focusin',event=>{if(event.target.closest('.toolbar,.modal'))app.commands.remember();});
-    const resizing=new ResizeObserver(()=>app.layout.render());resizing.observe(app.pageContainer);this.resizeObserver=resizing;
+    const resizing=new ResizeObserver(()=>{cancelAnimationFrame(this.resizeFrame);this.resizeFrame=requestAnimationFrame(()=>app.layout.render());});resizing.observe(app.pageContainer);this.resizeObserver=resizing;
     if(matchMedia('(max-width: 640px)').matches)document.getElementById('sidebar').classList.add('collapsed');
     document.querySelectorAll('.export-format-btn,.save-fmt-btn,.style-btn').forEach(el=>{if(el.tagName!=='BUTTON'){el.tabIndex=0;el.setAttribute('role','button');}});
     document.addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&event.target.matches('[role="button"]:not(button):not(.sidebar-tab)')){event.preventDefault();event.target.click();}});
